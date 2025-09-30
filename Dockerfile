@@ -62,11 +62,10 @@ RUN npm run build
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# permisos
-RUN chown -R www-data:www-data /var/www \
- && chmod -R 755 /var/www/storage /var/www/bootstrap/cache \
- && mkdir -p /var/log/nginx /var/run \
- && chown -R nginx:nginx /var/log/nginx /var/run
+# Copiar y configurar el entrypoint
+COPY docker/entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 80
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord"]
