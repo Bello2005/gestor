@@ -3,25 +3,29 @@ set -e
 
 echo "🚀 Starting build process..."
 
-# Install PHP dependencies
-composer install --no-dev --optimize-autoloader
+# Crear archivo .env si no existe
+if [ ! -f .env ]; then
+    cp .env.example .env
+fi
 
-# Install Node dependencies and build assets
-npm ci
-npm run build
-
-# Generate application key if needed
+# Generar application key
 php artisan key:generate --force
 
-# Cache configuration
+# Limpiar cachés
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
+# Optimizar
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Run migrations
+# Migraciones
 php artisan migrate --force
 
-# Create storage link
+# Storage link
 php artisan storage:link
 
-echo "✅ Build completed successfully!"
+echo "✅ Build completed!"
