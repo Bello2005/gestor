@@ -7,8 +7,13 @@
     <title>Login - Gestor de Archivos Uniclaretiana</title>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/login.js') }}"></script>
     <style>
         :root {
+            /* Animaciones para los toasts */
+            --animate-duration: 0.3s;
+            --animate-delay: 0s;
             --primary: #FFD700;
             --primary-dark: #F4C400;
             --secondary: #FFFFFF;
@@ -425,9 +430,43 @@
             </div>
 
             @if(session('success'))
-                <div class="alert alert-success mt-3">
-                    {{ session('success') }}
-                </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: '{{ session("success") }}',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            background: '#4CAF50',
+                            color: '#fff',
+                            iconColor: '#fff'
+                        });
+                    });
+                </script>
+            @endif
+
+            @if($errors->any())
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '¡Error!',
+                            text: '{{ $errors->first() }}',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            background: '#F44336',
+                            color: '#fff',
+                            iconColor: '#fff'
+                        });
+                    });
+                </script>
             @endif
         </div>
     </div>

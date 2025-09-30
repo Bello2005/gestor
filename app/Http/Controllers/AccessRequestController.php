@@ -27,10 +27,19 @@ class AccessRequestController extends Controller
             'reason' => 'required|string'
         ]);
 
-        AccessRequest::create($validated);
-
-        return redirect()->route('login')
-            ->with('success', 'Tu solicitud ha sido enviada. Te notificaremos por correo cuando sea revisada.');
+        try {
+            AccessRequest::create($validated);
+            Log::info('Nueva solicitud de acceso creada para: ' . $validated['email']);
+            
+            return redirect()->route('login')
+                ->with('success', '¡Tu solicitud de acceso ha sido enviada exitosamente! Te notificaremos por correo cuando sea revisada por nuestro equipo.');
+        } catch (\Exception $e) {
+            Log::error("Error al crear solicitud de acceso: " . $e->getMessage());
+            
+            return back()
+                ->withErrors(['error' => 'Lo sentimos, hubo un problema al procesar tu solicitud. Por favor, intenta nuevamente.'])
+                ->withInput();
+        }
     }
 
     public function index()

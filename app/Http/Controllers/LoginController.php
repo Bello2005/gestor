@@ -17,46 +17,55 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            "email" => ["required", "email"],
-            "password" => ["required"]
-        ]);
-
-        $user = User::where("email", $credentials["email"])->first();
-
-        if (!$user) {
-            return back()
-                ->withErrors(["email" => "Las credenciales proporcionadas no coinciden con nuestros registros."])
-                ->withInput();
-        }
-
-        // Primero verificamos si es una contraseña sin encriptar
-        if ($user->password === $credentials["password"]) {
-            // Actualizamos la contraseña con versión encriptada
-            $user->password = Hash::make($credentials["password"]);
-            $user->save();
-            
-            Auth::login($user);
-            $request->session()->regenerate();
-            return redirect()->intended("dashboard");
-        }
-        
-        // Si no coincide, intentamos verificar si está encriptada
         try {
+            $credentials = $request->validate([
+                "email" => ["required", "email"],
+                "password" => ["required"]
+            ]);
+
+            $user = User::where("email", $credentials["email"])->first();
+
+            if (!$user) {
+                return back()
+                    ->withErrors(["email" => "No se encontró ninguna cuenta con este correo electrónico."])
+                    ->withInput();
+            }
+
+            // Primero verificamos si es una contraseña sin encriptar
+            if ($user->password === $credentials["password"]) {
+                // Actualizamos la contraseña con versión encriptada
+                $user->password = Hash::make($credentials["password"]);
+                $user->save();
+                
+                Auth::login($user);
+                $request->session()->regenerate();
+                Log::info('Usuario autenticado exitosamente', ['user' => $user->email]);
+                
+                return redirect()->intended("dashboard")
+                    ->with('success', '¡Bienvenido(a) de nuevo, ' . $user->name . '!');
+            }
+            
+            // Si no coincide, intentamos verificar si está encriptada
             if (Hash::check($credentials["password"], $user->password)) {
                 Auth::login($user);
                 $request->session()->regenerate();
-                return redirect()->intended("dashboard");
+                Log::info('Usuario autenticado exitosamente', ['user' => $user->email]);
+                
+                return redirect()->intended("dashboard")
+                    ->with('success', '¡Bienvenido(a) de nuevo, ' . $user->name . '!');
             }
-        } catch (\RuntimeException $e) {
-            // Si hay un error al verificar el hash, significa que la contraseña
-            // no está en formato válido de hash
-            Log::warning("Contraseña en formato inválido para usuario: " . $user->email);
-        }
 
-        return back()
-            ->withErrors(["email" => "Las credenciales proporcionadas no coinciden con nuestros registros."])
-            ->withInput();
+            Log::warning("Intento fallido de inicio de sesión", ['email' => $credentials["email"]]);
+            return back()
+                ->withErrors(["password" => "La contraseña ingresada es incorrecta."])
+                ->withInput();
+
+        } catch (\RuntimeException $e) {
+            Log::error("Error durante el inicio de sesión: " . $e->getMessage());
+            return back()
+                ->withErrors(["email" => "Ha ocurrido un error durante el inicio de sesión. Por favor, intenta nuevamente."])
+                ->withInput();
+        }
     }
 
     public function logout(Request $request)

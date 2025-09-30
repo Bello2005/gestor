@@ -7,6 +7,8 @@
     <title>Solicitar Acceso</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/auth.js') }}"></script>
     <style>
         :root {
             --primary: #FFD700;
@@ -263,9 +265,25 @@
                             <svg width="20" height="20" fill="none" stroke="#666" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M22 6 12 13 2 6"/></svg>
                         </span>
                         <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" required>
-                        @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        @if($errors->any())
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: '¡Error!',
+                                        text: '{{ $errors->first() }}',
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 3000,
+                                        timerProgressBar: true,
+                                        background: '#F44336',
+                                        color: '#fff',
+                                        iconColor: '#fff'
+                                    });
+                                });
+                            </script>
+                        @endif
                     </div>
                 </div>
                 <div class="form-group">

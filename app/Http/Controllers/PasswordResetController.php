@@ -34,7 +34,7 @@ class PasswordResetController extends Controller
             if (!$user) {
                 Log::warning('Email no encontrado en la base de datos: ' . $request->email);
                 return back()
-                    ->withErrors(['email' => 'No encontramos una cuenta con ese correo electrónico.'])
+                    ->withErrors(['error' => 'No pudimos encontrar una cuenta asociada a ese correo electrónico. Por favor, verifica que el correo sea correcto.'])
                     ->withInput();
             }
 
@@ -55,7 +55,7 @@ class PasswordResetController extends Controller
             
             return redirect()
                 ->route('login')
-                ->with('success', 'Se ha enviado un correo con las instrucciones para restablecer tu contraseña.');
+                ->with('success', '¡Listo! Hemos enviado las instrucciones de recuperación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.');
                 
         } catch (\Exception $e) {
             Log::error('Error en reset de contraseña: ' . $e->getMessage());
