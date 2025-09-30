@@ -8,7 +8,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('js/login.js') }}"></script>
     <style>
         :root {
             /* Animaciones para los toasts */
@@ -381,7 +380,7 @@
                 <p>Ingresa tus credenciales para acceder a tu cuenta</p>
             </div>
             
-            <form method="POST" action="{{ route('login.submit') }}">
+            <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="form-group">
                     <label for="email">Correo electrónico</label>
