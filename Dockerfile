@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg-dev libfreetype6-dev zip unzip nginx supervisor \
   && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
   && apt-get install -y --no-install-recommends nodejs \
+  && useradd -r nginx \
   \
   # configurar GD (si necesita jpeg/freetype)
   && docker-php-ext-configure gd --with-jpeg --with-freetype \
@@ -54,7 +55,9 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # permisos
 RUN chown -R www-data:www-data /var/www \
- && chmod -R 755 /var/www/storage /var/www/bootstrap/cache
+ && chmod -R 755 /var/www/storage /var/www/bootstrap/cache \
+ && mkdir -p /var/log/nginx /var/run \
+ && chown -R nginx:nginx /var/log/nginx /var/run
 
 EXPOSE 80
 CMD ["/usr/bin/supervisord"]
