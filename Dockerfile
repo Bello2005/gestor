@@ -59,7 +59,7 @@ RUN npm install
 RUN npm run build
 
 # configs
-COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY docker/nginx/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
