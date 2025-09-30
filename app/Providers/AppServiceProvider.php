@@ -19,14 +19,10 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    public function boot()
     {
-        // Registrar el proveedor de autenticación personalizado
-        Auth::provider('custom', function ($app, array $config) {
-            return new CustomUserProvider($app['hash'], $config['model']);
-        });
-
-        // Habilitar Blade Stack
-        \Illuminate\Support\Facades\Blade::withoutDoubleEncoding();
+        if ($this->app->environment('production')) {
+            \URL::forceScheme('https');
+        }
     }
 }
