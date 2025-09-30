@@ -2,6 +2,12 @@ FROM php:8.3-fpm
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# NO hardcodees credenciales aquí
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV DB_CONNECTION=pgsql
+# Las credenciales vendrán de Render
+
 # instalar deps del sistema, Node.js y preparar compilación de extensiones
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates git curl build-essential pkg-config \
@@ -15,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && docker-php-ext-configure gd --with-jpeg --with-freetype \
   \
   # instalar extensiones (zip se instala SIN pasar --with-libzip)
-  && docker-php-ext-install -j$(nproc) pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip \
+  && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip \
   \
   && apt-get purge -y --auto-remove build-essential pkg-config \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -39,6 +45,9 @@ COPY routes ./routes
 # crear carpetas que artisan espera y dar permisos
 RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views storage/app/public bootstrap/cache \
  && chown -R www-data:www-data storage bootstrap/cache
+
+# Copiar configuración de PHP-FPM
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 # ahora instalar dependencias (composer scripts pueden ejecutar artisan correctamente)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
