@@ -21,8 +21,8 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 /* Importar layouts */
-@import './layouts/sidebar.css';
-@import './layouts/content.css';
+@import "./layouts/sidebar.css";
+@import "./layouts/content.css";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

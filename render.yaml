@@ -1,10 +1,10 @@
 services:
   - type: web
     name: gestor-laravel
-    runtime: php
+    runtime: docker
     plan: free
-    buildCommand: ./build.sh
-    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    dockerCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    healthCheckPath: /
     envVars:
       - key: APP_NAME
         value: Sistema de Gestión
@@ -18,6 +18,26 @@ services:
         value: stack
       - key: DB_CONNECTION
         value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: gestor-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: gestor-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: gestor-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: gestor-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: gestor-db
+          property: password
       - key: SESSION_DRIVER
         value: cookie
       - key: CACHE_DRIVER
@@ -26,3 +46,20 @@ services:
         value: sync
       - key: FILESYSTEM_DRIVER
         value: public
+      - key: APP_URL
+        fromService:
+          type: web
+          name: gestor-laravel
+          property: defaultDomain
+      - key: ASSET_URL
+        fromService:
+          type: web
+          name: gestor-laravel
+          property: defaultDomain
+
+  - type: pserv
+    name: gestor-db
+    plan: free
+    engine: postgres
+    version: "15.0"
+    ipAllowList: []

@@ -1,57 +1,60 @@
 FROM php:8.3-fpm
 
-# Instalar dependencias del sistema
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libpq-dev \
-    zip \
-    unzip \
-    nginx \
-    supervisor
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
+# instalar deps del sistema, Node.js y preparar compilación de extensiones
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates git curl build-essential pkg-config \
+    libpng-dev libonig-dev libxml2-dev libpq-dev libzip-dev zlib1g-dev \
+    libjpeg-dev libfreetype6-dev zip unzip nginx supervisor \
+  && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+  && apt-get install -y --no-install-recommends nodejs \
+  \
+  # configurar GD (si necesita jpeg/freetype)
+  && docker-php-ext-configure gd --with-jpeg --with-freetype \
+  \
+  # instalar extensiones (zip se instala SIN pasar --with-libzip)
+  && docker-php-ext-install -j$(nproc) pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip \
+  \
+  && apt-get purge -y --auto-remove build-essential pkg-config \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Limpiar cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Instalar extensiones de PHP
-RUN docker-php-ext-install pdo pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip
-
-# Instalar Composer
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Establecer directorio de trabajo
 WORKDIR /var/www
 
-# Copiar archivos del proyecto
+
+# optimización: copiar composer files primero para cache
+COPY composer.lock composer.json ./
+
+# copiar archivos mínimos necesarios para que artisan funcione durante composer scripts
+COPY artisan ./
+COPY bootstrap ./bootstrap
+COPY app ./app
+COPY config ./config
+COPY routes ./routes
+
+# crear carpetas que artisan espera y dar permisos
+RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views storage/app/public bootstrap/cache \
+ && chown -R www-data:www-data storage bootstrap/cache
+
+# ahora instalar dependencias (composer scripts pueden ejecutar artisan correctamente)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-ansi
+
+# ahora copiar el resto del proyecto
 COPY . .
 
-# Instalar dependencias de PHP
-RUN composer install --no-dev --optimize-autoloader
-
-# Instalar dependencias de Node y compilar assets
 RUN npm install
 RUN npm run build
 
-# Copiar configuración de nginx
+# configs
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
-
-# Copiar configuración de supervisor
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Permisos
-RUN chown -R www-data:www-data /var/www
-RUN chmod -R 755 /var/www/storage
-RUN chmod -R 755 /var/www/bootstrap/cache
+# permisos
+RUN chown -R www-data:www-data /var/www \
+ && chmod -R 755 /var/www/storage /var/www/bootstrap/cache
 
-# Exponer puerto
 EXPOSE 80
-
-# Comando de inicio
 CMD ["/usr/bin/supervisord"]
