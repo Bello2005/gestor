@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates git curl build-essential pkg-config \
     libpng-dev libonig-dev libxml2-dev libpq-dev libzip-dev zlib1g-dev \
     libjpeg-dev libfreetype6-dev zip unzip nginx supervisor \
+    gettext-base \
   && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
   && apt-get install -y --no-install-recommends nodejs \
   && useradd -r nginx \
