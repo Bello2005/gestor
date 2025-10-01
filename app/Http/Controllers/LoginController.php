@@ -60,7 +60,7 @@ class LoginController extends Controller
                 ->withErrors(["password" => "La contraseña ingresada es incorrecta."])
                 ->withInput();
 
-        } catch (\RuntimeException $e) {
+        } catch (\Exception $e) {
             Log::error("Error durante el inicio de sesión: " . $e->getMessage());
             return back()
                 ->withErrors(["email" => "Ha ocurrido un error durante el inicio de sesión. Por favor, intenta nuevamente."])
