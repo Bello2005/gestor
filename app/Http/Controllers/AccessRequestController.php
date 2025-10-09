@@ -59,11 +59,12 @@ class AccessRequestController extends Controller
 
         try {
             $user = DB::transaction(function () use ($request) {
-            // Crear el usuario
+            // Crear el usuario con contraseña temporal hasheada
+            $temporaryPassword = 'password123';
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make('password123'), // Contraseña temporal
+                'password' => bcrypt($temporaryPassword), // Usar bcrypt explícitamente
                 'is_temporary_password' => true
             ]);                // Asignar rol de usuario normal (role_id = 3)
                 DB::table('role_user')->insert([
@@ -98,6 +99,10 @@ class AccessRequestController extends Controller
 
         } catch (\Exception $e) {
             Log::error("Error al aprobar solicitud de acceso: " . $e->getMessage());
+            return response()->json([
+                'error' => 'Hubo un error al procesar la solicitud. Por favor, intente nuevamente.',
+                'details' => $e->getMessage()
+            ], 500);
             report($e);
             
             return response()->json([
