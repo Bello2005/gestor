@@ -66,10 +66,14 @@ class AccessRequestController extends Controller
                 'email' => $request->email,
                 'password' => bcrypt($temporaryPassword), // Usar bcrypt explícitamente
                 'is_temporary_password' => true
-            ]);                // Asignar rol de usuario normal (role_id = 3)
+            ]);                // Asignar rol de usuario normal
+                $userRole = DB::table('roles')->where('slug', 'user')->first();
+                if (!$userRole) {
+                    throw new \Exception('No se encontró el rol de usuario');
+                }
                 DB::table('role_user')->insert([
                     'user_id' => $user->id,
-                    'role_id' => 3
+                    'role_id' => $userRole->id
                 ]);
 
                 // Actualizar estado de la solicitud
@@ -86,16 +90,19 @@ class AccessRequestController extends Controller
             try {
                 Mail::to($user->email)->send(new AccessRequestApproved($user, 'password123'));
                 Log::info("Email de bienvenida enviado a {$user->email}");
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Solicitud aprobada y usuario creado exitosamente'
+                ]);
             } catch (\Exception $e) {
                 Log::error("Error al enviar email a {$user->email}: " . $e->getMessage());
-                report($e);
-                // Continuamos ya que el usuario fue creado exitosamente
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Solicitud aprobada y usuario creado exitosamente, pero hubo un error al enviar el correo electrónico'
+                ]);
             }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Solicitud aprobada y usuario creado exitosamente'
-            ]);
 
         } catch (\Exception $e) {
             Log::error("Error al aprobar solicitud de acceso: " . $e->getMessage());
