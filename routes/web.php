@@ -29,7 +29,7 @@ use App\Http\Controllers\UserController;
 
 // Rutas públicas
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('login.show');
-Route::post('/login', [LoginController::class, 'login'])->name('login');
+Route::match(['GET', 'POST'], '/login', [LoginController::class, 'login'])->name('login');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Recuperación de contraseña (público)

@@ -17,6 +17,11 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        // Si es una petición GET, redirigir al formulario de login
+        if ($request->isMethod('get')) {
+            return redirect()->route('login.show');
+        }
+
         $credentials = $request->validate([
             "email" => ["required", "email"],
             "password" => ["required"]

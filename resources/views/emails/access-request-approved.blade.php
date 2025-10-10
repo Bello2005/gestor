@@ -15,12 +15,14 @@ Nos complace informarte que tu solicitud de acceso al sistema ha sido aprobada. 
 **IMPORTANTE:** Por tu seguridad, el sistema te solicitará cambiar tu contraseña temporal la primera vez que inicies sesión. Este paso es obligatorio para garantizar la seguridad de tu cuenta.
 @endcomponent
 
-@component('mail::button', ['url' => 'https://gestor-0o3w.onrender.com'])
-Acceder al Sistema
+@component('mail::button', ['url' => 'https://gestor-0o3w.onrender.com/'])
+Ir al Sistema
 @endcomponent
 
 También puedes acceder directamente copiando esta URL en tu navegador:
-https://gestor-0o3w.onrender.com
+https://gestor-0o3w.onrender.com/
+
+Una vez allí, inicia sesión con las credenciales proporcionadas.
 
 Si tienes alguna pregunta o necesitas ayuda:
 - Contacta al equipo de soporte
