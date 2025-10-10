@@ -88,15 +88,34 @@ class AccessRequestController extends Controller
 
             // Enviar email con las credenciales
             try {
-                Mail::to($user->email)->send(new AccessRequestApproved($user, 'password123'));
-                Log::info("Email de bienvenida enviado a {$user->email}");
+                Log::info("Intentando enviar email a {$user->email}");
+                
+                $mailable = new AccessRequestApproved($user, 'password123');
+                Mail::to($user->email)->send($mailable);
+                
+                Log::info("Email de bienvenida enviado exitosamente a {$user->email}");
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Solicitud aprobada y usuario creado exitosamente'
                 ]);
             } catch (\Exception $e) {
-                Log::error("Error al enviar email a {$user->email}: " . $e->getMessage());
+                Log::error("Error al enviar email a {$user->email}. Error: " . $e->getMessage());
+                Log::error("Stack trace: " . $e->getTraceAsString());
+                
+                // Intentar verificar la configuración de correo
+                try {
+                    $config = config('mail');
+                    Log::info("Configuración de correo actual:", [
+                        'driver' => $config['default'],
+                        'host' => $config['mailers']['smtp']['host'],
+                        'port' => $config['mailers']['smtp']['port'],
+                        'from' => $config['from'],
+                        'encryption' => $config['mailers']['smtp']['encryption']
+                    ]);
+                } catch (\Exception $configError) {
+                    Log::error("Error al verificar configuración de correo: " . $configError->getMessage());
+                }
                 
                 return response()->json([
                     'success' => true,
