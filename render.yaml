@@ -3,7 +3,7 @@ services:
     name: gestor-laravel
     runtime: docker
     plan: free
-    dockerCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    dockerCommand: /docker/entrypoint.sh
     healthCheckPath: /
     envVars:
       - key: APP_NAME
