@@ -253,3 +253,242 @@
     background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.05));
     pointer-events: none;
 }
+
+/* RESPONSIVE DESIGN */
+
+/* Tablets landscape */
+@media (max-width: 1199.98px) {
+    .table {
+        min-width: 1400px;
+    }
+
+    .table thead th,
+    .table td {
+        font-size: 0.8rem;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .btn-icon {
+        width: 32px !important;
+        height: 32px !important;
+        padding: 0.4rem !important;
+    }
+
+    .btn-icon i {
+        font-size: 0.875rem !important;
+    }
+}
+
+/* Tablets portrait */
+@media (max-width: 991.98px) {
+    .table-responsive {
+        padding: 1rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .table {
+        min-width: 1200px;
+    }
+
+    .table thead th,
+    .table td {
+        font-size: 0.75rem;
+        padding: 0.65rem 0.4rem;
+    }
+
+    /* Reducir anchos de columnas */
+    .table th:nth-child(1),
+    .table td:nth-child(1) {
+        width: 150px;
+        min-width: 150px;
+    }
+
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        width: 170px;
+        min-width: 170px;
+    }
+
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        width: 150px;
+        min-width: 150px;
+    }
+
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        width: 120px;
+        min-width: 120px;
+    }
+
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        width: 150px;
+        min-width: 150px;
+    }
+}
+
+/* Móviles y tablets pequeñas */
+@media (max-width: 767.98px) {
+    .table-responsive {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 6px;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table {
+        min-width: 1000px;
+    }
+
+    .table thead th {
+        font-size: 0.7rem;
+        padding: 0.6rem 0.35rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table td {
+        font-size: 0.7rem;
+        padding: 0.6rem 0.35rem;
+    }
+
+    /* Columnas más compactas */
+    .table th:nth-child(1),
+    .table td:nth-child(1) {
+        width: 130px;
+        min-width: 130px;
+    }
+
+    .table th:nth-child(2),
+    .table td:nth-child(2) {
+        width: 150px;
+        min-width: 150px;
+    }
+
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        width: 130px;
+        min-width: 130px;
+    }
+
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+        width: 100px;
+        min-width: 100px;
+    }
+
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        width: 130px;
+        min-width: 130px;
+    }
+
+    .table th:nth-child(6),
+    .table td:nth-child(6) {
+        width: 110px;
+        min-width: 110px;
+    }
+
+    .table th:nth-child(7),
+    .table td:nth-child(7) {
+        width: 80px;
+        min-width: 80px;
+    }
+
+    .table th:nth-child(8),
+    .table td:nth-child(8) {
+        width: 110px;
+        min-width: 110px;
+    }
+
+    /* Botones más pequeños */
+    .btn-icon {
+        width: 28px !important;
+        height: 28px !important;
+        padding: 0.3rem !important;
+        margin: 0 0.15rem !important;
+    }
+
+    .btn-icon i {
+        font-size: 0.75rem !important;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .document-badge {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* Indicador visual de scroll horizontal */
+    .table-responsive::before {
+        content: "← Desliza para ver más →";
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(79, 70, 229, 0.9);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        z-index: 100;
+        animation: fadeInOut 3s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+    }
+
+    /* Ocultar el indicador después del primer scroll */
+    .table-responsive.scrolled::before {
+        display: none;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 575.98px) {
+    .table-responsive {
+        padding: 0.5rem;
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+        border-radius: 0;
+    }
+
+    .table {
+        min-width: 900px;
+    }
+
+    .table thead th,
+    .table td {
+        font-size: 0.65rem;
+        padding: 0.5rem 0.3rem;
+    }
+
+    .btn-icon {
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    .btn-icon i {
+        font-size: 0.7rem !important;
+    }
+
+    .status-badge {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.4rem;
+    }
+
+    .document-badge {
+        width: 26px;
+        height: 26px;
+    }
+}

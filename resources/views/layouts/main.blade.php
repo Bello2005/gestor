@@ -27,6 +27,11 @@
 
     <!-- Main Content -->
     <div id="main-content">
+        <!-- Botón hamburguesa para móviles -->
+        <button class="mobile-menu-btn d-md-none" id="mobileMenuBtn" aria-label="Abrir menú">
+            <i class="fas fa-bars"></i>
+        </button>
+
         @yield('content')
     </div>
 
@@ -136,15 +141,89 @@
     <script src="{{ asset('js/profile.js') }}"></script>
 
     <script>
-        // Script común para el sidebar
-        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-            document.getElementById('sidebar')?.classList.toggle('collapsed');
-            document.getElementById('main-content')?.classList.toggle('expanded');
-        });
+        // Gestión del sidebar - Desktop y Móvil
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.querySelector('.sidebar-overlay');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mainContent = document.getElementById('main-content');
 
-        // Cerrar sidebar en móviles al hacer clic en overlay
-        document.querySelector('.sidebar-overlay')?.addEventListener('click', function() {
-            document.getElementById('sidebar')?.classList.remove('show');
+            // Función para abrir sidebar en móvil
+            function openSidebar() {
+                sidebar?.classList.add('show');
+                sidebarOverlay?.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+            }
+
+            // Función para cerrar sidebar en móvil
+            function closeSidebar() {
+                sidebar?.classList.remove('show');
+                sidebarOverlay?.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // Botón hamburguesa en móviles
+            mobileMenuBtn?.addEventListener('click', function() {
+                openSidebar();
+            });
+
+            // Botón toggle dentro del sidebar (móvil)
+            sidebarToggle?.addEventListener('click', function() {
+                const isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    closeSidebar();
+                } else {
+                    sidebar?.classList.toggle('collapsed');
+                    mainContent?.classList.toggle('sidebar-collapsed');
+                }
+            });
+
+            // Cerrar sidebar al hacer clic en overlay
+            sidebarOverlay?.addEventListener('click', closeSidebar);
+
+            // Cerrar sidebar al hacer clic en un link (solo en móvil)
+            const navLinks = sidebar?.querySelectorAll('.nav-link');
+            navLinks?.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        setTimeout(closeSidebar, 200);
+                    }
+                });
+            });
+
+            // Manejar cambio de tamaño de ventana
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    const isMobile = window.innerWidth <= 768;
+                    if (!isMobile) {
+                        closeSidebar();
+                        sidebar?.classList.remove('show');
+                    } else {
+                        sidebar?.classList.remove('collapsed');
+                        mainContent?.classList.remove('sidebar-collapsed');
+                    }
+                }, 250);
+            });
+
+            // Cerrar sidebar con tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar?.classList.contains('show')) {
+                    closeSidebar();
+                }
+            });
+
+            // Marcar tablas como "scrolled" cuando se hace scroll
+            const tableResponsive = document.querySelectorAll('.table-responsive');
+            tableResponsive.forEach(table => {
+                table.addEventListener('scroll', function() {
+                    if (this.scrollLeft > 0) {
+                        this.classList.add('scrolled');
+                    }
+                }, { once: true });
+            });
         });
 
         // Lógica para el modal de cambio de contraseña
@@ -160,7 +239,7 @@
                 document.getElementById('changePasswordBtn').addEventListener('click', function() {
                     const form = document.getElementById('changePasswordForm');
                     const errorDiv = document.getElementById('passwordError');
-                    
+
                     const formData = {
                         current_password: form.current_password.value,
                         new_password: form.new_password.value,
@@ -193,21 +272,6 @@
                 });
             @endif
         @endauth
-
-        // Mostrar sidebar en móviles
-        document.addEventListener('DOMContentLoaded', function() {
-            const mediaQuery = window.matchMedia('(max-width: 768px)');
-            
-            function handleMobileView(e) {
-                if (e.matches) {
-                    document.getElementById('sidebar')?.classList.remove('collapsed');
-                    document.getElementById('main-content')?.classList.remove('expanded');
-                }
-            }
-
-            mediaQuery.addListener(handleMobileView);
-            handleMobileView(mediaQuery);
-        });
     </script>
     
     <!-- jQuery -->

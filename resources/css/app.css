@@ -49,21 +49,44 @@
 }
 
 /* Estilos globales adicionales */
+#main-content,
 .main-content {
     margin-left: var(--sidebar-width);
     padding: 2rem;
     min-height: 100vh;
-    transition: var(--transition);
+    transition: margin-left 0.3s ease;
+    background-color: var(--gray-50);
 }
 
+#main-content.sidebar-collapsed,
 .main-content.sidebar-collapsed {
     margin-left: 80px !important;
-    transition: margin-left 0.3s;
 }
 
+#main-content > .container,
 .main-content > .container {
     max-width: 100%;
-    padding: 0 2rem;
+    padding: 0;
+}
+
+/* Contenedor de página */
+.page-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Header de página responsive */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: 0.5rem;
+}
+
+.page-header .breadcrumb {
+    font-size: 0.875rem;
 }
 
 /* Utilidades adicionales */
@@ -116,22 +139,169 @@
     visibility: hidden;
 }
 
+/* Botón hamburguesa para móviles */
+.mobile-menu-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1020;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: white;
+    border: 1px solid var(--gray-200);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.mobile-menu-btn:active {
+    transform: scale(0.95);
+}
+
+.mobile-menu-btn i {
+    font-size: 1.25rem;
+}
+
 /* Responsive utilities */
-@media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-    }
 
-    .sidebar.mobile-open {
-        transform: translateX(0);
-    }
-
+/* Tablets y landscape */
+@media (max-width: 991.98px) {
+    #main-content,
     .main-content {
-        margin-left: 0;
+        margin-left: 260px;
+        padding: 1.5rem;
+    }
+}
+
+/* Tablets portrait y móviles */
+@media (max-width: 767.98px) {
+    #main-content,
+    .main-content {
+        margin-left: 0 !important;
+        padding: 1.5rem 1rem;
+        padding-top: 5rem; /* Espacio para el botón hamburguesa */
     }
 
+    #main-content.sidebar-collapsed,
     .main-content.sidebar-collapsed {
-        margin-left: 0;
+        margin-left: 0 !important;
+    }
+
+    /* Mostrar botón hamburguesa */
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    /* Headers y títulos más compactos */
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    /* Botones en mobile */
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-group > .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Formularios responsive */
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-row > * {
+        width: 100% !important;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 575.98px) {
+    #main-content,
+    .main-content {
+        padding: 1rem 0.75rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.25rem;
+    }
+
+    /* Cards más compactas */
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    /* Modales responsive */
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    .modal-body {
+        padding: 1.25rem;
+    }
+
+    .modal-header,
+    .modal-footer {
+        padding: 1rem 1.25rem;
+    }
+
+    .modal-title {
+        font-size: 1.125rem;
+    }
+
+    /* Formularios responsive */
+    .form-label {
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 0.9375rem;
+        padding: 0.625rem 0.875rem;
+    }
+
+    .form-text {
+        font-size: 0.8125rem;
+    }
+
+    /* Botones en modales */
+    .modal-footer .btn {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.9375rem;
+    }
+
+    /* Inputs de búsqueda y filtros */
+    .dataTables_filter input[type="search"] {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    .dataTables_length select {
+        width: 100% !important;
     }
 }
 /* Menú de exportar y acciones prioritarias */

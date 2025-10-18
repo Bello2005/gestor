@@ -138,3 +138,134 @@
 .dataTables_paginate {
     margin-top: 1rem;
 }
+
+/* RESPONSIVE DESIGN */
+
+/* Tablets landscape */
+@media (max-width: 1199.98px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    .stat-card {
+        padding: 1.25rem;
+    }
+
+    .stat-value {
+        font-size: 1.35rem;
+    }
+}
+
+/* Tablets portrait y móviles */
+@media (max-width: 767.98px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+        flex-direction: row;
+    }
+
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1.25rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .table-container {
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+
+    /* DataTables responsive */
+    .dataTables_wrapper .row {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .dataTables_length,
+    .dataTables_filter {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .dataTables_filter input {
+        width: 100% !important;
+        max-width: 100%;
+    }
+
+    .dataTables_info,
+    .dataTables_paginate {
+        text-align: center;
+        width: 100%;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .pagination .page-item .page-link {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 575.98px) {
+    .stats-grid {
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card {
+        padding: 0.875rem;
+    }
+
+    .stat-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+    }
+
+    .stat-value {
+        font-size: 1.15rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .table-container {
+        padding: 0.75rem;
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+        border-radius: 0;
+    }
+
+    .dataTables_length select,
+    .dataTables_filter input {
+        font-size: 0.875rem;
+    }
+
+    .pagination .page-item .page-link {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.8rem;
+    }
+}
