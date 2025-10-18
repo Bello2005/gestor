@@ -144,7 +144,7 @@
     position: fixed;
     top: 1rem;
     left: 1rem;
-    z-index: 1050;
+    z-index: 1060;
     width: 50px;
     height: 50px;
     border-radius: 12px;
@@ -171,6 +171,12 @@
 .mobile-menu-btn i {
     font-size: 1.4rem;
     color: white;
+    transition: transform 0.3s ease;
+}
+
+/* Rotación del icono cuando el sidebar está abierto */
+.mobile-menu-btn.open i {
+    transform: rotate(90deg);
 }
 
 /* Responsive utilities */

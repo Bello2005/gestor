@@ -145,7 +145,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.querySelector('.sidebar-overlay');
-            const sidebarToggle = document.getElementById('sidebarToggle');
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const mainContent = document.getElementById('main-content');
 
@@ -153,7 +152,14 @@
             function openSidebar() {
                 sidebar?.classList.add('show');
                 sidebarOverlay?.classList.add('active');
-                document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+                document.body.style.overflow = 'hidden';
+                // Cambiar icono del botón hamburguesa a X
+                if (mobileMenuBtn) {
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon?.classList.remove('fa-bars');
+                    icon?.classList.add('fa-times');
+                    mobileMenuBtn.classList.add('open');
+                }
             }
 
             // Función para cerrar sidebar en móvil
@@ -161,21 +167,21 @@
                 sidebar?.classList.remove('show');
                 sidebarOverlay?.classList.remove('active');
                 document.body.style.overflow = '';
+                // Cambiar icono del botón X a hamburguesa
+                if (mobileMenuBtn) {
+                    const icon = mobileMenuBtn.querySelector('i');
+                    icon?.classList.remove('fa-times');
+                    icon?.classList.add('fa-bars');
+                    mobileMenuBtn.classList.remove('open');
+                }
             }
 
-            // Botón hamburguesa en móviles
+            // Botón hamburguesa en móviles (toggle)
             mobileMenuBtn?.addEventListener('click', function() {
-                openSidebar();
-            });
-
-            // Botón toggle dentro del sidebar (móvil)
-            sidebarToggle?.addEventListener('click', function() {
-                const isMobile = window.innerWidth <= 768;
-                if (isMobile) {
+                if (sidebar?.classList.contains('show')) {
                     closeSidebar();
                 } else {
-                    sidebar?.classList.toggle('collapsed');
-                    mainContent?.classList.toggle('sidebar-collapsed');
+                    openSidebar();
                 }
             });
 
@@ -208,7 +214,7 @@
                 }, 250);
             });
 
-            // Cerrar sidebar con tecla ESC
+            // Cerrar sidebar con tecla ESC en móvil
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && sidebar?.classList.contains('show')) {
                     closeSidebar();
@@ -223,6 +229,11 @@
                         this.classList.add('scrolled');
                     }
                 }, { once: true });
+            });
+
+            // Debug: Log cuando se hace click en el overlay
+            sidebarOverlay?.addEventListener('click', function() {
+                console.log('Overlay clicked - closing sidebar');
             });
         });
 

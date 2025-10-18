@@ -8,10 +8,6 @@
                 <small class="logo-subtitle">Gestor de Proyectos</small>
             </div>
         </div>
-        <!-- Botón solo en móvil -->
-        <button class="sidebar-toggle d-md-none" id="sidebarToggle" title="Cerrar menú">
-            <i class="fas fa-times"></i>
-        </button>
     </div>
 
     <div class="nav-section">
