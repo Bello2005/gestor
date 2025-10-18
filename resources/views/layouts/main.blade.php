@@ -29,7 +29,11 @@
     <div id="main-content">
         <!-- Botón hamburguesa para móviles -->
         <button class="mobile-menu-btn d-md-none" id="mobileMenuBtn" aria-label="Abrir menú">
-            <i class="fas fa-bars"></i>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </button>
 
         @yield('content')
@@ -153,13 +157,7 @@
                 sidebar?.classList.add('show');
                 sidebarOverlay?.classList.add('active');
                 document.body.style.overflow = 'hidden';
-                // Cambiar icono del botón hamburguesa a X
-                if (mobileMenuBtn) {
-                    const icon = mobileMenuBtn.querySelector('i');
-                    icon?.classList.remove('fa-bars');
-                    icon?.classList.add('fa-times');
-                    mobileMenuBtn.classList.add('open');
-                }
+                mobileMenuBtn?.classList.add('open');
             }
 
             // Función para cerrar sidebar en móvil
@@ -167,13 +165,7 @@
                 sidebar?.classList.remove('show');
                 sidebarOverlay?.classList.remove('active');
                 document.body.style.overflow = '';
-                // Cambiar icono del botón X a hamburguesa
-                if (mobileMenuBtn) {
-                    const icon = mobileMenuBtn.querySelector('i');
-                    icon?.classList.remove('fa-times');
-                    icon?.classList.add('fa-bars');
-                    mobileMenuBtn.classList.remove('open');
-                }
+                mobileMenuBtn?.classList.remove('open');
             }
 
             // Botón hamburguesa en móviles (toggle)
