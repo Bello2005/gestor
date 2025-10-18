@@ -59,10 +59,17 @@
     flex: 1;
 }
 
+.logo-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
 .logo-text {
     display: flex;
     flex-direction: column;
     transition: opacity 0.3s ease;
+    min-width: 0;
+    flex: 1;
 }
 
 #sidebar.collapsed .logo-text {
@@ -157,9 +164,12 @@
 
 .nav-link i {
     min-width: 1.5rem;
-    font-size: 1.25rem;
+    width: 1.5rem;
+    font-size: 1.1rem;
     margin-right: 0.75rem;
     transition: margin 0.3s ease;
+    text-align: center;
+    flex-shrink: 0;
 }
 
 #sidebar.collapsed .nav-link i {
@@ -169,6 +179,9 @@
 .nav-text {
     white-space: nowrap;
     transition: opacity 0.3s ease;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #sidebar.collapsed .nav-text {
@@ -190,6 +203,33 @@
     font-weight: 600;
     font-size: 1.1rem;
     flex-shrink: 0;
+}
+
+/* Perfil de usuario */
+.user-profile-hover {
+    min-width: 0;
+}
+
+.user-profile-hover .flex-grow-1 {
+    min-width: 0;
+    flex: 1;
+}
+
+.user-profile-hover h6 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-profile-hover small {
+    font-size: 0.75rem;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Overlay para móvil */
@@ -270,20 +310,28 @@
 /* Móviles */
 @media (max-width: 575.98px) {
     #sidebar {
-        width: 85%;
-        max-width: 300px;
+        width: 90%;
+        max-width: 320px;
     }
 
     .sidebar-header {
-        padding: 1rem;
+        padding: 1.25rem 1rem;
+    }
+
+    .logo-container {
+        gap: 0.75rem;
+    }
+
+    .logo-icon {
+        font-size: 1.5rem !important;
     }
 
     .nav-section {
-        padding: 1rem;
+        padding: 0.75rem 1rem;
     }
 
     .logo-title {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 
     .logo-subtitle {
@@ -291,7 +339,57 @@
     }
 
     .nav-link {
-        padding: 0.65rem 0.85rem;
+        padding: 0.7rem 0.75rem;
+    }
+
+    .nav-link i {
+        font-size: 1rem;
+        min-width: 1.25rem;
+        width: 1.25rem;
+        margin-right: 0.65rem;
+    }
+
+    .nav-text {
+        font-size: 0.9rem;
+    }
+
+    .nav-section-title {
+        font-size: 0.7rem;
+        padding-left: 0.25rem;
+    }
+
+    /* Usuario en móvil */
+    .avatar-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .user-profile-hover {
+        padding: 0.5rem !important;
+    }
+
+    .user-profile-hover h6 {
+        font-size: 0.85rem;
+    }
+
+    .user-profile-hover small {
+        font-size: 0.7rem;
+    }
+
+    .user-profile-hover .gap-3 {
+        gap: 0.5rem !important;
+    }
+
+    /* Sección de usuario más compacta */
+    .nav-section.mt-auto .px-4 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .nav-section.mt-auto .py-3 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
     }
 
     #main-content {

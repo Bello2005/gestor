@@ -2,15 +2,15 @@
 <div id="sidebar">
     <div class="sidebar-header">
         <div class="logo-container">
-            <i class="fas fa-university text-primary fa-2x"></i>
+            <i class="fas fa-university text-primary logo-icon"></i>
             <div class="logo-text">
                 <span class="logo-title">UNICLARETIANA</span>
                 <small class="logo-subtitle">Gestor de Proyectos</small>
             </div>
         </div>
         <!-- Botón solo en móvil -->
-        <button class="sidebar-toggle d-md-none" id="sidebarToggle" title="Plegar/Desplegar menú">
-            <i class="fas fa-chevron-left"></i>
+        <button class="sidebar-toggle d-md-none" id="sidebarToggle" title="Cerrar menú">
+            <i class="fas fa-times"></i>
         </button>
     </div>
 
