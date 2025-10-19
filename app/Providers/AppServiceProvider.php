@@ -3,8 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Auth;
-use App\Providers\CustomUserProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,8 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if ($this->app->environment('production')) {
-            \URL::forceScheme('https');
+        // Forzar HTTPS en production y development (no en local)
+        if ($this->app->environment('production', 'development')) {
+            URL::forceScheme('https');
         }
     }
 }
