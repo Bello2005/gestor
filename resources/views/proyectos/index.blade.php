@@ -153,32 +153,42 @@
 
             .search-row {
                 flex-direction: column;
-                gap: 0.75rem;
+                gap: 0.5rem;
             }
 
-            .search-row .search-container,
-            .search-row #proyectosTable_length,
-            .search-row .btn-group,
-            .search-row .btn-primary {
+            /* Ocultar el selector de registros en móvil */
+            .search-row #proyectosTable_length {
+                display: none !important;
+            }
+
+            .search-row .search-container {
                 width: 100% !important;
                 flex: none !important;
+                margin-bottom: 0 !important;
             }
 
-            /* Arreglar espaciado de botones */
+            /* Botones juntos en una fila */
+            .search-row .btn-group,
+            .search-row a.btn-primary {
+                width: 100% !important;
+                flex: none !important;
+                margin-left: 0 !important;
+                margin-top: 0 !important;
+            }
+
+            /* Arreglar espaciado de card */
             .content-card {
                 margin-top: 1rem !important;
             }
 
             .card-header {
-                padding: 1rem !important;
+                padding: 0.75rem !important;
             }
 
-            .search-row .btn-group {
-                margin-left: 0 !important;
-            }
-
-            .search-row a.btn-primary {
-                margin-left: 0 !important;
+            /* Botones más compactos */
+            .search-row .btn {
+                padding: 0.6rem 1rem !important;
+                font-size: 0.9rem !important;
             }
         }
 
