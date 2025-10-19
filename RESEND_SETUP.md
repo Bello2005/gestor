@@ -96,6 +96,21 @@ MAIL_FROM_ADDRESS=tu-email@gmail.com
 
 ## Troubleshooting
 
+### "You can only send testing emails to your own email address"
+
+**Problema**: Resend en modo FREE sin dominio verificado solo permite enviar emails a tu propio email (el que usaste para registrarte).
+
+**Soluciones**:
+
+1. **Verificar un dominio** (RECOMENDADA - gratis y permanente):
+   - Ve a https://resend.com/domains
+   - Agrega tu dominio (ej: `tudominio.com`)
+   - Configura los DNS records
+   - Cambia `MAIL_FROM_ADDRESS=noreply@tudominio.com`
+
+2. **Usar Gmail SMTP** (temporal, si no tienes dominio):
+   - Ve a la sección "Alternativa: Gmail SMTP" más abajo
+
 ### "No se envía el correo"
 
 1. Verifica que las variables estén correctas en Render
@@ -128,9 +143,60 @@ Este paquete ya está instalado en el proyecto:
 - `composer.json` incluye `resend/resend-php`
 - Laravel 12 detecta automáticamente el driver cuando `MAIL_MAILER=resend`
 
+## Alternativa: Gmail SMTP (Si no tienes dominio)
+
+Si no tienes un dominio propio y necesitas enviar correos YA, usa Gmail SMTP:
+
+### Paso 1: Habilitar App Password en Google
+
+1. Ve a tu cuenta de Google: https://myaccount.google.com/security
+2. Activa **"Verificación en 2 pasos"** (si no la tienes)
+3. Ve a **"Contraseñas de aplicaciones"**: https://myaccount.google.com/apppasswords
+4. Selecciona:
+   - App: "Correo"
+   - Dispositivo: "Otro (nombre personalizado)" → escribe "Laravel Gestor"
+5. Click "Generar"
+6. **Copia la contraseña de 16 caracteres** (sin espacios)
+
+### Paso 2: Configurar variables en Render
+
+Cambia estas variables en Render:
+
+```bash
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=deinerb2.0.0.5@gmail.com
+MAIL_PASSWORD=tu_app_password_de_16_caracteres
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=deinerb2.0.0.5@gmail.com
+MAIL_FROM_NAME="Sistema de Gestión"
+```
+
+**Importante**: Usa la App Password de 16 caracteres, NO tu contraseña normal de Gmail.
+
+### Paso 3: Eliminar variables de Resend
+
+Elimina o comenta (si las agregaste):
+- `RESEND_KEY`
+
+### Limitaciones de Gmail
+
+- **Límite**: 500 emails/día
+- **Problema**: Los correos pueden ir a spam más fácilmente
+- **Advertencia**: Si Gmail detecta uso "masivo", puede bloquear temporalmente
+
+### ¿Cuál usar?
+
+| Opción | Ventajas | Desventajas | Recomendado para |
+|--------|----------|-------------|------------------|
+| **Resend + dominio** | ✅ Profesional<br>✅ No va a spam<br>✅ 3000 emails/mes | ⚠️ Requiere dominio | Producción |
+| **Gmail SMTP** | ✅ Setup rápido<br>✅ No requiere dominio | ❌ Puede ir a spam<br>❌ Solo 500/día<br>❌ Menos profesional | Pruebas/desarrollo |
+
 ## Recursos
 
 - Documentación Resend: https://resend.com/docs
 - Dashboard: https://resend.com/emails
 - API Keys: https://resend.com/api-keys
 - Laravel Mail: https://laravel.com/docs/12.x/mail
+- Gmail App Passwords: https://myaccount.google.com/apppasswords
