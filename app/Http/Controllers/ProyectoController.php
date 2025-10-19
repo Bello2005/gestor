@@ -297,22 +297,24 @@ class ProyectoController extends Controller
 
             // Subir archivo de proyecto a Cloudinary
             if ($request->hasFile('archivo_proyecto')) {
-                $path = $request->file('archivo_proyecto')->storeOnCloudinary('proyectos/archivos');
-                $data['cargar_archivo_proyecto'] = $path->getSecurePath();
+                $file = $request->file('archivo_proyecto');
+                $path = Storage::disk('cloudinary')->putFile('proyectos/archivos', $file);
+                $data['cargar_archivo_proyecto'] = $path; // El path ya es la URL completa de Cloudinary
             }
 
             // Subir contrato a Cloudinary
             if ($request->hasFile('archivo_contrato')) {
-                $path = $request->file('archivo_contrato')->storeOnCloudinary('proyectos/contratos');
-                $data['cargar_contrato_o_convenio'] = $path->getSecurePath();
+                $file = $request->file('archivo_contrato');
+                $path = Storage::disk('cloudinary')->putFile('proyectos/contratos', $file);
+                $data['cargar_contrato_o_convenio'] = $path; // El path ya es la URL completa de Cloudinary
             }
 
             // Subir evidencias a Cloudinary
             if ($request->hasFile('evidencias')) {
                 $evidencias = [];
                 foreach ($request->file('evidencias') as $evidencia) {
-                    $path = $evidencia->storeOnCloudinary('proyectos/evidencias');
-                    $evidencias[] = $path->getSecurePath();
+                    $path = Storage::disk('cloudinary')->putFile('proyectos/evidencias', $evidencia);
+                    $evidencias[] = $path; // El path ya es la URL completa de Cloudinary
                 }
                 $data['cargar_evidencias'] = $evidencias;
             }
@@ -401,22 +403,24 @@ class ProyectoController extends Controller
 
             // Actualizar archivo de proyecto en Cloudinary
             if ($request->hasFile('archivo_proyecto')) {
-                $path = $request->file('archivo_proyecto')->storeOnCloudinary('proyectos/archivos');
-                $validated['cargar_archivo_proyecto'] = $path->getSecurePath();
+                $file = $request->file('archivo_proyecto');
+                $path = Storage::disk('cloudinary')->putFile('proyectos/archivos', $file);
+                $validated['cargar_archivo_proyecto'] = $path; // El path ya es la URL completa de Cloudinary
             }
 
             // Actualizar contrato en Cloudinary
             if ($request->hasFile('archivo_contrato')) {
-                $path = $request->file('archivo_contrato')->storeOnCloudinary('proyectos/contratos');
-                $validated['cargar_contrato_o_convenio'] = $path->getSecurePath();
+                $file = $request->file('archivo_contrato');
+                $path = Storage::disk('cloudinary')->putFile('proyectos/contratos', $file);
+                $validated['cargar_contrato_o_convenio'] = $path; // El path ya es la URL completa de Cloudinary
             }
 
             // Actualizar evidencias en Cloudinary (agregar nuevas a las existentes)
             if ($request->hasFile('evidencias')) {
                 $evidencias = $proyecto->cargar_evidencias ?? [];
                 foreach ($request->file('evidencias') as $evidencia) {
-                    $path = $evidencia->storeOnCloudinary('proyectos/evidencias');
-                    $evidencias[] = $path->getSecurePath();
+                    $path = Storage::disk('cloudinary')->putFile('proyectos/evidencias', $evidencia);
+                    $evidencias[] = $path; // El path ya es la URL completa de Cloudinary
                 }
                 $validated['cargar_evidencias'] = $evidencias;
             }
