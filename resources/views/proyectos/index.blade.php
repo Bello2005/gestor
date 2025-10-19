@@ -14,12 +14,7 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap5.min.css">
-    
-    <!-- Project Styles -->
-    <link rel="stylesheet" href="{{ asset('css/base.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/components/proyectos.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/components/status-chips.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/components/table-states.css') }}">
+
     <style>
         /* Oculta el buscador de DataTables */
         #proyectosTable_filter {
@@ -74,8 +69,22 @@
 
         /* Responsive para status bar */
         @media (max-width: 768px) {
+            /* FORZAR eliminación de espacios del contenedor principal */
+            .container-fluid.py-4 {
+                padding-top: 1rem !important;
+                padding-bottom: 0.5rem !important;
+            }
+
+            /* Eliminar animación y espacios de fade-in */
+            .fade-in {
+                animation: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                transform: none !important;
+            }
+
             .status-bar {
-                margin-bottom: 1.5rem !important;
+                margin-bottom: 1rem !important;
             }
 
             .status-bar .d-flex {
@@ -105,11 +114,14 @@
 
             .stats-grid {
                 grid-template-columns: 1fr !important;
-                gap: 1rem !important;
+                gap: 0.75rem !important;
+                margin-bottom: 0.75rem !important;
+                margin-top: 0 !important;
             }
 
             .stat-card {
                 padding: 1.25rem !important;
+                margin: 0 !important;
             }
 
             .stat-header {
@@ -214,37 +226,21 @@
         }
 
         @media (max-width: 768px) {
-            .stats-grid {
-                margin-bottom: 0.75rem !important;
-            }
-
-            .content-card {
-                margin-top: 0.75rem !important;
-            }
-
-            .card-header {
-                padding: 1rem !important;
-                border-bottom: none !important;
-            }
-
-            .table-container {
-                padding: 0 !important;
-            }
-
-            .py-4 {
-                padding-top: 1rem !important;
-                padding-bottom: 1rem !important;
-            }
-
-            /* FORZAR margin 0 en todo */
+            /* Aplicar compresión extrema de espacios */
             .content-card {
                 margin-top: 0.5rem !important;
                 margin-bottom: 0 !important;
             }
 
-            .fade-in {
-                margin-top: 0 !important;
-                margin-bottom: 0 !important;
+            .card-header {
+                padding: 1rem !important;
+                border-bottom: none !important;
+                margin: 0 !important;
+            }
+
+            .table-container {
+                padding: 0 !important;
+                margin: 0 !important;
             }
         }
 
