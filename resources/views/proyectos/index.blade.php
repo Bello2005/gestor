@@ -16,6 +16,96 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap5.min.css">
 
     <style>
+        /* Status chips */
+        .status-bar {
+            margin-bottom: 1.5rem;
+        }
+
+        .status-chips {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .status-chip:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-chip.active {
+            border-color: currentColor;
+            font-weight: 600;
+        }
+
+        .status-chip.activo {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+        }
+
+        .status-chip.activo.active {
+            background: #059669;
+            color: white;
+        }
+
+        .status-chip.inactivo {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+        }
+
+        .status-chip.inactivo.active {
+            background: #d97706;
+            color: white;
+        }
+
+        .status-chip.cerrado {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+        }
+
+        .status-chip.cerrado.active {
+            background: #dc2626;
+            color: white;
+        }
+
+        .status-chip[data-estado="todos"].active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        /* Botones de acción */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            filter: brightness(0.95);
+        }
+
         /* Oculta el buscador de DataTables */
         #proyectosTable_filter {
             display: none !important;
