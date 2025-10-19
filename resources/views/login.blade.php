@@ -1,508 +1,357 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Login - Gestor de Archivos Uniclaretiana</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>QUANTUM - Gestión a la Velocidad del Pensamiento</title>
+
+    <!-- Vite Assets -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- SweetAlert2 para notificaciones -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
-        :root {
-            /* Animaciones para los toasts */
-            --animate-duration: 0.3s;
-            --animate-delay: 0s;
-            --primary: #FFD700;
-            --primary-dark: #F4C400;
-            --secondary: #FFFFFF;
-            --text-dark: #1E1E1E;
-            --text-light: #666666;
-            --gray-light: #F5F5F5;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            --transition: all 0.3s ease;
+        /* Animated gradient background */
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+
+        .quantum-bg {
+            background: linear-gradient(135deg,
+                hsl(240, 15%, 6%) 0%,
+                hsl(270, 80%, 10%) 25%,
+                hsl(195, 100%, 15%) 50%,
+                hsl(270, 80%, 10%) 75%,
+                hsl(240, 15%, 6%) 100%
+            );
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
         }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #FFD700 0%, #FFFFFF 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .login-container {
+
+        /* Particles effect */
+        .particles {
+            position: absolute;
             width: 100%;
-            max-width: 1100px;
-            background: var(--secondary);
-            border-radius: 20px;
+            height: 100%;
             overflow: hidden;
-            box-shadow: var(--shadow);
-            display: flex;
-            min-height: 600px;
+            z-index: 0;
         }
-        
-        .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-dark);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .login-left::before {
-            content: '';
+
+        .particle {
             position: absolute;
-            width: 200px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 191, 255, 0.5);
             border-radius: 50%;
-            top: -50px;
-            left: -50px;
+            animation: float 10s infinite ease-in-out;
         }
-        
-        .login-left::after {
-            content: '';
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            bottom: -100px;
-            right: -100px;
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
         }
-        
-        .logo-container {
-            text-align: center;
-            margin-bottom: 40px;
-            z-index: 1;
+
+        /* Glassmorphism card */
+        .glass-card {
+            background: rgba(21, 21, 31, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                        0 0 80px rgba(0, 191, 255, 0.15);
         }
-        
-        .logo-container h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-top: 20px;
+
+        /* Glow effect on focus */
+        .input-quantum:focus {
+            box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.3),
+                        0 0 20px rgba(0, 191, 255, 0.2);
         }
-        
-        .illustration {
-            width: 100%;
-            max-width: 350px;
-            margin-bottom: 30px;
-            z-index: 1;
+
+        /* Logo animation */
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
         }
-        
-        .features {
-            list-style: none;
-            margin-top: 30px;
-            z-index: 1;
+
+        .logo-quantum {
+            animation: logoFloat 6s ease-in-out infinite;
         }
-        
-        .features li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-weight: 500;
+
+        /* Button hover effect */
+        .btn-quantum:hover {
+            box-shadow: 0 0 40px rgba(0, 191, 255, 0.5),
+                        0 8px 25px rgba(0, 0, 0, 0.3);
         }
-        
-        .features li::before {
-            content: '✓';
-            background: var(--secondary);
-            color: var(--primary);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-            font-weight: bold;
+
+        /* Password toggle icon */
+        .password-toggle-btn {
+            transition: all 0.2s ease;
         }
-        
-        .login-right {
-            flex: 1;
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .login-header {
-            margin-bottom: 40px;
-        }
-        
-        .login-header h2 {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 10px;
-        }
-        
-        .login-header p {
-            color: var(--text-light);
-            font-size: 16px;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-            position: relative;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-        
-        .input-with-icon {
-            position: relative;
-        }
-        
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 15px 15px 15px 45px;
-            border: 2px solid #e1e1e1;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: var(--transition);
-        }
-        
-        .form-control:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
-        }
-        
-        .password-toggle {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
-        }
-        
-        .remember-forgot {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-        
-        .remember-me {
-            display: flex;
-            align-items: center;
-        }
-        
-        .remember-me input {
-            margin-right: 8px;
-            accent-color: var(--primary);
-        }
-        
-        .forgot-password {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-        
-        .forgot-password:hover {
-            text-decoration: underline;
-        }
-        
-        .btn-login {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary);
-            border: none;
-            border-radius: 10px;
-            color: var(--text-dark);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-bottom: 20px;
-        }
-        
-        .btn-login:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        
-        .divider {
-            text-align: center;
-            position: relative;
-            margin: 25px 0;
-            color: var(--text-light);
-        }
-        
-        .divider::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 100%;
-            height: 1px;
-            background: #e1e1e1;
-        }
-        
-        .divider span {
-            background: white;
-            padding: 0 15px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .social-login {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .social-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--gray-light);
-            border: 1px solid #e1e1e1;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .social-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
-        
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-            color: var(--text-light);
-        }
-        
-        .register-link a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-        
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-        
-        @media (max-width: 992px) {
-            .login-container {
-                flex-direction: column;
-                max-width: 500px;
-            }
-            
-            .login-left {
-                padding: 30px;
-            }
-            
-            .illustration {
-                max-width: 250px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .login-right {
-                padding: 30px;
-            }
-            
-            .remember-forgot {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
+
+        .password-toggle-btn:hover {
+            transform: scale(1.1);
+            color: hsl(195, 100%, 50%);
         }
     </style>
 </head>
-<body>
-    <div class="login-container">
-        <div class="login-left">
-            <div class="logo-container">
-                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="40" cy="40" r="38" stroke="#1E1E1E" stroke-width="4"/>
-                    <path d="M25 40L35 50L55 30" stroke="#1E1E1E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <h1>Uniclaretiana</h1>
-            </div>
-            
-            <svg class="illustration" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                <path d="M150,300 C50,250 50,150 150,100 C250,50 350,100 350,200 C350,300 250,350 150,300 Z" fill="#FFFFFF" opacity="0.2"/>
-                <path d="M250,100 C350,150 350,250 250,300 C150,350 50,300 50,200 C50,100 150,50 250,100 Z" fill="#FFFFFF" opacity="0.2"/>
-                <circle cx="250" cy="200" r="80" fill="#FFFFFF"/>
-                <circle cx="150" cy="200" r="80" fill="#FFFFFF"/>
-                <path d="M150,200 L250,200" stroke="#1E1E1E" stroke-width="8" stroke-linecap="round"/>
-                <path d="M200,150 L200,250" stroke="#1E1E1E" stroke-width="8" stroke-linecap="round"/>
-            </svg>
-            
-            <ul class="features">
-                <li>Gestión segura de archivos académicos</li>
-                <li>Acceso multi-dispositivo</li>
-                <li>Colaboración en tiempo real</li>
-                <li>Compatible con todos los formatos</li>
-            </ul>
-        </div>
-        
-        <div class="login-right">
-            <div class="login-header">
-                <h2>Bienvenido al Gestor de Archivos</h2>
-                <p>Ingresa tus credenciales para acceder a tu cuenta</p>
-            </div>
-            
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-                <div class="form-group">
-                    <label for="email">Correo electrónico</label>
-                    <div class="input-with-icon">
-                        <span class="input-icon">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M2.5 6.66669L9.0755 11.0504C9.63533 11.4236 10.3647 11.4236 10.9245 11.0504L17.5 6.66669M4.16667 15.8334H15.8333C16.7538 15.8334 17.5 15.0872 17.5 14.1667V5.83335C17.5 4.91288 16.7538 4.16669 15.8333 4.16669H4.16667C3.24619 4.16669 2.5 4.91288 2.5 5.83335V14.1667C2.5 15.0872 3.24619 15.8334 4.16667 15.8334Z" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<body class="quantum-bg min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <!-- Animated particles background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Main Login Container -->
+    <div class="w-full max-w-6xl flex items-center justify-center relative z-10">
+        <div class="w-full grid md:grid-cols-2 gap-8 items-center">
+
+            <!-- Left Side - Branding -->
+            <div class="hidden md:flex flex-col items-center justify-center space-y-8 text-center">
+                <!-- Logo -->
+                <div class="logo-quantum">
+                    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="quantumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:hsl(195, 100%, 50%);stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:hsl(270, 80%, 60%);stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Quantum Particles Structure -->
+                        <circle cx="60" cy="30" r="8" fill="url(#quantumGradient)"/>
+                        <circle cx="30" cy="60" r="8" fill="url(#quantumGradient)"/>
+                        <circle cx="90" cy="60" r="8" fill="url(#quantumGradient)"/>
+                        <circle cx="60" cy="90" r="8" fill="url(#quantumGradient)"/>
+                        <!-- Connection Lines -->
+                        <line x1="60" y1="30" x2="30" y2="60" stroke="url(#quantumGradient)" stroke-width="2"/>
+                        <line x1="60" y1="30" x2="90" y2="60" stroke="url(#quantumGradient)" stroke-width="2"/>
+                        <line x1="30" y1="60" x2="60" y2="90" stroke="url(#quantumGradient)" stroke-width="2"/>
+                        <line x1="90" y1="60" x2="60" y2="90" stroke="url(#quantumGradient)" stroke-width="2"/>
+                        <line x1="30" y1="60" x2="90" y2="60" stroke="url(#quantumGradient)" stroke-width="2"/>
+                        <!-- Central Core -->
+                        <circle cx="60" cy="60" r="15" fill="none" stroke="url(#quantumGradient)" stroke-width="3"/>
+                        <circle cx="60" cy="60" r="5" fill="url(#quantumGradient)"/>
+                    </svg>
+                </div>
+
+                <!-- Brand Name -->
+                <div>
+                    <h1 class="text-6xl font-bold text-gradient mb-2">QUANTUM</h1>
+                    <p class="text-gray-400 text-lg">Gestión a la Velocidad del Pensamiento</p>
+                </div>
+
+                <!-- Features -->
+                <div class="space-y-4 text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-quantum-500/20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-quantum-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
-                        </span>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="usuario@uniclaretiana.edu.co" required autofocus autocomplete="username">
+                        </div>
+                        <span class="text-gray-300">Velocidad cuántica de procesamiento</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-void-500/20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-void-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                        <span class="text-gray-300">Seguridad de nivel enterprise</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-photon-500/20 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-photon-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <span class="text-gray-300">Colaboración en tiempo real</span>
                     </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <div class="input-with-icon">
-                        <span class="input-icon">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15.8333 9.16669H4.16667C3.24619 9.16669 2.5 9.91288 2.5 10.8334V15.8334C2.5 16.7539 3.24619 17.5 4.16667 17.5H15.8333C16.7538 17.5 17.5 16.7539 17.5 15.8334V10.8334C17.5 9.91288 16.7538 9.16669 15.8333 9.16669Z" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M5.83333 9.16669V5.83335C5.83333 4.72828 6.27232 3.66848 7.05372 2.88708C7.83512 2.10568 8.89493 1.66669 10 1.66669C11.1051 1.66669 12.1649 2.10568 12.9463 2.88708C13.7277 3.66848 14.1667 4.72828 14.1667 5.83335V9.16669" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </div>
+
+            <!-- Right Side - Login Form -->
+            <div class="w-full">
+                <div class="glass-card rounded-quantum-xl p-8 md:p-12 scale-in">
+                    <!-- Header -->
+                    <div class="mb-8">
+                        <!-- Mobile Logo -->
+                        <div class="md:hidden flex justify-center mb-6">
+                            <svg width="60" height="60" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="mobileLogo" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:hsl(195, 100%, 50%);stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:hsl(270, 80%, 60%);stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="60" cy="30" r="8" fill="url(#mobileLogo)"/>
+                                <circle cx="30" cy="60" r="8" fill="url(#mobileLogo)"/>
+                                <circle cx="90" cy="60" r="8" fill="url(#mobileLogo)"/>
+                                <circle cx="60" cy="90" r="8" fill="url(#mobileLogo)"/>
+                                <line x1="60" y1="30" x2="30" y2="60" stroke="url(#mobileLogo)" stroke-width="2"/>
+                                <line x1="60" y1="30" x2="90" y2="60" stroke="url(#mobileLogo)" stroke-width="2"/>
+                                <line x1="30" y1="60" x2="60" y2="90" stroke="url(#mobileLogo)" stroke-width="2"/>
+                                <line x1="90" y1="60" x2="60" y2="90" stroke="url(#mobileLogo)" stroke-width="2"/>
+                                <circle cx="60" cy="60" r="15" fill="none" stroke="url(#mobileLogo)" stroke-width="3"/>
+                                <circle cx="60" cy="60" r="5" fill="url(#mobileLogo)"/>
                             </svg>
-                        </span>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Ingresa tu contraseña" required autocomplete="current-password">
-                        <button type="button" class="password-toggle" id="togglePassword">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1.66675 10C1.66675 10 4.16675 4.16669 10.0001 4.16669C15.8334 4.16669 18.3334 10 18.3334 10C18.3334 10 15.8334 15.8334 10.0001 15.8334C4.16675 15.8334 1.66675 10 1.66675 10Z" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61929 11.3807 7.5 10 7.5C8.61929 7.5 7.5 8.61929 7.5 10C7.5 11.3807 8.61929 12.5 10 12.5Z" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                        </div>
+
+                        <h2 class="text-3xl font-bold text-white mb-2">Bienvenido de nuevo</h2>
+                        <p class="text-gray-400">Ingresa tus credenciales para continuar</p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form method="POST" action="{{ route('login') }}" class="space-y-6" x-data="{ showPassword: false }">
+                        @csrf
+
+                        <!-- Email Input -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                                Correo electrónico
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    id="email"
+                                    class="input-quantum pl-12 w-full"
+                                    placeholder="tu@email.com"
+                                    required
+                                    autofocus
+                                    autocomplete="username"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Password Input -->
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+                                Contraseña
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    :type="showPassword ? 'text' : 'password'"
+                                    name="password"
+                                    id="password"
+                                    class="input-quantum pl-12 pr-12 w-full"
+                                    placeholder="••••••••"
+                                    required
+                                    autocomplete="current-password"
+                                >
+                                <button
+                                    type="button"
+                                    @click="showPassword = !showPassword"
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center password-toggle-btn"
+                                >
+                                    <svg x-show="!showPassword" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    <svg x-show="showPassword" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember & Forgot -->
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    name="remember"
+                                    class="w-4 h-4 rounded border-matter-light bg-matter text-quantum-500 focus:ring-2 focus:ring-quantum-500 focus:ring-offset-0"
+                                >
+                                <span class="ml-2 text-sm text-gray-300">Recordarme</span>
+                            </label>
+                            <a href="{{ route('password.request') }}" class="text-sm text-quantum-400 hover:text-quantum-300 transition-colors">
+                                ¿Olvidaste tu contraseña?
+                            </a>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-quantum w-full">
+                            Iniciar Sesión
                         </button>
-                    </div>
-                </div>
-                
-                <div class="remember-forgot">
-                    <div class="remember-me">
-                        <input type="checkbox" id="remember" name="remember">
-                        <label for="remember">Recordarme</label>
-                    </div>
-                    <a href="{{ route('password.request') }}" class="forgot-password">¿Olvidaste tu contraseña?</a>
-                </div>
-                
-                <button type="submit" class="btn-login">Iniciar Sesión</button>
-            </form>
+                    </form>
 
-            <div class="register-link">
-                ¿No tienes una cuenta? <a href="{{ route('access-requests.create') }}">Solicitar acceso</a>
+                    <!-- Divider -->
+                    <div class="relative my-8">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-matter-light"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-matter/50 text-gray-400">¿No tienes una cuenta?</span>
+                        </div>
+                    </div>
+
+                    <!-- Register Link -->
+                    <a href="{{ route('access-requests.create') }}" class="btn-ghost w-full text-center block">
+                        Solicitar acceso
+                    </a>
+                </div>
             </div>
-
-            @if(session('success'))
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Éxito!',
-                            text: '{{ session("success") }}',
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            background: '#4CAF50',
-                            color: '#fff',
-                            iconColor: '#fff'
-                        });
-                    });
-                </script>
-            @endif
-
-            @if($errors->any())
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: '¡Error!',
-                            text: '{{ $errors->first() }}',
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            background: '#F44336',
-                            color: '#fff',
-                            iconColor: '#fff'
-                        });
-                    });
-                </script>
-            @endif
         </div>
     </div>
 
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: '{{ session("success") }}',
+                    background: 'hsl(240, 12%, 10%)',
+                    color: '#fff',
+                    confirmButtonColor: 'hsl(195, 100%, 50%)',
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+            });
+        </script>
+    @endif
+
+    @if($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de autenticación',
+                    text: '{{ $errors->first() }}',
+                    background: 'hsl(240, 12%, 10%)',
+                    color: '#fff',
+                    confirmButtonColor: 'hsl(0, 84%, 60%)',
+                });
+            });
+        </script>
+    @endif
+
+    <!-- Particles Script -->
     <script>
-        // Funcionalidad para mostrar/ocultar contraseña
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            // Cambiar el icono
-            this.querySelector('svg').innerHTML = type === 'password' 
-                ? '<path d="M1.66675 10C1.66675 10 4.16675 4.16669 10.0001 4.16669C15.8334 4.16669 18.3334 10 18.3334 10C18.3334 10 15.8334 15.8334 10.0001 15.8334C4.16675 15.8334 1.66675 10 1.66675 10Z" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 12.5C11.3807 12.5 12.5 11.3807 12.5 10C12.5 8.61929 11.3807 7.5 10 7.5C8.61929 7.5 7.5 8.61929 7.5 10C7.5 11.3807 8.61929 12.5 10 12.5Z" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
-                : '<path d="M3.33325 3.33331L16.6666 16.6666M10.8333 10.8333C10.3923 11.1633 9.87592 11.338 9.34502 11.3367C8.81412 11.3354 8.29852 11.1583 7.85905 10.8265C7.41958 10.4947 7.07707 10.0234 6.87859 9.4727C6.68011 8.92198 6.63461 8.31726 6.74825 7.73831M14.9999 12.0833C14.0674 13.0333 12.8333 13.6593 11.6666 13.9583M6.66659 13.9583C5.07742 13.5133 3.33325 12.0833 2.08325 10C2.91659 8.74998 3.74992 7.91665 4.99992 7.08331" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-        });
-        
-        // Efectos de hover mejorados
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-            button.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.1)';
-            });
-            
-            button.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = 'none';
-            });
-        });
-        
-        // Configurar el token CSRF para todas las llamadas AJAX
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+        // Create floating particles
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 50;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 10 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
     </script>
 </body>
 </html>
