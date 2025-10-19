@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\AccessRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -86,54 +85,35 @@ class AccessRequestController extends Controller
                 return $user;
             });
 
-            // Enviar email con las credenciales
+            // Enviar email con las credenciales en cola (background)
             try {
-                Log::info("Intentando enviar email a {$user->email}");
-                
+                Log::info("Encolando email de bienvenida para {$user->email}");
+
                 $mailable = new AccessRequestApproved($user, 'password123');
-                Mail::to($user->email)->send($mailable);
-                
-                Log::info("Email de bienvenida enviado exitosamente a {$user->email}");
+                Mail::to($user->email)->queue($mailable);
+
+                Log::info("Email de bienvenida encolado exitosamente para {$user->email}");
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Solicitud aprobada y usuario creado exitosamente'
                 ]);
             } catch (\Exception $e) {
-                Log::error("Error al enviar email a {$user->email}. Error: " . $e->getMessage());
-                Log::error("Stack trace: " . $e->getTraceAsString());
-                
-                // Intentar verificar la configuración de correo
-                try {
-                    $config = config('mail');
-                    Log::info("Configuración de correo actual:", [
-                        'driver' => $config['default'],
-                        'host' => $config['mailers']['smtp']['host'],
-                        'port' => $config['mailers']['smtp']['port'],
-                        'from' => $config['from'],
-                        'encryption' => $config['mailers']['smtp']['encryption']
-                    ]);
-                } catch (\Exception $configError) {
-                    Log::error("Error al verificar configuración de correo: " . $configError->getMessage());
-                }
-                
+                Log::error("Error al encolar email para {$user->email}. Error: " . $e->getMessage());
+
                 return response()->json([
                     'success' => true,
-                    'message' => 'Solicitud aprobada y usuario creado exitosamente, pero hubo un error al enviar el correo electrónico'
+                    'message' => 'Solicitud aprobada y usuario creado exitosamente, pero hubo un error al encolar el correo electrónico'
                 ]);
             }
 
         } catch (\Exception $e) {
             Log::error("Error al aprobar solicitud de acceso: " . $e->getMessage());
+            report($e);
+
             return response()->json([
                 'error' => 'Hubo un error al procesar la solicitud. Por favor, intente nuevamente.',
                 'details' => $e->getMessage()
-            ], 500);
-            report($e);
-            
-            return response()->json([
-                'error' => 'Error al procesar la solicitud',
-                'message' => $e->getMessage()
             ], 500);
         }
     }
