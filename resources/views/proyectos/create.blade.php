@@ -159,16 +159,20 @@
                         @enderror
                     </div>
                     <div class="col-md-4 mb-3">
-                        <label for="evidencias" class="form-label">Cargar Evidencias</label>
-                        <input type="file" class="form-control @error('evidencias.*') is-invalid @enderror" id="evidencias" name="evidencias[]" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                        <small class="form-text text-muted">Múltiples archivos: PDF, DOC, DOCX, JPG, PNG (Max: 10MB c/u)</small>
-                        @if(isset($proyecto) && $proyecto->cargar_evidencias)
-                            <div class="mt-2">
-                                @foreach($proyecto->cargar_evidencias as $index => $evidencia)
-                                    <a href="{{ $evidencia }}" target="_blank" class="btn btn-sm btn-outline-primary me-1 mb-1">
-                                        <i class="fas fa-download"></i> Evidencia {{ $index + 1 }}
-                                    </a>
-                                @endforeach
+                        <label for="evidencias" class="form-label">Cargar Evidencias (Imágenes)</label>
+                        <input type="file" class="form-control @error('evidencias.*') is-invalid @enderror" id="evidencias" name="evidencias[]" multiple accept="image/jpeg,image/jpg,image/png,image/webp">
+                        <small class="form-text text-muted">Solo imágenes: JPG, PNG, WEBP (Max: 10MB c/u)</small>
+                        @if(isset($proyecto) && $proyecto->cargar_evidencias && count($proyecto->cargar_evidencias) > 0)
+                            <div class="mt-2" style="max-height: 200px; overflow-y: auto;">
+                                <div class="row g-2">
+                                    @foreach($proyecto->cargar_evidencias as $index => $evidencia)
+                                        <div class="col-6">
+                                            <a href="{{ $evidencia }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 text-truncate" title="Ver evidencia {{ $index + 1 }}">
+                                                <i class="fas fa-image me-1"></i> Evidencia {{ $index + 1 }}
+                                            </a>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         @endif
                         @error('evidencias.*')

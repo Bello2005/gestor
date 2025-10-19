@@ -6,16 +6,8 @@ use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpWord\IOFactory;
-use Cloudinary\Cloudinary;
 
 class ProyectoController extends Controller
 {
@@ -302,7 +294,8 @@ class ProyectoController extends Controller
                 'entidad_contratante' => 'nullable|string|max:255',
                 'fecha_de_ejecucion' => 'nullable|date',
                 'plazo' => 'nullable|numeric|min:0',
-                'valor_total' => 'nullable|numeric|min:0'
+                'valor_total' => 'nullable|numeric|min:0',
+                'evidencias.*' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:10240' // Solo imágenes, max 10MB
             ]);
 
             $data = $validated;
@@ -410,7 +403,8 @@ class ProyectoController extends Controller
                 'fecha_de_ejecucion' => 'nullable|date',
                 'plazo' => 'nullable|numeric|min:0',
                 'valor_total' => 'nullable|numeric|min:0',
-                'estado' => 'nullable|string|in:activo,inactivo,cerrado'
+                'estado' => 'nullable|string|in:activo,inactivo,cerrado',
+                'evidencias.*' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:10240' // Solo imágenes (Cloudinary FREE)
             ]);
 
             // Actualizar archivo de proyecto en Cloudinary
