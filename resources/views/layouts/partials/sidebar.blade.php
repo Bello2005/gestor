@@ -8,6 +8,10 @@
                 <small class="logo-subtitle">Gestor de Proyectos</small>
             </div>
         </div>
+        <!-- Botón cerrar solo visible en móvil -->
+        <button class="sidebar-close-btn d-md-none" id="sidebarCloseBtn" title="Cerrar menú">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
 
     <div class="nav-section">

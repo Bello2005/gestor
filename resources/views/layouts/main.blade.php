@@ -148,6 +148,7 @@
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.querySelector('.sidebar-overlay');
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
             const mainContent = document.getElementById('main-content');
 
             // Función para abrir sidebar en móvil
@@ -155,7 +156,6 @@
                 sidebar?.classList.add('show');
                 sidebarOverlay?.classList.add('active');
                 document.body.style.overflow = 'hidden';
-                mobileMenuBtn?.classList.add('open');
             }
 
             // Función para cerrar sidebar en móvil
@@ -163,17 +163,13 @@
                 sidebar?.classList.remove('show');
                 sidebarOverlay?.classList.remove('active');
                 document.body.style.overflow = '';
-                mobileMenuBtn?.classList.remove('open');
             }
 
-            // Botón hamburguesa en móviles (toggle)
-            mobileMenuBtn?.addEventListener('click', function() {
-                if (sidebar?.classList.contains('show')) {
-                    closeSidebar();
-                } else {
-                    openSidebar();
-                }
-            });
+            // Botón hamburguesa SOLO abre
+            mobileMenuBtn?.addEventListener('click', openSidebar);
+
+            // Botón cerrar SOLO cierra
+            sidebarCloseBtn?.addEventListener('click', closeSidebar);
 
             // Cerrar sidebar al hacer clic en overlay
             sidebarOverlay?.addEventListener('click', closeSidebar);
