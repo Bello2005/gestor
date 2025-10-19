@@ -65,9 +65,103 @@
             flex: 0 0 auto;
             white-space: nowrap;
         }
+        /* RESPONSIVE DESIGN */
         @media (max-width: 900px) {
             .search-row {
                 flex-wrap: wrap;
+            }
+        }
+
+        /* Responsive para status bar */
+        @media (max-width: 768px) {
+            .status-bar {
+                margin-bottom: 1.5rem !important;
+            }
+
+            .status-bar .d-flex {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 1rem;
+            }
+
+            .status-bar h1 {
+                font-size: 1.5rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            .status-bar .status-chips {
+                margin-left: 0 !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            .status-chip {
+                font-size: 0.75rem !important;
+                padding: 0.5rem !important;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+
+            .stat-card {
+                padding: 1.25rem !important;
+            }
+
+            .stat-header {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+            }
+
+            .stat-title {
+                font-size: 0.9rem !important;
+            }
+
+            .stat-value {
+                font-size: 1.75rem !important;
+                margin-top: 0.5rem;
+            }
+
+            .stat-icon {
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 1.25rem !important;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .container-fluid {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+
+            .status-bar h1 {
+                font-size: 1.25rem !important;
+            }
+
+            .stat-card {
+                padding: 1rem !important;
+            }
+
+            .stat-value {
+                font-size: 1.5rem !important;
+            }
+
+            .search-row {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .search-row .search-container,
+            .search-row #proyectosTable_length,
+            .search-row .btn-group,
+            .search-row .btn-primary {
+                width: 100% !important;
+                flex: none !important;
             }
         }
 
