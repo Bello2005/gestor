@@ -163,6 +163,7 @@ Si no tienes un dominio propio y necesitas enviar correos YA, usa Gmail SMTP:
 Cambia estas variables en Render:
 
 ```bash
+# Configuración de correo (Gmail SMTP)
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
@@ -171,9 +172,14 @@ MAIL_PASSWORD=tu_app_password_de_16_caracteres
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=deinerb2.0.0.5@gmail.com
 MAIL_FROM_NAME="Sistema de Gestión"
+
+# Configuración de colas (IMPORTANTE para evitar timeouts)
+QUEUE_CONNECTION=database
 ```
 
-**Importante**: Usa la App Password de 16 caracteres, NO tu contraseña normal de Gmail.
+**Importante**:
+- Usa la App Password de 16 caracteres (sin espacios), NO tu contraseña normal de Gmail
+- `QUEUE_CONNECTION=database` envía los correos en segundo plano para evitar timeout 504
 
 ### Paso 3: Eliminar variables de Resend
 
@@ -192,6 +198,41 @@ Elimina o comenta (si las agregaste):
 |--------|----------|-------------|------------------|
 | **Resend + dominio** | ✅ Profesional<br>✅ No va a spam<br>✅ 3000 emails/mes | ⚠️ Requiere dominio | Producción |
 | **Gmail SMTP** | ✅ Setup rápido<br>✅ No requiere dominio | ❌ Puede ir a spam<br>❌ Solo 500/día<br>❌ Menos profesional | Pruebas/desarrollo |
+
+## Cómo funciona el sistema de colas
+
+### ¿Por qué colas?
+
+Antes del cambio:
+1. Usuario hace click "Restablecer contraseña"
+2. Laravel **espera** a que Gmail envíe el correo (5-10 segundos)
+3. Si tarda más de 60 segundos → **Error 504 Gateway Timeout**
+
+Después del cambio (con colas):
+1. Usuario hace click "Restablecer contraseña"
+2. Laravel guarda el correo en la base de datos
+3. Responde inmediatamente: "✅ Correo enviado"
+4. El **queue worker** (proceso en background) toma el correo de la BD y lo envía
+
+### ¿Qué hace el queue worker?
+
+El proyecto ya incluye un **queue worker** en `docker/supervisor/supervisord.conf` que:
+- Corre automáticamente en Render cuando haces deploy
+- Revisa la tabla `jobs` cada segundo
+- Envía los correos pendientes en segundo plano
+- Si falla, reintenta hasta 3 veces
+- Se reinicia automáticamente si se detiene
+
+### Verificar que funciona
+
+Después del deploy, puedes verificar en los logs de Render:
+
+```
+2025-10-19 07:24:13,882 INFO spawned: 'queue-worker' with pid 34
+2025-10-19 07:24:15,263 INFO success: queue-worker entered RUNNING state
+```
+
+Si ves eso, el worker está funcionando correctamente.
 
 ## Recursos
 

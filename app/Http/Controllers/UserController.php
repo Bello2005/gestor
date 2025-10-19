@@ -145,11 +145,11 @@ class UserController extends Controller
                 );
 
                 try {
-                    // Enviar correo con el token y el usuario
-                    Mail::to($user->email)->send(new PasswordReset($user, $token));
+                    // Enviar correo en cola (background) para evitar timeout
+                    Mail::to($user->email)->queue(new PasswordReset($user, $token));
                 } catch (\Exception $e) {
-                    \Log::error('Error sending password reset email:', ['error' => $e->getMessage()]);
-                    throw new \Exception('Error al enviar el correo de restablecimiento: ' . $e->getMessage());
+                    \Log::error('Error queueing password reset email:', ['error' => $e->getMessage()]);
+                    throw new \Exception('Error al encolar el correo de restablecimiento: ' . $e->getMessage());
                 }
 
                 // Registrar historial
