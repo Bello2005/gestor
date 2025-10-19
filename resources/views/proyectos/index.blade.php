@@ -198,21 +198,53 @@
         }
 
         .content-card {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table-container {
+            padding: 1.5rem;
         }
 
         @media (max-width: 768px) {
             .stats-grid {
-                margin-bottom: 1rem;
+                margin-bottom: 0.75rem !important;
             }
 
             .content-card {
-                margin-top: 1rem;
+                margin-top: 0.75rem !important;
+            }
+
+            .card-header {
+                padding: 1rem !important;
+                border-bottom: none !important;
+            }
+
+            .table-container {
+                padding: 0 !important;
             }
 
             .py-4 {
                 padding-top: 1rem !important;
                 padding-bottom: 1rem !important;
+            }
+
+            /* FORZAR margin 0 en todo */
+            .content-card {
+                margin-top: 0.5rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            .fade-in {
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
             }
         }
 
