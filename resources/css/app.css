@@ -1,6 +1,24 @@
+/* Tailwind Directives */
+@import "tailwindcss";
+
+/* Variables primero */
+@import "./variables.css";
+@import "./base.css";
+
+/* Layouts */
+@import "./layouts/sidebar.css";
+@import "./layouts/content.css";
+
+/* Componentes */
+@import "./components/proyecto.css";
+@import "./components/proyectos-table.css";
+@import "./components/table-responsive.css";
+@import "./components/table-fixes.css";
+
+/* Estilos personalizados */
 .dropdown-menu.exportar-dropdown {
     position: fixed !important;
-    top: 80px !important; /* Ajusta según tu layout */
+    top: 80px !important;
     right: 40px !important;
     z-index: 9999 !important;
     background: #fff !important;
@@ -17,35 +35,9 @@
     margin-bottom: 8px;
     transition: box-shadow 0.2s;
 }
+
 .dropdown-menu.exportar-dropdown .dropdown-item:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-}
-/* Importar layouts */
-@import "./layouts/sidebar.css";
-@import "./layouts/content.css";
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
-
-/* Importar variables y estilos base */
-@import "./variables.css";
-@import "./base.css";
-
-/* Importar layouts */
-@import "./layouts/sidebar.css";
-
-/* Importar componentes */
-@import "./components/proyecto.css";
-@import "./components/proyectos-table.css";
-@import "./components/table-responsive.css";
-@import "./components/table-fixes.css";
-
-@theme {
-    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
 }
 
 /* Estilos globales adicionales */
