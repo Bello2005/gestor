@@ -1,649 +1,449 @@
-@extends('layouts.main')
+@extends('layouts.quantum')
 
-@section('title', 'Panel de Analítica - UNICLARETIANA')
-
-@push('styles')
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
-    <style>
-        * {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        
-        .gradient-bg {
-            background: #ffffff;
-        }
-        
-        .glass-effect {
-            backdrop-filter: blur(16px);
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-        
-        .stat-number {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: none;
-        }
-        
-        .chart-container {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-        }
-        
-        .progress-ring {
-            transform: rotate(-90deg);
-        }
-        
-        .floating-element {
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        .floating-element:nth-child(1) { background: linear-gradient(45deg, #4f46e5, #7c3aed); }
-        .floating-element:nth-child(2) { background: linear-gradient(45deg, #06b6d4, #3b82f6); }
-        .floating-element:nth-child(3) { background: linear-gradient(45deg, #10b981, #059669); }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .metric-trend {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .metric-trend::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-        
-        .metric-trend:hover::before {
-            left: 100%;
-        }
-        
-        .custom-selector {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        
-        .pulse-dot {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: .5;
-            }
-        }
-    </style>
-</push>
+@section('page-title', 'Estadísticas')
 
 @section('content')
-<div class="min-h-screen gradient-bg">
-    <!-- Hero Section -->
-    <div class="relative overflow-hidden bg-gray-50">
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/80 to-purple-50/80"></div>
-        
-        <!-- Floating geometric elements -->
-        <div class="absolute top-20 left-10 w-20 h-20 rounded-full floating-element opacity-20"></div>
-        <div class="absolute top-40 right-20 w-16 h-16 rounded-lg rotate-45 floating-element opacity-20" style="animation-delay: -2s;"></div>
-        <div class="absolute bottom-40 left-1/4 w-12 h-12 rounded-full floating-element opacity-20" style="animation-delay: -4s;"></div>
-        
-        <div class="relative px-6 py-12 max-w-7xl mx-auto">
-            <!-- Header -->
-            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-12">
-                <div class="mb-8 lg:mb-0">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-3 h-3 bg-green-500 rounded-full pulse-dot"></div>
-                        <span class="text-gray-600 text-sm font-medium uppercase tracking-wider">Panel en Vivo</span>
-                    </div>
-                    <h1 class="text-4xl lg:text-6xl font-bold text-gray-800 mb-4 leading-tight">
-                        Analítica de Proyectos
-                        <span class="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                            UNICLARETIANA
-                        </span>
-                    </h1>
-                    <p class="text-gray-600 text-lg max-w-2xl leading-relaxed">
-                        Información en tiempo real y analítica integral para la toma de decisiones estratégicas. Supervisa el desempeño de los proyectos, sigue métricas clave y visualiza patrones de éxito.
-                    </p>
-                </div>
-                
-                <!-- Chart Type Selector -->
-                <div class="custom-selector rounded-2xl p-6 shadow-2xl border border-white/20">
-                    <label class="block text-gray-700 text-sm font-semibold mb-3">Tipo de Gráfico</label>
-                    <div class="relative">
-                        <select id="chartTypeSelector" class="appearance-none w-full bg-transparent border-2 border-indigo-200 rounded-xl px-4 py-3 pr-8 text-gray-700 font-medium focus:outline-none focus:border-indigo-500 transition-colors">
-                            <option value="bar">📊 Gráfico de Barras</option>
-                            <option value="pie">🥧 Gráfico de Pastel</option>
-                            <option value="doughnut">🍩 Gráfico de Dona</option>
-                            <option value="line">📈 Gráfico de Líneas</option>
-                            <option value="radar">🎯 Gráfico de Radar</option>
-                            <option value="polarArea">⭕ Área Polar</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- Header Section - Maldini Precision -->
+<div class="mb-8">
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                <div class="w-1 h-8 bg-gradient-to-b from-quantum-500 via-void-500 to-photon-500 rounded-full"></div>
+                Analytics & Insights
+            </h1>
+            <p class="text-gray-400">Precisión táctica en cada métrica, elegancia en cada dato</p>
+        </div>
 
-            <!-- KPI Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                <!-- Total Projects -->
-                <div class="glass-effect rounded-2xl p-6 card-hover group">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-indigo-500 p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                            </svg>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-gray-600 text-xs uppercase tracking-wider font-medium">Portafolio</div>
-                            <div class="text-gray-700 text-sm">Total de Proyectos</div>
-                        </div>
-                    </div>
-                    <div class="stat-number text-4xl font-bold mb-2">{{ $totalProyectos }}</div>
-                    <div class="flex items-center text-green-600 text-sm">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        <span>+{{ $crecimientoProyectos }}% vs mes anterior</span>
-                    </div>
-                </div>
-
-                <!-- Active Projects -->
-                <div class="glass-effect rounded-2xl p-6 card-hover group">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-green-500 p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-gray-600 text-xs uppercase tracking-wider font-medium">Estado</div>
-                            <div class="text-gray-700 text-sm">Proyectos Activos</div>
-                        </div>
-                    </div>
-                    <div class="stat-number text-4xl font-bold mb-2">{{ $proyectosActivos }}</div>
-                    <div class="flex items-center text-green-600 text-sm">
-                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        <span>{{ $porcentajeActivos }}% del total</span>
-                    </div>
-                </div>
-
-                <!-- Total Value -->
-                <div class="glass-effect rounded-2xl p-6 card-hover group">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-yellow-500 p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-gray-600 text-xs uppercase tracking-wider font-medium">Inversión</div>
-                            <div class="text-gray-700 text-sm">Valor Total</div>
-                        </div>
-                    </div>
-                    <div class="stat-number text-4xl font-bold mb-2">${{ number_format($valorTotal / 1000000, 1) }}M</div>
-                    <div class="flex items-center text-yellow-600 text-sm">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                        </svg>
-                        <span>+{{ $crecimiento }}% crecimiento</span>
-                    </div>
-                </div>
-
-                <!-- Success Rate -->
-                <div class="glass-effect rounded-2xl p-6 card-hover group">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-purple-500 p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-gray-600 text-xs uppercase tracking-wider font-medium">Desempeño</div>
-                            <div class="text-gray-700 text-sm">Tasa de Éxito</div>
-                        </div>
-                    </div>
-                    <div class="stat-number text-4xl font-bold mb-2">{{ $tasaExito }}%</div>
-                    <div class="flex items-center text-purple-600 text-sm">
-                        <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-                        <span>
-                            @if($tasaExito >= 90)
-                                Líder en la industria
-                            @elseif($tasaExito >= 70)
-                                Muy buen desempeño
-                            @elseif($tasaExito >= 50)
-                                Desempeño aceptable
-                            @else
-                                Mejorable
-                            @endif
-                        </span>
-                    </div>
-                </div>
-            </div>
+        <!-- Time Range Selector - Maldini Style -->
+        <div x-data="{ range: '30d' }" class="flex items-center gap-2">
+            <button @click="range = '7d'"
+                    :class="range === '7d' ? 'bg-quantum-500 text-white shadow-quantum' : 'bg-matter-light text-gray-400 hover:text-white'"
+                    class="px-4 py-2 rounded-quantum font-medium text-sm transition-all duration-200">
+                7 días
+            </button>
+            <button @click="range = '30d'"
+                    :class="range === '30d' ? 'bg-quantum-500 text-white shadow-quantum' : 'bg-matter-light text-gray-400 hover:text-white'"
+                    class="px-4 py-2 rounded-quantum font-medium text-sm transition-all duration-200">
+                30 días
+            </button>
+            <button @click="range = '90d'"
+                    :class="range === '90d' ? 'bg-quantum-500 text-white shadow-quantum' : 'bg-matter-light text-gray-400 hover:text-white'"
+                    class="px-4 py-2 rounded-quantum font-medium text-sm transition-all duration-200">
+                90 días
+            </button>
         </div>
     </div>
 
-    <!-- Charts Section -->
-    <div class="px-6 pb-12">
-        <div class="max-w-7xl mx-auto">
-            <!-- Main Chart -->
-            <div class="chart-container rounded-3xl shadow-2xl p-8 mb-8 border border-white/20">
-                <div class="flex items-center justify-between mb-8">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Análisis de Distribución de Proyectos</h2>
-                        <p class="text-gray-600">Visualización en tiempo real del estado de los proyectos en la organización</p>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                            <span>Última actualización: ahora mismo</span>
+    <!-- KPI Cards - Maldini Precision -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Proyectos KPI -->
+        <div class="card-quantum p-6 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-quantum-500/5 rounded-full blur-3xl group-hover:bg-quantum-500/10 transition-all duration-500"></div>
+
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-quantum bg-quantum-500/20 border border-quantum-500/30 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-quantum-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
                         </div>
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Total</span>
                     </div>
+                    <span class="text-xs font-semibold text-green-400 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        +{{ $crecimientoProyectos }}%
+                    </span>
                 </div>
-                
-                <div class="relative">
-                    <canvas id="mainChart" class="max-w-full h-96"></canvas>
+
+                <div class="mb-2">
+                    <span class="text-4xl font-bold text-white">{{ $totalProyectos }}</span>
+                </div>
+
+                <p class="text-sm text-gray-400">Proyectos registrados</p>
+
+                <!-- Mini Progress Bar -->
+                <div class="mt-4 h-1 bg-matter-light rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-quantum-500 to-void-500 rounded-full animate-pulse"
+                         style="width: {{ min($porcentajeActivos, 100) }}%"></div>
                 </div>
             </div>
+        </div>
 
-            <!-- Detailed Metrics Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Project Status Counts -->
-                <div class="chart-container rounded-2xl shadow-xl p-6 border border-white/20">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-xl font-bold text-gray-800">Resumen de Estado de Proyectos</h3>
-                        <div class="text-sm text-gray-500">Números absolutos</div>
+        <!-- Valor Total KPI -->
+        <div class="card-quantum p-6 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-photon-500/5 rounded-full blur-3xl group-hover:bg-photon-500/10 transition-all duration-500"></div>
+
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-quantum bg-photon-500/20 border border-photon-500/30 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-photon-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Portfolio</span>
                     </div>
-                    
-                    <div class="space-y-4">
-                        @php
-                            $estadosFijos = collect([
-                                (object)['estado' => 'Activo', 'total' => 0, 'color' => 'green', 'icon' => 'play'],
-                                (object)['estado' => 'Inactivo', 'total' => 0, 'color' => 'yellow', 'icon' => 'pause'],
-                                (object)['estado' => 'Cerrado', 'total' => 0, 'color' => 'red', 'icon' => 'check-circle'],
-                            ]);
-                            $proyectosPorEstadoMap = $proyectosPorEstado->keyBy(function($item) {
-                                return strtolower($item->estado);
-                            });
-                        @endphp
-                        
-                        @foreach($estadosFijos as $index => $estadoFijo)
-                            @php
-                                $key = strtolower($estadoFijo->estado);
-                                $total = $proyectosPorEstadoMap->has($key) ? $proyectosPorEstadoMap[$key]->total : 0;
-                                $colors = [
-                                    'green' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'accent' => 'bg-green-500'],
-                                    'yellow' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'accent' => 'bg-yellow-500'],
-                                    'red' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'accent' => 'bg-red-500']
-                                ];
-                                $currentColor = $colors[$estadoFijo->color];
-                            @endphp
-                            
-                            <div class="metric-trend {{ $currentColor['bg'] }} rounded-xl p-4 flex items-center justify-between group hover:shadow-lg transition-all">
-                                <div class="flex items-center space-x-4">
-                                    <div class="{{ $currentColor['accent'] }} p-3 rounded-lg shadow-sm">
-                                        @if($estadoFijo->icon === 'play')
-                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        @elseif($estadoFijo->icon === 'pause')
-                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        @else
-                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <p class="{{ $currentColor['text'] }} font-semibold">Proyectos {{ $estadoFijo->estado }}</p>
-                                        <p class="text-gray-600 text-sm">{{ $estadoFijo->estado === 'Activo' ? 'En ejecución' : ($estadoFijo->estado === 'Inactivo' ? 'En pausa' : 'Completados') }}</p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="{{ $currentColor['text'] }} text-3xl font-bold">{{ $total }}</div>
-                                    <div class="text-gray-500 text-sm">proyectos</div>
-                                </div>
-                            </div>
-                        @endforeach
+                    <span class="text-xs font-semibold text-green-400 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        +{{ $crecimiento }}%
+                    </span>
+                </div>
+
+                <div class="mb-2">
+                    <span class="text-4xl font-bold text-white">${{ number_format($valorTotal / 1000, 0) }}K</span>
+                </div>
+
+                <p class="text-sm text-gray-400">Valor total portfolio</p>
+
+                <!-- Mini Sparkline -->
+                <div class="mt-4">
+                    <svg class="w-full h-8" viewBox="0 0 100 30">
+                        <defs>
+                            <linearGradient id="sparkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:hsl(45, 100%, 50%)"/>
+                                <stop offset="100%" style="stop-color:hsl(195, 100%, 50%)"/>
+                            </linearGradient>
+                        </defs>
+                        <polyline points="0,25 20,20 40,15 60,18 80,10 100,5"
+                                  fill="none"
+                                  stroke="url(#sparkGradient)"
+                                  stroke-width="2"
+                                  stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proyectos Activos KPI -->
+        <div class="card-quantum p-6 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full blur-3xl group-hover:bg-green-500/10 transition-all duration-500"></div>
+
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-quantum bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Activos</span>
+                    </div>
+                    <div class="text-xs font-semibold text-quantum-400">
+                        {{ $porcentajeActivos }}%
                     </div>
                 </div>
 
-                <!-- Project Status Percentages -->
-                <div class="chart-container rounded-2xl shadow-xl p-6 border border-white/20">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-xl font-bold text-gray-800">Análisis de Distribución</h3>
-                        <div class="text-sm text-gray-500">Desglose porcentual</div>
+                <div class="mb-2">
+                    <span class="text-4xl font-bold text-white">{{ $proyectosActivos }}</span>
+                    <span class="text-lg text-gray-500">/{{ $totalProyectos }}</span>
+                </div>
+
+                <p class="text-sm text-gray-400">En ejecución actual</p>
+
+                <!-- Circular Progress -->
+                <div class="mt-4 flex items-center gap-3">
+                    <svg class="w-12 h-12 transform -rotate-90">
+                        <circle cx="24" cy="24" r="20" stroke="rgba(16, 185, 129, 0.1)" stroke-width="4" fill="none"/>
+                        <circle cx="24" cy="24" r="20"
+                                stroke="rgb(16, 185, 129)"
+                                stroke-width="4"
+                                fill="none"
+                                stroke-dasharray="{{ 2 * 3.14159 * 20 }}"
+                                stroke-dashoffset="{{ 2 * 3.14159 * 20 * (1 - $porcentajeActivos / 100) }}"
+                                stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-xs text-gray-500">Tasa de ejecución</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasa de Éxito KPI -->
+        <div class="card-quantum p-6 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-void-500/5 rounded-full blur-3xl group-hover:bg-void-500/10 transition-all duration-500"></div>
+
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-quantum bg-void-500/20 border border-void-500/30 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-void-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Éxito</span>
                     </div>
-                    
-                    <div class="space-y-6">
-                        @foreach($estadosFijos as $index => $estadoFijo)
-                            @php
-                                $key = strtolower($estadoFijo->estado);
-                                $total = $proyectosPorEstadoMap->has($key) ? $proyectosPorEstadoMap[$key]->total : 0;
-                                $porcentaje = $totalProyectos > 0 ? round(($total / $totalProyectos) * 100, 1) : 0;
-                                $colors = [
-                                    'green' => ['progress' => 'bg-green-500', 'text' => 'text-green-600', 'bg' => 'bg-green-50'],
-                                    'yellow' => ['progress' => 'bg-yellow-500', 'text' => 'text-yellow-600', 'bg' => 'bg-yellow-50'],
-                                    'red' => ['progress' => 'bg-red-500', 'text' => 'text-red-600', 'bg' => 'bg-red-50']
-                                ];
-                                $currentColor = $colors[$estadoFijo->color];
-                            @endphp
-                            
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-medium text-gray-700">{{ $estadoFijo->estado }}</span>
-                                    <span class="{{ $currentColor['text'] }} font-bold text-lg">{{ $porcentaje }}%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                                    <div class="{{ $currentColor['progress'] }} h-3 rounded-full transition-all duration-1000 ease-out" 
-                                         style="width: {{ $porcentaje }}%"></div>
-                                </div>
-                                <div class="flex justify-between text-xs text-gray-500">
-                                    <span>{{ $total }} proyectos</span>
-                                    <span>de {{ $totalProyectos }} en total</span>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
+                    <span class="px-2 py-1 bg-void-500/10 text-void-300 text-xs font-semibold rounded-full">
+                        Óptimo
+                    </span>
+                </div>
+
+                <div class="mb-2">
+                    <span class="text-4xl font-bold text-white">{{ $tasaExito }}%</span>
+                </div>
+
+                <p class="text-sm text-gray-400">Proyectos completados</p>
+
+                <!-- Rating Stars -->
+                <div class="mt-4 flex items-center gap-1">
+                    @for($i = 1; $i <= 5; $i++)
+                        <svg class="w-4 h-4 {{ $i <= round($tasaExito / 20) ? 'text-photon-400' : 'text-gray-600' }}" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                    @endfor
                 </div>
             </div>
         </div>
     </div>
 </div>
-@endsection
 
-@push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <script id="chartData" type="application/json">@json($proyectosPorEstado->pluck('total'))</script>
-    <script id="chartLabels" type="application/json">@json($proyectosPorEstado->pluck('estado'))</script>
-    
-    <script>
-        // Chart.js configuration with modern styling
-        Chart.register(ChartDataLabels);
-        
-        const chartData = JSON.parse(document.getElementById('chartData').textContent);
-        const chartLabels = JSON.parse(document.getElementById('chartLabels').textContent);
-        
-        const colors = {
-            primary: '#4f46e5',
-            secondary: '#7c3aed',
-            success: '#10b981',
-            warning: '#f59e0b',
-            danger: '#ef4444',
-            info: '#3b82f6'
-        };
-        
-        const gradientColors = [
-            {
-                start: 'rgba(16, 185, 129, 0.8)',
-                end: 'rgba(16, 185, 129, 0.2)'
-            },
-            {
-                start: 'rgba(245, 158, 11, 0.8)',
-                end: 'rgba(245, 158, 11, 0.2)'
-            },
-            {
-                start: 'rgba(239, 68, 68, 0.8)',
-                end: 'rgba(239, 68, 68, 0.2)'
-            }
-        ];
-        
-        let mainChart;
-        
-        function createChart(type = 'bar') {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            
-            if (mainChart) {
-                mainChart.destroy();
-            }
-            
-            const isRadialChart = ['pie', 'doughnut', 'polarArea'].includes(type);
-            
-            mainChart = new Chart(ctx, {
-                type: type,
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: 'Proyectos',
-                        data: chartData,
-                        backgroundColor: isRadialChart ? [
-                            'rgba(16, 185, 129, 0.8)',
-                            'rgba(245, 158, 11, 0.8)',
-                            'rgba(239, 68, 68, 0.8)',
-                            'rgba(59, 130, 246, 0.8)',
-                            'rgba(147, 51, 234, 0.8)'
-                        ] : chartData.map((_, index) => {
-                            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                            const colorSet = gradientColors[index % gradientColors.length];
-                            gradient.addColorStop(0, colorSet.start);
-                            gradient.addColorStop(1, colorSet.end);
-                            return gradient;
-                        }),
-                        borderColor: isRadialChart ? [
-                            'rgba(16, 185, 129, 1)',
-                            'rgba(245, 158, 11, 1)',
-                            'rgba(239, 68, 68, 1)',
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(147, 51, 234, 1)'
-                        ] : [
-                            'rgba(16, 185, 129, 1)',
-                            'rgba(245, 158, 11, 1)',
-                            'rgba(239, 68, 68, 1)'
-                        ],
-                        borderWidth: 2,
-                        borderRadius: type === 'bar' ? 8 : 0,
-                        borderSkipped: false,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: isRadialChart,
-                            position: 'bottom',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20,
-                                font: {
-                                    size: 14,
-                                    family: 'Inter'
-                                }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: 'white',
-                            bodyColor: 'white',
-                            cornerRadius: 12,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.label}: ${context.parsed} proyectos`;
-                                }
-                            }
-                        },
-                        datalabels: {
-                            display: isRadialChart,
-                            color: 'white',
-                            font: {
-                                weight: 'bold',
-                                size: 14
-                            },
-                            formatter: (value, context) => {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return `${percentage}%`;
-                            }
-                        }
-                    },
-                    scales: !isRadialChart ? {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                font: {
-                                    family: 'Inter'
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                font: {
-                                    family: 'Inter'
-                                }
-                            }
-                        }
-                    } : {}
-                }
-            });
-        }
-        
-        // Initialize chart
-        document.addEventListener('DOMContentLoaded', function() {
-            createChart();
-            
-            // Chart type selector
-            document.getElementById('chartTypeSelector').addEventListener('change', function(e) {
-                createChart(e.target.value);
-            });
-            
-            // Smooth scroll animations for progress bars
-            setTimeout(() => {
-                document.querySelectorAll('[style*="width:"]').forEach(bar => {
-                    bar.style.transition = 'width 2s ease-in-out';
-                });
-            }, 500);
-            
-            // Animate counters
-            function animateValue(element, start, end, duration) {
-                let startTimestamp = null;
-                const step = (timestamp) => {
-                    if (!startTimestamp) startTimestamp = timestamp;
-                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                    const current = Math.floor(progress * (end - start) + start);
-                    element.textContent = current.toLocaleString();
-                    if (progress < 1) {
-                        window.requestAnimationFrame(step);
-                    }
-                };
-                window.requestAnimationFrame(step);
-            }
-            
-            // Start counter animations
-            setTimeout(() => {
-                const counters = document.querySelectorAll('.stat-number');
-                counters.forEach((counter, index) => {
-                    const finalValue = parseInt(counter.textContent.replace(/[^0-9]/g, ''));
-                    if (!isNaN(finalValue)) {
-                        counter.textContent = '0';
-                        setTimeout(() => {
-                            animateValue(counter, 0, finalValue, 2000);
-                        }, index * 200);
-                    }
-                });
-            }, 800);
-        });
-        
-        // Add sparkle effect on hover
-        document.addEventListener('mousemove', function(e) {
-            if (Math.random() < 0.1) {
-                createSparkle(e.clientX, e.clientY);
-            }
-        });
-        
-        function createSparkle(x, y) {
-            const sparkle = document.createElement('div');
-            sparkle.className = 'fixed pointer-events-none z-50';
-            sparkle.style.left = x + 'px';
-            sparkle.style.top = y + 'px';
-            sparkle.style.width = '4px';
-            sparkle.style.height = '4px';
-            sparkle.style.backgroundColor = '#ffffff';
-            sparkle.style.borderRadius = '50%';
-            sparkle.style.opacity = '0.8';
-            sparkle.style.animation = 'sparkleAnimation 1s ease-out forwards';
-            
-            document.body.appendChild(sparkle);
-            
-            setTimeout(() => {
-                sparkle.remove();
-            }, 1000);
-        }
-        
-        // Add sparkle animation CSS
-        const sparkleStyle = document.createElement('style');
-        sparkleStyle.textContent = `
-            @keyframes sparkleAnimation {
-                0% {
-                    transform: translateY(0px) scale(1);
-                    opacity: 0.8;
-                }
-                50% {
-                    transform: translateY(-20px) scale(1.2);
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateY(-40px) scale(0.8);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(sparkleStyle);
-        
-        // Real-time data simulation (optional)
-        setInterval(() => {
-            const liveIndicator = document.querySelector('.pulse-dot');
-            if (liveIndicator) {
-                liveIndicator.style.animation = 'none';
-                setTimeout(() => {
-                    liveIndicator.style.animation = 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite';
-                }, 100);
-            }
-        }, 30000);
-    </script>
-@endpush
+<!-- Charts Section - Maldini Tactics -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Distribución por Estado - Donut Chart -->
+    <div class="lg:col-span-2 card-quantum p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-1 h-6 bg-gradient-to-b from-quantum-500 to-void-500 rounded-full"></div>
+                <h2 class="text-xl font-semibold text-white">Distribución por Estado</h2>
+            </div>
+            <div class="text-sm text-gray-400">Tiempo real</div>
+        </div>
+
+        <div class="flex items-center justify-center gap-8 flex-wrap">
+            <!-- Donut Chart -->
+            <div class="relative">
+                <svg class="w-64 h-64 transform -rotate-90">
+                    @php
+                        $total = $totalProyectos > 0 ? $totalProyectos : 1;
+                        $activosAngle = ($proyectosActivos / $total) * 360;
+                        $inactivosAngle = ($proyectosInactivos / $total) * 360;
+                        $cerradosAngle = ($proyectosCerrados / $total) * 360;
+
+                        $radius = 100;
+                        $circumference = 2 * 3.14159 * $radius;
+
+                        $activosOffset = 0;
+                        $inactivosOffset = ($proyectosActivos / $total) * $circumference;
+                        $cerradosOffset = (($proyectosActivos + $proyectosInactivos) / $total) * $circumference;
+                    @endphp
+
+                    <!-- Background circle -->
+                    <circle cx="128" cy="128" r="{{ $radius }}"
+                            stroke="rgba(255,255,255,0.05)"
+                            stroke-width="40"
+                            fill="none"/>
+
+                    <!-- Activos segment -->
+                    <circle cx="128" cy="128" r="{{ $radius }}"
+                            stroke="rgb(16, 185, 129)"
+                            stroke-width="40"
+                            fill="none"
+                            stroke-dasharray="{{ ($proyectosActivos / $total) * $circumference }} {{ $circumference }}"
+                            stroke-dashoffset="0"
+                            class="transition-all duration-500"/>
+
+                    <!-- Inactivos segment -->
+                    <circle cx="128" cy="128" r="{{ $radius }}"
+                            stroke="rgb(234, 179, 8)"
+                            stroke-width="40"
+                            fill="none"
+                            stroke-dasharray="{{ ($proyectosInactivos / $total) * $circumference }} {{ $circumference }}"
+                            stroke-dashoffset="-{{ $inactivosOffset }}"
+                            class="transition-all duration-500"/>
+
+                    <!-- Cerrados segment -->
+                    <circle cx="128" cy="128" r="{{ $radius }}"
+                            stroke="rgb(239, 68, 68)"
+                            stroke-width="40"
+                            fill="none"
+                            stroke-dasharray="{{ ($proyectosCerrados / $total) * $circumference }} {{ $circumference }}"
+                            stroke-dashoffset="-{{ $cerradosOffset }}"
+                            class="transition-all duration-500"/>
+                </svg>
+
+                <!-- Center text -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-4xl font-bold text-white">{{ $totalProyectos }}</span>
+                    <span class="text-sm text-gray-400">Total</span>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-4 h-4 rounded bg-green-500"></div>
+                    <div>
+                        <p class="text-sm font-medium text-white">Activos</p>
+                        <p class="text-xs text-gray-400">{{ $proyectosActivos }} proyectos ({{ round(($proyectosActivos / $total) * 100) }}%)</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-4 h-4 rounded bg-yellow-500"></div>
+                    <div>
+                        <p class="text-sm font-medium text-white">Inactivos</p>
+                        <p class="text-xs text-gray-400">{{ $proyectosInactivos }} proyectos ({{ round(($proyectosInactivos / $total) * 100) }}%)</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-4 h-4 rounded bg-red-500"></div>
+                    <div>
+                        <p class="text-sm font-medium text-white">Cerrados</p>
+                        <p class="text-xs text-gray-400">{{ $proyectosCerrados }} proyectos ({{ round(($proyectosCerrados / $total) * 100) }}%)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tendencias - Quick Stats -->
+    <div class="card-quantum p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-1 h-6 bg-gradient-to-b from-photon-500 to-quantum-500 rounded-full"></div>
+                <h2 class="text-lg font-semibold text-white">Tendencias</h2>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Crecimiento Proyectos -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-gray-400">Crecimiento</span>
+                    <span class="text-sm font-semibold text-green-400">+{{ $crecimientoProyectos }}%</span>
+                </div>
+                <div class="h-2 bg-matter-light rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full"
+                         style="width: {{ min($crecimientoProyectos * 5, 100) }}%"></div>
+                </div>
+            </div>
+
+            <!-- Tasa Ejecución -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-gray-400">Ejecución</span>
+                    <span class="text-sm font-semibold text-quantum-400">{{ $porcentajeActivos }}%</span>
+                </div>
+                <div class="h-2 bg-matter-light rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-quantum-500 to-void-500 rounded-full"
+                         style="width: {{ $porcentajeActivos }}%"></div>
+                </div>
+            </div>
+
+            <!-- Tasa Éxito -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-gray-400">Éxito</span>
+                    <span class="text-sm font-semibold text-photon-400">{{ $tasaExito }}%</span>
+                </div>
+                <div class="h-2 bg-matter-light rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-photon-500 to-quantum-500 rounded-full"
+                         style="width: {{ $tasaExito }}%"></div>
+                </div>
+            </div>
+
+            <!-- Value Growth -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-gray-400">Valor Portfolio</span>
+                    <span class="text-sm font-semibold text-void-400">+{{ $crecimiento }}%</span>
+                </div>
+                <div class="h-2 bg-matter-light rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-void-500 to-photon-500 rounded-full animate-pulse"
+                         style="width: {{ min($crecimiento * 10, 100) }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Action -->
+        <div class="mt-6 pt-6 border-t border-matter-light">
+            <a href="{{ route('proyectos.index') }}"
+               class="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-quantum-500/20 hover:bg-quantum-500/30 border border-quantum-500/30 hover:border-quantum-500 text-quantum-300 hover:text-quantum-200 rounded-quantum text-sm font-medium transition-all duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Ver Proyectos
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Metrics - Maldini Defense -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Performance Score -->
+    <div class="card-quantum p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-quantum bg-quantum-500/20 border border-quantum-500/30 flex items-center justify-center">
+                <svg class="w-5 h-5 text-quantum-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Performance</h3>
+        </div>
+
+        <div class="text-center">
+            <div class="text-5xl font-bold text-white mb-2">{{ round(($porcentajeActivos + $tasaExito) / 2) }}</div>
+            <div class="text-sm text-gray-400 mb-4">Score General</div>
+
+            <div class="flex justify-center gap-1">
+                @for($i = 0; $i < 10; $i++)
+                    <div class="w-1.5 h-8 rounded-full {{ $i < round((($porcentajeActivos + $tasaExito) / 2) / 10) ? 'bg-gradient-to-t from-quantum-500 to-void-500' : 'bg-matter-light' }}"></div>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    <!-- Efficiency -->
+    <div class="card-quantum p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-quantum bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Eficiencia</h3>
+        </div>
+
+        <div class="text-center">
+            <div class="text-5xl font-bold text-white mb-2">{{ $porcentajeActivos }}%</div>
+            <div class="text-sm text-gray-400 mb-4">Tasa Operativa</div>
+
+            <div class="relative pt-1">
+                <div class="flex mb-2 items-center justify-between">
+                    <div class="text-xs font-semibold inline-block text-green-400">Óptimo</div>
+                </div>
+                <div class="overflow-hidden h-2 text-xs flex rounded-full bg-matter-light">
+                    <div style="width:{{ $porcentajeActivos }}%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-green-500 to-green-400"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quality -->
+    <div class="card-quantum p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-quantum bg-photon-500/20 border border-photon-500/30 flex items-center justify-center">
+                <svg class="w-5 h-5 text-photon-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Calidad</h3>
+        </div>
+
+        <div class="text-center">
+            <div class="text-5xl font-bold text-white mb-2">{{ $tasaExito }}%</div>
+            <div class="text-sm text-gray-400 mb-4">Tasa de Éxito</div>
+
+            <div class="flex items-center justify-center gap-2">
+                <div class="flex-1 h-1.5 bg-matter-light rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-photon-500 to-quantum-500 rounded-full" style="width: {{ $tasaExito }}%"></div>
+                </div>
+                <span class="text-xs font-semibold text-photon-400">A+</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@endsection

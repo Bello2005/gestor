@@ -1,836 +1,448 @@
-@extends('layouts.main')
+@extends('layouts.quantum')
 
-@section('title', 'Gestión de Proyectos')
-
-@section('styles')
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap5.min.css">
-
-    <style>
-        /* Status chips */
-        .status-bar {
-            margin-bottom: 1.5rem;
-        }
-
-        .status-chips {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .status-chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        .status-chip:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .status-chip.active {
-            border-color: currentColor;
-            font-weight: 600;
-        }
-
-        .status-chip.activo {
-            background: rgba(16, 185, 129, 0.1);
-            color: #059669;
-        }
-
-        .status-chip.activo.active {
-            background: #059669;
-            color: white;
-        }
-
-        .status-chip.inactivo {
-            background: rgba(245, 158, 11, 0.1);
-            color: #d97706;
-        }
-
-        .status-chip.inactivo.active {
-            background: #d97706;
-            color: white;
-        }
-
-        .status-chip.cerrado {
-            background: rgba(239, 68, 68, 0.1);
-            color: #dc2626;
-        }
-
-        .status-chip.cerrado.active {
-            background: #dc2626;
-            color: white;
-        }
-
-        .status-chip[data-estado="todos"].active {
-            background: #4f46e5;
-            color: white;
-            border-color: #4f46e5;
-        }
-
-        /* Botones de acción */
-        .btn-action {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 1rem;
-        }
-
-        .btn-action:hover {
-            transform: translateY(-2px);
-            filter: brightness(0.95);
-        }
-
-        /* Oculta el buscador de DataTables */
-        #proyectosTable_filter {
-            display: none !important;
-        }
-        /* Fuerza el layout horizontal de buscador y selector */
-        .search-row {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: nowrap;
-            width: 100%;
-        }
-        .search-row .search-container {
-            flex: 1 1 220px;
-            min-width: 180px;
-        }
-        .search-row #proyectosTable_length {
-            flex: 0 0 auto;
-            min-width: 120px;
-            margin-bottom: 0 !important;
-            display: flex;
-            align-items: center;
-            height: 38px;
-        }
-        /* Ajusta el select y label de DataTables para que se alineen con el input */
-        #proyectosTable_length label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0;
-            font-weight: 400;
-        }
-        #proyectosTable_length select {
-            height: 32px;
-            margin-bottom: 0;
-            font-size: 1rem;
-        }
-        .search-row .btn-group {
-            flex: 0 0 auto;
-        }
-        .search-row .btn-primary {
-            flex: 0 0 auto;
-            white-space: nowrap;
-        }
-        /* RESPONSIVE DESIGN */
-        @media (max-width: 900px) {
-            .search-row {
-                flex-wrap: wrap;
-            }
-        }
-
-        /* Responsive para status bar */
-        @media (max-width: 768px) {
-            /* FORZAR eliminación de espacios del contenedor principal */
-            .container-fluid.py-4 {
-                padding-top: 1rem !important;
-                padding-bottom: 0.5rem !important;
-            }
-
-            /* Eliminar animación y espacios de fade-in */
-            .fade-in {
-                animation: none !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                transform: none !important;
-            }
-
-            .status-bar {
-                margin-bottom: 1rem !important;
-            }
-
-            .status-bar .d-flex {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 1rem;
-            }
-
-            .status-bar h1 {
-                font-size: 1.5rem !important;
-                margin-bottom: 0 !important;
-            }
-
-            .status-bar .status-chips {
-                margin-left: 0 !important;
-                display: grid !important;
-                grid-template-columns: 1fr 1fr;
-                gap: 0.5rem;
-                width: 100%;
-            }
-
-            .status-chip {
-                font-size: 0.75rem !important;
-                padding: 0.5rem !important;
-                justify-content: center;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr !important;
-                gap: 0.75rem !important;
-                margin-bottom: 0.75rem !important;
-                margin-top: 0 !important;
-            }
-
-            .stat-card {
-                padding: 1.25rem !important;
-                margin: 0 !important;
-            }
-
-            .stat-header {
-                flex-direction: row !important;
-                justify-content: space-between !important;
-            }
-
-            .stat-title {
-                font-size: 0.9rem !important;
-            }
-
-            .stat-value {
-                font-size: 1.75rem !important;
-                margin-top: 0.5rem;
-            }
-
-            .stat-icon {
-                width: 40px !important;
-                height: 40px !important;
-                font-size: 1.25rem !important;
-            }
-        }
-
-        @media (max-width: 575px) {
-            .container-fluid {
-                padding-left: 0.75rem !important;
-                padding-right: 0.75rem !important;
-            }
-
-            .status-bar h1 {
-                font-size: 1.25rem !important;
-            }
-
-            .stat-card {
-                padding: 1rem !important;
-            }
-
-            .stat-value {
-                font-size: 1.5rem !important;
-            }
-
-            .search-row {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            /* Ocultar el selector de registros en móvil */
-            .search-row #proyectosTable_length {
-                display: none !important;
-            }
-
-            .search-row .search-container {
-                width: 100% !important;
-                flex: none !important;
-                margin-bottom: 0 !important;
-            }
-
-            /* Botones juntos en una fila */
-            .search-row .btn-group,
-            .search-row a.btn-primary {
-                width: 100% !important;
-                flex: none !important;
-                margin-left: 0 !important;
-                margin-top: 0 !important;
-            }
-
-            /* Arreglar espaciado de card */
-            .content-card {
-                margin-top: 1rem !important;
-            }
-
-            .card-header {
-                padding: 0.75rem !important;
-            }
-
-            /* Botones más compactos */
-            .search-row .btn {
-                padding: 0.6rem 1rem !important;
-                font-size: 0.9rem !important;
-            }
-        }
-
-        /* Espaciado general mejorado */
-        .stats-grid {
-            margin-bottom: 1.5rem;
-        }
-
-        .content-card {
-            margin-top: 1.5rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .card-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .table-container {
-            padding: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-            /* Aplicar compresión extrema de espacios */
-            .content-card {
-                margin-top: 0.5rem !important;
-                margin-bottom: 0 !important;
-            }
-
-            .card-header {
-                padding: 1rem !important;
-                border-bottom: none !important;
-                margin: 0 !important;
-            }
-
-            .table-container {
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-        }
-
-        /* Estilos para la tabla de proyectos */
-        #proyectosTable td {
-            padding: 1rem;
-            vertical-align: middle;
-        }
-
-        #proyectosTable .font-weight-medium {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-            line-height: 1.4;
-        }
-
-        #proyectosTable .text-muted.small {
-            font-size: 0.875rem;
-            line-height: 1.2;
-        }
-
-        #proyectosTable th {
-            font-weight: 600;
-            background-color: #f8f9fa;
-            border-bottom-width: 2px;
-        }
-    </style>
-@endsection
+@section('page-title', 'Proyectos')
 
 @section('content')
-<div class="container-fluid py-4">
-    <!-- Barra superior -->
-    <div class="status-bar">
-        <div class="d-flex align-items-center">
-            <h1 class="card-title">Gestión de Proyectos</h1>
-            <div class="status-chips ms-4">
-                <div class="status-chip activo" data-estado="activo">
-                    <i class="fas fa-check-circle me-1"></i>
-                    Activos <span class="count">({{ $proyectos->where('estado', 'activo')->count() }})</span>
-                </div>
-                <div class="status-chip inactivo" data-estado="inactivo">
-                    <i class="fas fa-pause-circle me-1"></i>
-                    Inactivos <span class="count">({{ $proyectos->where('estado', 'inactivo')->count() }})</span>
-                </div>
-                <div class="status-chip cerrado" data-estado="cerrado">
-                    <i class="fas fa-times-circle me-1"></i>
-                    Cerrados <span class="count">({{ $proyectos->where('estado', 'cerrado')->count() }})</span>
-                </div>
-                <div class="status-chip" data-estado="todos">
-                    <i class="fas fa-list me-1"></i>
-                    Todos <span class="count">({{ $proyectos->count() }})</span>
-                </div>
-            </div>
+<!-- Header Section - Versace Style -->
+<div class="mb-8">
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                <div class="w-1 h-8 bg-gradient-to-b from-photon-500 to-quantum-500 rounded-full"></div>
+                Gestión de Proyectos
+            </h1>
+            <p class="text-gray-400">Elegancia en cada detalle, excelencia en cada proyecto</p>
         </div>
+        <a href="{{ route('proyectos.create') }}" class="btn-quantum">
+            <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Nuevo Proyecto
+        </a>
     </div>
 
-    <!-- Modal de Filtros Avanzados -->
-    <div class="modal fade" id="filtrosModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Filtros Avanzados</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="filtrosForm">
-                        <!-- Estados -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Estado</label>
-                            <div class="d-flex gap-3">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" name="estados[]" value="activo" id="estadoActivo">
-                                    <label class="form-check-label" for="estadoActivo">Activo</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" name="estados[]" value="inactivo" id="estadoInactivo">
-                                    <label class="form-check-label" for="estadoInactivo">Inactivo</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" name="estados[]" value="cerrado" id="estadoCerrado">
-                                    <label class="form-check-label" for="estadoCerrado">Cerrado</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Rango de Fechas -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Rango de Fechas</label>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <input type="date" class="form-control" name="fechaInicio" id="fechaInicio">
-                                    <label class="form-text">Fecha Inicio</label>
-                                </div>
-                                <div class="col-md-6">
-                                    <input type="date" class="form-control" name="fechaFin" id="fechaFin">
-                                    <label class="form-text">Fecha Fin</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Rango de Monto -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Rango de Monto</label>
-                            <div class="row align-items-center">
-                                <div class="col-md-6">
-                                    <input type="number" class="form-control" name="montoMin" id="montoMin" placeholder="Monto mínimo">
-                                </div>
-                                <div class="col-md-6">
-                                    <input type="number" class="form-control" name="montoMax" id="montoMax" placeholder="Monto máximo">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Entidad -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold" for="entidad">Entidad Contratante</label>
-                            <select class="form-select" name="entidad" id="entidad">
-                                <option value="">Todas las entidades</option>
-                                @foreach($entidades as $entidad)
-                                    <option value="{{ $entidad }}">{{ $entidad }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Guardar Preset -->
-                        <div class="mb-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <input type="text" class="form-control" id="presetName" placeholder="Nombre del preset (opcional)">
-                                <button type="button" class="btn btn-outline-primary" id="savePreset">
-                                    <i class="fas fa-save"></i> Guardar
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Presets Guardados -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Presets Guardados</label>
-                            <select class="form-select" id="savedPresets">
-                                <option value="">Seleccionar preset...</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="limpiarFiltros">Limpiar</button>
-                    <button type="button" class="btn btn-primary" id="aplicarFiltros">Aplicar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-card primary fade-in">
-            <div class="stat-header">
-                <h3 class="stat-title">Total Proyectos</h3>
-                <div class="stat-icon primary">
-                    <i class="fas fa-folder-open"></i>
-                </div>
-            </div>
-            <div class="stat-value">{{ $proyectos->count() }}</div>
-        </div>
-        
-        <div class="stat-card success fade-in">
-            <div class="stat-header">
-                <h3 class="stat-title">Proyectos Activos</h3>
-                <div class="stat-icon success">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-            </div>
-            <div class="stat-value">{{ $proyectos->where('estado', 'activo')->count() }}</div>
-        </div>
-        
-        <div class="stat-card warning fade-in">
-            <div class="stat-header">
-                <h3 class="stat-title">Valor Total</h3>
-                <div class="stat-icon warning">
-                    <i class="fas fa-dollar-sign"></i>
-                </div>
-            </div>
-            <div class="stat-value">${{ number_format($proyectos->sum('valor_total'), 0, ',', '.') }}</div>
-        </div>
-        
-        <div class="stat-card info fade-in">
-            <div class="stat-header">
-                <h3 class="stat-title">Entidades</h3>
-                <div class="stat-icon info">
-                    <i class="fas fa-building"></i>
-                </div>
-            </div>
-            <div class="stat-value">{{ $proyectos->unique('entidad_contratante')->count() }}</div>
-        </div>
-    </div>
-
-    <div class="content-card fade-in">
-        <div class="card-header">
-            <div class="search-row">
-                <div class="search-container position-relative">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search"></i></span>
-                        <input type="text" placeholder="Buscar proyecto..." class="form-control border-start-0" id="searchProjects" autocomplete="off" style="border-radius: 0 0.375rem 0.375rem 0;">
+    <!-- Stats Cards - Versace Luxury -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Proyectos -->
+        <div class="group relative overflow-hidden rounded-quantum-lg border border-matter-light bg-gradient-to-br from-matter via-matter-light to-matter p-6 transition-all duration-300 hover:scale-105 hover:shadow-quantum-lg">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-quantum-500/10 rounded-full blur-3xl"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-quantum bg-quantum-500/20 border border-quantum-500/30 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-quantum-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                        </svg>
                     </div>
+                    <span class="text-xs font-medium text-quantum-400 bg-quantum-500/10 px-3 py-1 rounded-full">Total</span>
                 </div>
-                <div id="proyectosTable_length"></div>
-                <div class="btn-group ms-auto">
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-file-export me-2"></i>Exportar
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item" href="{{ route('proyectos.export.excel') }}">
-                                <i class="fas fa-file-excel text-success me-2"></i>Excel
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ route('proyectos.export.pdf') }}">
-                                <i class="fas fa-file-pdf text-danger me-2"></i>PDF
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ route('proyectos.export.word') }}">
-                                <i class="fas fa-file-word text-primary me-2"></i>Word
-                            </a>
-                        </li>
-                    </ul>
+                <h3 class="text-4xl font-bold text-white mb-2">{{ $proyectos->count() }}</h3>
+                <p class="text-sm text-gray-400">Proyectos Totales</p>
+            </div>
+        </div>
+
+        <!-- Proyectos Activos -->
+        <div class="group relative overflow-hidden rounded-quantum-lg border border-matter-light bg-gradient-to-br from-matter via-matter-light to-matter p-6 transition-all duration-300 hover:scale-105 hover:shadow-quantum-lg">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-quantum bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-medium text-green-400 bg-green-500/10 px-3 py-1 rounded-full">Activos</span>
                 </div>
-                
-                <a href="{{ route('proyectos.create') }}" class="btn btn-primary ms-2">
-                    <i class="fas fa-plus me-2"></i>Nuevo Proyecto
+                <h3 class="text-4xl font-bold text-white mb-2">{{ $proyectos->where('estado', 'activo')->count() }}</h3>
+                <p class="text-sm text-gray-400">En Ejecución</p>
+            </div>
+        </div>
+
+        <!-- Valor Total -->
+        <div class="group relative overflow-hidden rounded-quantum-lg border border-matter-light bg-gradient-to-br from-matter via-matter-light to-matter p-6 transition-all duration-300 hover:scale-105 hover:shadow-quantum-lg">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-photon-500/10 rounded-full blur-3xl"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-quantum bg-photon-500/20 border border-photon-500/30 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-photon-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-medium text-photon-400 bg-photon-500/10 px-3 py-1 rounded-full">Portfolio</span>
+                </div>
+                <h3 class="text-3xl font-bold text-white mb-2">${{ number_format($proyectos->sum('valor_total'), 0, ',', '.') }}</h3>
+                <p class="text-sm text-gray-400">Valor Total</p>
+            </div>
+        </div>
+
+        <!-- Entidades -->
+        <div class="group relative overflow-hidden rounded-quantum-lg border border-matter-light bg-gradient-to-br from-matter via-matter-light to-matter p-6 transition-all duration-300 hover:scale-105 hover:shadow-quantum-lg">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-void-500/10 rounded-full blur-3xl"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-quantum bg-void-500/20 border border-void-500/30 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-void-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                    </div>
+                    <span class="text-xs font-medium text-void-400 bg-void-500/10 px-3 py-1 rounded-full">Partners</span>
+                </div>
+                <h3 class="text-4xl font-bold text-white mb-2">{{ $proyectos->unique('entidad_contratante')->count() }}</h3>
+                <p class="text-sm text-gray-400">Entidades</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters & Search - Versace Elegance -->
+<div class="card-quantum p-6 mb-8">
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-1 h-6 bg-gradient-to-b from-quantum-500 to-void-500 rounded-full"></div>
+            <h2 class="text-xl font-semibold text-white">Filtros</h2>
+        </div>
+    </div>
+
+    <!-- Status Filters -->
+    <div class="flex flex-wrap gap-3 mb-6" x-data="{ estadoActual: 'todos' }">
+        <button @click="estadoActual = 'todos'"
+                :class="estadoActual === 'todos' ? 'bg-gradient-to-r from-quantum-500 to-void-500 text-white shadow-quantum' : 'bg-matter-light text-gray-400 hover:text-white hover:bg-matter'"
+                class="px-5 py-2.5 rounded-quantum font-medium transition-all duration-200 border border-matter-light hover:border-quantum-500/30"
+                data-estado="todos">
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+            </svg>
+            Todos
+            <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-white/20">({{ $proyectos->count() }})</span>
+        </button>
+
+        <button @click="estadoActual = 'activo'"
+                :class="estadoActual === 'activo' ? 'bg-green-500 text-white shadow-glow' : 'bg-green-500/10 text-green-300 hover:bg-green-500/20'"
+                class="px-5 py-2.5 rounded-quantum font-medium transition-all duration-200 border border-green-500/30"
+                data-estado="activo">
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Activos
+            <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-white/20">({{ $proyectos->where('estado', 'activo')->count() }})</span>
+        </button>
+
+        <button @click="estadoActual = 'inactivo'"
+                :class="estadoActual === 'inactivo' ? 'bg-yellow-500 text-white shadow-glow' : 'bg-yellow-500/10 text-yellow-300 hover:bg-yellow-500/20'"
+                class="px-5 py-2.5 rounded-quantum font-medium transition-all duration-200 border border-yellow-500/30"
+                data-estado="inactivo">
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Inactivos
+            <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-white/20">({{ $proyectos->where('estado', 'inactivo')->count() }})</span>
+        </button>
+
+        <button @click="estadoActual = 'cerrado'"
+                :class="estadoActual === 'cerrado' ? 'bg-red-500 text-white shadow-glow' : 'bg-red-500/10 text-red-300 hover:bg-red-500/20'"
+                class="px-5 py-2.5 rounded-quantum font-medium transition-all duration-200 border border-red-500/30"
+                data-estado="cerrado">
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Cerrados
+            <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-white/20">({{ $proyectos->where('estado', 'cerrado')->count() }})</span>
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </div>
+        <input type="text"
+               id="searchProjects"
+               placeholder="Buscar por nombre, entidad, objeto contractual..."
+               class="w-full pl-12 pr-4 py-3 bg-matter border border-matter-light rounded-quantum text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-quantum-500 focus:border-transparent transition-all duration-200">
+    </div>
+</div>
+
+<!-- Projects Grid - Versace Patterns -->
+<div id="proyectosGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+    @forelse($proyectos as $proyecto)
+    <div class="project-card group relative overflow-hidden rounded-quantum-xl border border-matter-light bg-gradient-to-br from-matter via-matter-light to-matter transition-all duration-300 hover:scale-105 hover:shadow-quantum-lg hover:border-quantum-500/30"
+         data-estado="{{ $proyecto->estado }}">
+
+        <!-- Decorative Pattern - Versace Style -->
+        <div class="absolute top-0 right-0 w-40 h-40 opacity-10">
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <pattern id="versace-{{ $proyecto->id }}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <circle cx="10" cy="10" r="1.5" fill="url(#gradient-{{ $proyecto->id }})"/>
+                    <line x1="0" y1="10" x2="20" y2="10" stroke="url(#gradient-{{ $proyecto->id }})" stroke-width="0.5"/>
+                    <line x1="10" y1="0" x2="10" y2="20" stroke="url(#gradient-{{ $proyecto->id }})" stroke-width="0.5"/>
+                </pattern>
+                <defs>
+                    <linearGradient id="gradient-{{ $proyecto->id }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:hsl(195, 100%, 50%)"/>
+                        <stop offset="100%" style="stop-color:hsl(270, 80%, 60%)"/>
+                    </linearGradient>
+                </defs>
+                <rect width="100" height="100" fill="url(#versace-{{ $proyecto->id }})"/>
+            </svg>
+        </div>
+
+        <!-- Card Content -->
+        <div class="relative p-6">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-white mb-2 group-hover:text-quantum-400 transition-colors line-clamp-2">
+                        {{ $proyecto->nombre_del_proyecto }}
+                    </h3>
+                    @php
+                        $statusColors = [
+                            'activo' => 'bg-green-500/20 text-green-300 border-green-500/50',
+                            'inactivo' => 'bg-yellow-500/20 text-yellow-300 border-yellow-500/50',
+                            'cerrado' => 'bg-red-500/20 text-red-300 border-red-500/50',
+                        ];
+                        $statusIcons = [
+                            'activo' => '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+                            'inactivo' => '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+                            'cerrado' => '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+                        ];
+                        $statusClass = $statusColors[$proyecto->estado] ?? 'bg-gray-500/20 text-gray-300 border-gray-500/50';
+                        $statusIcon = $statusIcons[$proyecto->estado] ?? '';
+                    @endphp
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border {{ $statusClass }}">
+                        {!! $statusIcon !!}
+                        {{ ucfirst($proyecto->estado) }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <p class="text-sm text-gray-400 mb-4 line-clamp-3">
+                {{ $proyecto->objeto_contractual ?? 'Sin descripción disponible' }}
+            </p>
+
+            <!-- Info Grid -->
+            <div class="space-y-3 mb-6">
+                <!-- Entidad -->
+                <div class="flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4 text-void-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                    <span class="text-gray-300 truncate">{{ $proyecto->entidad_contratante ?? 'Sin entidad' }}</span>
+                </div>
+
+                <!-- Fecha -->
+                <div class="flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4 text-quantum-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="text-gray-300">{{ $proyecto->fecha_de_ejecucion ? $proyecto->fecha_de_ejecucion->format('d M, Y') : 'Sin fecha' }}</span>
+                </div>
+
+                <!-- Valor -->
+                <div class="flex items-center gap-2 text-sm">
+                    <svg class="w-4 h-4 text-photon-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-photon-300 font-semibold">${{ number_format($proyecto->valor_total ?? 0, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            @if(auth()->check() && auth()->user()->roles->pluck('id')->intersect([1,2])->isNotEmpty())
+            <div class="flex items-center gap-2 pt-4 border-t border-matter-light">
+                <a href="{{ route('proyectos.show', $proyecto->id) }}"
+                   class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-quantum-500/20 hover:bg-quantum-500/30 border border-quantum-500/30 hover:border-quantum-500 text-quantum-300 hover:text-quantum-200 rounded-quantum text-sm font-medium transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    Ver
+                </a>
+                <a href="{{ route('proyectos.edit', $proyecto->id) }}"
+                   class="flex items-center justify-center p-2.5 bg-void-500/20 hover:bg-void-500/30 border border-void-500/30 hover:border-void-500 text-void-300 hover:text-void-200 rounded-quantum transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </a>
+                <button type="button"
+                        class="btn-delete-project flex items-center justify-center p-2.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 hover:border-red-500 text-red-300 hover:text-red-200 rounded-quantum transition-all duration-200"
+                        data-proyecto-id="{{ $proyecto->id }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>
+            </div>
+            @else
+            <div class="pt-4 border-t border-matter-light">
+                <a href="{{ route('proyectos.show', $proyecto->id) }}"
+                   class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-quantum-500/20 hover:bg-quantum-500/30 border border-quantum-500/30 hover:border-quantum-500 text-quantum-300 hover:text-quantum-200 rounded-quantum text-sm font-medium transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    Ver Detalles
                 </a>
             </div>
-        </div>
-        
-        <div class="table-container">
-            <div class="table-responsive">
-                <table id="proyectosTable" class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>Proyecto</th>
-                            <th>Detalles del Contrato</th>
-                            <th>Alcance</th>
-                            <th>Entidad</th>
-                            <th>Tiempo</th>
-                            <th class="text-end">Valor Total</th>
-                            <th>Estado</th>
-                                @if(auth()->check() && auth()->user()->roles->pluck('id')->intersect([1,2])->isNotEmpty())
-                                    <th class="text-center">Acciones</th>
-                                @endif
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach($proyectos as $proyecto)
-                    <tr>
-                        <td>
-                            <div class="font-weight-medium">
-                                <i class="fas fa-folder fa-lg text-primary me-2"></i>
-                                {{ $proyecto->nombre_del_proyecto }}
-                            </div>
-                            <div class="text-muted small">ID: {{ $proyecto->id }}</div>
-                        </td>
-                        <td>
-                            <div class="font-weight-medium contract-details-truncate" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-height: 2.8em;">
-                                {{ $proyecto->objeto_contractual }}
-                            </div>
-                            <a href="#" class="ver-mas-link" data-bs-toggle="modal" data-bs-target="#verMasModal" data-objeto="{{ $proyecto->objeto_contractual }}" style="font-size: 0.95em; color: #4361ee; text-decoration: underline;">…ver más</a>
-                            <div class="text-muted small">{{ $proyecto->lineas_de_accion }}</div>
-                        </td>
-                        <td>
-                            <div class="font-weight-medium">{{ $proyecto->cobertura }}</div>
-                        </td>
-                        <td>
-                            <div class="font-weight-medium">{{ $proyecto->entidad_contratante }}</div>
-                        </td>
-                        <td>
-                            <div class="font-weight-medium">{{ $proyecto->fecha_de_ejecucion ? $proyecto->fecha_de_ejecucion->format('d M, Y') : 'N/A' }}</div>
-                            <div class="text-muted small">{{ $proyecto->plazo ? $proyecto->plazo . ' meses' : 'N/A' }}</div>
-                        </td>
-                        <td class="text-end">
-                            <div class="value-cell">${{ number_format($proyecto->valor_total ?? 0, 0, ',', '.') }}</div>
-                        </td>
-                        <td>
-                            <span class="badge bg-light text-dark" data-estado="{{ $proyecto->estado }}">
-                                {{ ucfirst($proyecto->estado) }}
-                            </span>
-                        </td>
-                            @if(auth()->check() && auth()->user()->roles->pluck('id')->intersect([1,2])->isNotEmpty())
-                            <td>
-                                <div class="action-buttons d-flex gap-2">
-                                    <a href="{{ route('proyectos.show', $proyecto->id) }}" class="btn-action" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Ver proyecto" title="Ver proyecto" style="color: #4361ee; background: #e3f0ff; border-radius: 8px; padding: 6px 10px;">
-                                        <i class="fas fa-eye fa-lg"></i>
-                                    </a>
-                                    <a href="{{ route('proyectos.edit', $proyecto->id) }}" class="btn-action" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Editar proyecto" title="Editar proyecto" style="color: #4cc9f0; background: #e0f7fa; border-radius: 8px; padding: 6px 10px;">
-                                        <i class="fas fa-edit fa-lg"></i>
-                                    </a>
-                                    <form action="{{ route('proyectos.destroy', $proyecto->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn-action btn-delete-project" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Eliminar proyecto" data-proyecto-id="{{ $proyecto->id }}" title="Eliminar proyecto" style="color: #e63946; background: #ffe3e3; border-radius: 8px; padding: 6px 10px;">
-                                            <i class="fas fa-trash-alt fa-lg"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                            @endif
-                    </tr>
-                    @endforeach
-                </tbody>
-                </table>
-            </div>
+            @endif
         </div>
     </div>
+    @empty
+    <div class="col-span-full text-center py-16">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-matter-light flex items-center justify-center">
+            <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+            </svg>
+        </div>
+        <p class="text-gray-400 text-lg mb-4">No hay proyectos disponibles</p>
+        <a href="{{ route('proyectos.create') }}" class="inline-block text-quantum-400 hover:text-quantum-300 transition-colors">
+            Crear tu primer proyecto →
+        </a>
+    </div>
+    @endforelse
 </div>
 
-<!-- Modal de confirmación de borrado -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteConfirmLabel">Confirmar eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <form id="deleteProjectForm" method="POST">
-                @csrf
-                @method('DELETE')
-                <div class="modal-body">
-                    <p>¿Está seguro de que desea eliminar este proyecto?</p>
-                    <div class="mb-3">
-                        <label for="deleteReason" class="form-label">Razón del borrado</label>
-                        <textarea class="form-control" id="deleteReason" name="reason" rows="2" required></textarea>
-                    </div>
+<!-- No Results Message -->
+<div id="noResults" class="hidden text-center py-16">
+    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-matter-light flex items-center justify-center">
+        <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+    </div>
+    <p class="text-gray-400 text-lg">No se encontraron proyectos</p>
+    <p class="text-gray-500 text-sm mt-2">Intenta ajustar los filtros o la búsqueda</p>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div x-data="{ open: false, proyectoId: null }"
+     @delete-project.window="open = true; proyectoId = $event.detail.id"
+     x-show="open"
+     x-cloak
+     class="fixed inset-0 z-50 overflow-y-auto"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+
+    <div class="flex items-center justify-center min-h-screen px-4">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="open = false"></div>
+
+        <!-- Modal -->
+        <div class="relative bg-matter border border-matter-light rounded-quantum-xl shadow-quantum-lg max-w-md w-full p-6"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                <div>
+                    <h3 class="text-lg font-semibold text-white">Confirmar Eliminación</h3>
+                    <p class="text-sm text-gray-400">Esta acción no se puede deshacer</p>
                 </div>
-            </form>
+            </div>
+
+            <p class="text-gray-300 mb-6">
+                ¿Estás seguro de que deseas eliminar este proyecto? Todos los datos asociados se perderán permanentemente.
+            </p>
+
+            <div class="flex gap-3">
+                <button @click="open = false"
+                        class="flex-1 px-4 py-2.5 bg-matter-light hover:bg-matter text-gray-300 hover:text-white rounded-quantum font-medium transition-all duration-200">
+                    Cancelar
+                </button>
+                <form :action="'/proyectos/' + proyectoId" method="POST" class="flex-1">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="w-full px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-quantum font-medium transition-all duration-200 shadow-glow">
+                        Eliminar
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Ver Más Detalles -->
-<div class="modal fade" id="verMasModal" tabindex="-1" aria-labelledby="verMasLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="verMasLabel">Detalles del Contrato</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <p id="verMasTexto" style="white-space: pre-line;"></p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Toast de deshacer -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="undoToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <strong class="me-auto">Proyecto eliminado</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
-        </div>
-        <div class="toast-body">
-            El proyecto ha sido eliminado. <button type="button" class="btn btn-link btn-sm" id="undoDeleteBtn">Deshacer</button>
-        </div>
-    </div>
-</div>
 @endsection
 
-@push('scripts')
-    <!-- jQuery primero -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- DataTables y Bootstrap -->
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Script de filtros final limpio -->
-    <script>
-        $(document).ready(function() {
-            // Inicializar DataTable
-            var table = $('#proyectosTable').DataTable({
-                language: {
-                    url: "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
-                },
-                dom: 't<"bottom"lp>',
-                order: [[0, 'asc']],
-                pageLength: 10
-            });
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchProjects');
+    const proyectosGrid = document.getElementById('proyectosGrid');
+    const noResults = document.getElementById('noResults');
+    const statusButtons = document.querySelectorAll('[data-estado]');
+    const projectCards = document.querySelectorAll('.project-card');
 
-            var estadoActual = 'todos';
-            var busquedaActual = '';
+    let estadoActual = 'todos';
+    let busquedaActual = '';
 
-            function getEstado(row) {
-                var badge = $(row).find('span[data-estado]');
-                if (badge.length === 0) badge = $(row).find('.badge[data-estado]');
-                if (badge.length === 0) badge = $(row).find('[data-estado]');
-                return badge.attr('data-estado') || badge.data('estado') || '';
+    // Filter function
+    function aplicarFiltros() {
+        let visibleCount = 0;
+
+        projectCards.forEach(card => {
+            const estado = card.getAttribute('data-estado');
+            const texto = card.textContent.toLowerCase();
+
+            const coincideEstado = (estadoActual === 'todos') || (estado === estadoActual);
+            const coincideBusqueda = !busquedaActual || texto.includes(busquedaActual.toLowerCase());
+
+            if (coincideEstado && coincideBusqueda) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
             }
-
-            function aplicarFiltros() {
-                $('#proyectosTable tbody tr').each(function() {
-                    var fila = $(this);
-                    var estado = getEstado(this);
-                    var textoFila = fila.text().toLowerCase();
-                    var coincideEstado = (estadoActual === 'todos') || (estado === estadoActual);
-                    var coincideBusqueda = !busquedaActual || textoFila.includes(busquedaActual.toLowerCase());
-                    if (coincideEstado && coincideBusqueda) {
-                        fila.show();
-                    } else {
-                        fila.hide();
-                    }
-                });
-                actualizarContadores();
-            }
-
-            function actualizarContadores() {
-                // Contadores absolutos por estado
-                var totalActivos = $('#proyectosTable tbody tr').filter(function() {
-                    return getEstado(this) === 'activo';
-                }).length;
-                var totalInactivos = $('#proyectosTable tbody tr').filter(function() {
-                    return getEstado(this) === 'inactivo';
-                }).length;
-                var totalCerrados = $('#proyectosTable tbody tr').filter(function() {
-                    return getEstado(this) === 'cerrado';
-                }).length;
-                var totalTodos = $('#proyectosTable tbody tr').length;
-
-                // Contador filtrado solo para el chip 'Todos'
-                var totalFiltrados = $('#proyectosTable tbody tr:visible').length;
-
-                $('.status-chip[data-estado="activo"] .count').text('(' + totalActivos + ')');
-                $('.status-chip[data-estado="inactivo"] .count').text('(' + totalInactivos + ')');
-                $('.status-chip[data-estado="cerrado"] .count').text('(' + totalCerrados + ')');
-                $('.status-chip[data-estado="todos"] .count').text('(' + totalFiltrados + ')');
-            }
-
-            $('.status-chip').on('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                $('.status-chip').removeClass('active');
-                $(this).addClass('active');
-                estadoActual = $(this).attr('data-estado');
-                aplicarFiltros();
-            });
-
-            $('#searchProjects').on('input', function() {
-                busquedaActual = $(this).val().trim();
-                aplicarFiltros();
-            });
-
-            $('.status-chip[data-estado="todos"]').addClass('active');
-            estadoActual = 'todos';
-            setTimeout(aplicarFiltros, 500);
-
-            $('[data-bs-toggle="tooltip"]').tooltip();
         });
-    </script>
-    <!-- Modal de eliminación y ver más -->
-    <script>
-        $(document).ready(function() {
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-            var undoToast = new bootstrap.Toast(document.getElementById('undoToast'));
-            var proyectoIdToDelete = null;
-            var deleteForm = $('#deleteProjectForm');
 
-            $('.btn-delete-project').on('click', function() {
-                proyectoIdToDelete = $(this).data('proyecto-id');
-                deleteForm.attr('action', '/proyectos/' + proyectoIdToDelete);
-                $('#deleteReason').val('');
-                deleteModal.show();
-            });
+        // Show/hide no results message
+        if (visibleCount === 0) {
+            proyectosGrid.classList.add('hidden');
+            noResults.classList.remove('hidden');
+        } else {
+            proyectosGrid.classList.remove('hidden');
+            noResults.classList.add('hidden');
+        }
+    }
 
-            deleteForm.on('submit', function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: $(this).attr('action'),
-                    type: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        deleteModal.hide();
-                        undoToast.show();
-                        setTimeout(function() {
-                            window.location.reload();
-                        }, 1200);
-                    },
-                    error: function() {
-                        alert('Error al eliminar el proyecto.');
-                    }
-                });
-            });
-
-            $('#undoDeleteBtn').on('click', function() {
-                undoToast.hide();
-                // Aquí puedes implementar la lógica de deshacer si es necesario
-            });
-
-            $('#verMasModal').on('show.bs.modal', function(event) {
-                var button = $(event.relatedTarget);
-                var objeto = button.data('objeto');
-                $('#verMasTexto').text(objeto);
-            });
+    // Status filter click
+    statusButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            estadoActual = this.getAttribute('data-estado');
+            aplicarFiltros();
         });
-    </script>
-@endpush
+    });
+
+    // Search input
+    searchInput.addEventListener('input', function() {
+        busquedaActual = this.value.trim();
+        aplicarFiltros();
+    });
+
+    // Delete project buttons
+    const deleteButtons = document.querySelectorAll('.btn-delete-project');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const proyectoId = this.getAttribute('data-proyecto-id');
+            window.dispatchEvent(new CustomEvent('delete-project', {
+                detail: { id: proyectoId }
+            }));
+        });
+    });
+
+    // Initial filter
+    aplicarFiltros();
+});
+</script>
+@endsection
