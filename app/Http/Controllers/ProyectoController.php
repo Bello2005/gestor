@@ -15,23 +15,19 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpWord\IOFactory;
+use Cloudinary\Cloudinary;
 
 class ProyectoController extends Controller
 {
     /**
      * Helper para construir la URL completa de Cloudinary desde un public_id
+     * Usa solo 'image' porque es el único tipo público en Cloudinary FREE
      */
-    private function getCloudinaryUrl($publicId, $resourceType = 'auto')
+    private function getCloudinaryUrl($publicId)
     {
         $cloudName = config('filesystems.disks.cloudinary.cloud');
-
-        // Determinar el tipo de recurso basado en la extensión
-        if ($resourceType === 'auto') {
-            $ext = strtolower(pathinfo($publicId, PATHINFO_EXTENSION));
-            $resourceType = in_array($ext, ['pdf', 'doc', 'docx', 'xls', 'xlsx']) ? 'raw' : 'image';
-        }
-
-        return "https://res.cloudinary.com/{$cloudName}/{$resourceType}/upload/{$publicId}";
+        // Solo usamos 'image' porque 'raw' requiere signed URLs en plan FREE
+        return "https://res.cloudinary.com/{$cloudName}/image/upload/{$publicId}";
     }
 
     public function exportPdf(Request $request)
