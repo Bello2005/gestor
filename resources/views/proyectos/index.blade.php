@@ -163,6 +163,47 @@
                 width: 100% !important;
                 flex: none !important;
             }
+
+            /* Arreglar espaciado de botones */
+            .content-card {
+                margin-top: 1rem !important;
+            }
+
+            .card-header {
+                padding: 1rem !important;
+            }
+
+            .search-row .btn-group {
+                margin-left: 0 !important;
+            }
+
+            .search-row a.btn-primary {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* Espaciado general mejorado */
+        .stats-grid {
+            margin-bottom: 1.5rem;
+        }
+
+        .content-card {
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                margin-bottom: 1rem;
+            }
+
+            .content-card {
+                margin-top: 1rem;
+            }
+
+            .py-4 {
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
         }
 
         /* Estilos para la tabla de proyectos */
