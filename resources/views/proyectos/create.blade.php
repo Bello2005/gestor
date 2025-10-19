@@ -134,7 +134,7 @@
                         <small class="form-text text-muted">Formatos: PDF, DOC, DOCX, XLS, XLSX (Max: 10MB)</small>
                         @if(isset($proyecto) && $proyecto->cargar_archivo_proyecto)
                             <div class="mt-2">
-                                <a href="{{ Storage::url($proyecto->cargar_archivo_proyecto) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <a href="{{ $proyecto->cargar_archivo_proyecto }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-download"></i> Ver archivo actual
                                 </a>
                             </div>
@@ -149,7 +149,7 @@
                         <small class="form-text text-muted">Formatos: PDF, DOC, DOCX (Max: 10MB)</small>
                         @if(isset($proyecto) && $proyecto->cargar_contrato_o_convenio)
                             <div class="mt-2">
-                                <a href="{{ Storage::url($proyecto->cargar_contrato_o_convenio) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <a href="{{ $proyecto->cargar_contrato_o_convenio }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-download"></i> Ver contrato actual
                                 </a>
                             </div>
@@ -165,7 +165,7 @@
                         @if(isset($proyecto) && $proyecto->cargar_evidencias)
                             <div class="mt-2">
                                 @foreach($proyecto->cargar_evidencias as $index => $evidencia)
-                                    <a href="{{ Storage::url($evidencia) }}" target="_blank" class="btn btn-sm btn-outline-primary me-1 mb-1">
+                                    <a href="{{ $evidencia }}" target="_blank" class="btn btn-sm btn-outline-primary me-1 mb-1">
                                         <i class="fas fa-download"></i> Evidencia {{ $index + 1 }}
                                     </a>
                                 @endforeach

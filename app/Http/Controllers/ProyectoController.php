@@ -15,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpWord\IOFactory;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProyectoController extends Controller
 {
@@ -295,20 +296,42 @@ class ProyectoController extends Controller
 
             $data = $validated;
 
+            // Subir archivo de proyecto a Cloudinary
             if ($request->hasFile('archivo_proyecto')) {
-                $data['cargar_archivo_proyecto'] = $request->file('archivo_proyecto')
-                    ->store('proyectos/archivos', 'public');
+                $uploadedFile = Cloudinary::upload(
+                    $request->file('archivo_proyecto')->getRealPath(),
+                    [
+                        'folder' => 'proyectos/archivos',
+                        'resource_type' => 'auto'
+                    ]
+                );
+                $data['cargar_archivo_proyecto'] = $uploadedFile->getSecurePath();
             }
 
+            // Subir contrato a Cloudinary
             if ($request->hasFile('archivo_contrato')) {
-                $data['cargar_contrato_o_convenio'] = $request->file('archivo_contrato')
-                    ->store('proyectos/contratos', 'public');
+                $uploadedFile = Cloudinary::upload(
+                    $request->file('archivo_contrato')->getRealPath(),
+                    [
+                        'folder' => 'proyectos/contratos',
+                        'resource_type' => 'auto'
+                    ]
+                );
+                $data['cargar_contrato_o_convenio'] = $uploadedFile->getSecurePath();
             }
 
+            // Subir evidencias a Cloudinary
             if ($request->hasFile('evidencias')) {
                 $evidencias = [];
                 foreach ($request->file('evidencias') as $evidencia) {
-                    $evidencias[] = $evidencia->store('proyectos/evidencias', 'public');
+                    $uploadedFile = Cloudinary::upload(
+                        $evidencia->getRealPath(),
+                        [
+                            'folder' => 'proyectos/evidencias',
+                            'resource_type' => 'auto'
+                        ]
+                    );
+                    $evidencias[] = $uploadedFile->getSecurePath();
                 }
                 $data['cargar_evidencias'] = $evidencias;
             }
@@ -395,26 +418,42 @@ class ProyectoController extends Controller
                 'estado' => 'nullable|string|in:activo,inactivo,cerrado'
             ]);
 
+            // Actualizar archivo de proyecto en Cloudinary
             if ($request->hasFile('archivo_proyecto')) {
-                if ($proyecto->cargar_archivo_proyecto) {
-                    Storage::disk('public')->delete($proyecto->cargar_archivo_proyecto);
-                }
-                $validated['cargar_archivo_proyecto'] = $request->file('archivo_proyecto')
-                    ->store('proyectos/archivos', 'public');
+                $uploadedFile = Cloudinary::upload(
+                    $request->file('archivo_proyecto')->getRealPath(),
+                    [
+                        'folder' => 'proyectos/archivos',
+                        'resource_type' => 'auto'
+                    ]
+                );
+                $validated['cargar_archivo_proyecto'] = $uploadedFile->getSecurePath();
             }
 
+            // Actualizar contrato en Cloudinary
             if ($request->hasFile('archivo_contrato')) {
-                if ($proyecto->cargar_contrato_o_convenio) {
-                    Storage::disk('public')->delete($proyecto->cargar_contrato_o_convenio);
-                }
-                $validated['cargar_contrato_o_convenio'] = $request->file('archivo_contrato')
-                    ->store('proyectos/contratos', 'public');
+                $uploadedFile = Cloudinary::upload(
+                    $request->file('archivo_contrato')->getRealPath(),
+                    [
+                        'folder' => 'proyectos/contratos',
+                        'resource_type' => 'auto'
+                    ]
+                );
+                $validated['cargar_contrato_o_convenio'] = $uploadedFile->getSecurePath();
             }
 
+            // Actualizar evidencias en Cloudinary (agregar nuevas a las existentes)
             if ($request->hasFile('evidencias')) {
                 $evidencias = $proyecto->cargar_evidencias ?? [];
                 foreach ($request->file('evidencias') as $evidencia) {
-                    $evidencias[] = $evidencia->store('proyectos/evidencias', 'public');
+                    $uploadedFile = Cloudinary::upload(
+                        $evidencia->getRealPath(),
+                        [
+                            'folder' => 'proyectos/evidencias',
+                            'resource_type' => 'auto'
+                        ]
+                    );
+                    $evidencias[] = $uploadedFile->getSecurePath();
                 }
                 $validated['cargar_evidencias'] = $evidencias;
             }
