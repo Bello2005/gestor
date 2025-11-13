@@ -32,6 +32,8 @@ Thumbs.db
 .env.*
 backup_critical_files/*.bak
 *.sql
+*.sql.gz
+database/backups/
 php.ini
 *.bak
 *.tmp
@@ -44,3 +46,4 @@ php.ini
 *.vscode/
 yarn-error.log
 npm-debug.log
+public/build

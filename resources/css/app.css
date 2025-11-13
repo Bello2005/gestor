@@ -120,6 +120,16 @@
     @apply transition-all duration-200;
   }
 
+  /* Calendar icon (date input) - White color */
+  .input-quantum[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(2);
+    cursor: pointer;
+  }
+
+  .input-quantum[type="date"]::-webkit-calendar-picker-indicator:hover {
+    filter: invert(1) brightness(2.5);
+  }
+
   .select-quantum {
     @apply input-quantum;
     @apply cursor-pointer;
@@ -295,5 +305,25 @@
   #main-content,
   .main-content {
     @apply ml-0 pt-20 px-4;
+  }
+}
+
+/* ==========================================================================
+   Alpine.js x-cloak - Hide elements until Alpine initializes
+   ========================================================================== */
+[x-cloak] {
+  display: none !important;
+}
+
+/* Tablet/iPad Pro optimizations */
+@media (min-width: 768px) and (max-width: 1279px) {
+  /* Mejor espaciado en tablets para grid de usuarios */
+  .user-grid-tablet {
+    @apply grid-cols-2 gap-4;
+  }
+  
+  /* Mejor espaciado para tarjetas de auditoría */
+  .audit-card-tablet {
+    @apply p-5;
   }
 }

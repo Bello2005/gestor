@@ -1,26 +1,27 @@
-# Sistema de Gestión de Proyectos
+# Sistema de Gestión
 
-Este es un sistema de gestión de proyectos desarrollado con Laravel, diseñado para administrar y dar seguimiento a proyectos de manera eficiente.
+Este es un sistema de gestión desarrollado con Laravel, que utiliza PostgreSQL como base de datos y cuenta con integración de Cloudinary para el manejo de archivos.
 
 ## 📋 Requisitos Previos
 
 -   PHP >= 8.2
 -   Composer
--   Node.js y NPM
--   MySQL >= 5.7 o MariaDB >= 10.3
--   Extensiones de PHP requeridas:
-    -   BCMath PHP Extension
-    -   Ctype PHP Extension
-    -   cURL PHP Extension
-    -   DOM PHP Extension
-    -   Fileinfo PHP Extension
-    -   JSON PHP Extension
-    -   Mbstring PHP Extension
-    -   OpenSSL PHP Extension
-    -   PCRE PHP Extension
-    -   PDO PHP Extension
-    -   Tokenizer PHP Extension
-    -   XML PHP Extension
+-   PostgreSQL
+-   Extensiones PHP requeridas:
+    -   pdo_pgsql
+    -   pgsql
+    -   BCMath
+    -   Ctype
+    -   cURL
+    -   DOM
+    -   Fileinfo
+    -   JSON
+    -   Mbstring
+    -   OpenSSL
+    -   PCRE
+    -   PDO
+    -   Tokenizer
+    -   XML
 
 ## 🚀 Instalación Local
 
@@ -50,29 +51,49 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-5. **Configurar la base de datos**
-    - Crear una base de datos en MySQL
-    - Actualizar las credenciales en el archivo `.env`:
+5. **Configurar la base de datos y servicios**
+
+    Actualizar las credenciales en el archivo `.env`:
 
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=nombre_de_tu_base_de_datos
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_contraseña
+# Base de datos PostgreSQL
+DB_CONNECTION=pgsql
+DB_HOST=tu-host-postgresql
+DB_PORT=5432
+DB_DATABASE=tu-base-de-datos
+DB_USERNAME=tu-usuario
+DB_PASSWORD=tu-contraseña
+
+# Cloudinary
+CLOUDINARY_URL=tu-url-de-cloudinary
+CLOUDINARY_CLOUD_NAME=tu-cloud-name
+CLOUDINARY_API_KEY=tu-api-key
+CLOUDINARY_API_SECRET=tu-api-secret
+
+# Configuración de correo
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=tu-email@gmail.com
+MAIL_PASSWORD=tu-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=tu-email@gmail.com
+MAIL_FROM_NAME="Sistema de Gestión"
 ```
 
-6. **Ejecutar las migraciones y seeders**
+6. **Crear enlace simbólico para el almacenamiento**
 
 ```bash
-php artisan migrate --seed
+php artisan storage:link
 ```
 
-7. **Generar assets**
+7. **Optimizar la aplicación**
 
 ```bash
-npm run build
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 ```
 
 8. **Iniciar el servidor de desarrollo**
@@ -83,15 +104,14 @@ php artisan serve
 
 La aplicación estará disponible en `http://localhost:8000`
 
-## 🌐 Despliegue en Producción
+## 🌐 Despliegue en Producción (Docker)
 
-1. **Preparación del Servidor**
+1. **Preparación**
 
-    - Configurar un servidor web (Apache/Nginx)
-    - Instalar PHP 8.2 o superior
-    - Instalar MySQL/MariaDB
-    - Instalar Composer
-    - Instalar Node.js y NPM
+    - Docker instalado en el servidor
+    - Variables de entorno configuradas
+    - Acceso a PostgreSQL en la nube (por ejemplo, en Render.com)
+    - Cuenta de Cloudinary configurada
 
 2. **Configuración del Servidor Web**
 
@@ -147,55 +167,61 @@ La aplicación estará disponible en `http://localhost:8000`
     }
     ```
 
-3. **Despliegue del Código**
+3. **Despliegue con Docker**
 
 ```bash
-# En el servidor de producción
-git clone https://github.com/Bello2005/gestor.git
-cd gestor
-composer install --no-dev
-npm install
-npm run build
+# Construir la imagen
+docker build -t gestor .
 
-cp .env.example .env
-# Editar .env con la configuración de producción
-php artisan key:generate
-php artisan storage:link
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+# Ejecutar el contenedor
+docker run -d \
+  --name gestor \
+  -p 80:80 \
+  --env-file .env \
+  gestor
 ```
 
 4. **Configuración del Entorno de Producción**
-   Editar el archivo `.env`:
+   Ejemplo del archivo `.env` para producción:
 
 ```env
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://tudominio.com
+APP_URL=https://tu-dominio.com
+APP_KEY=tu-app-key
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=tu_base_de_datos
+# PostgreSQL en Render.com
+DB_CONNECTION=pgsql
+DB_HOST=tu-host.render.com
+DB_PORT=5432
+DB_DATABASE=tu_database
 DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_contraseña_segura
+DB_PASSWORD=tu_password
 
-CACHE_DRIVER=file
-SESSION_DRIVER=file
-QUEUE_CONNECTION=database
+# Cloudinary
+CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
+CLOUDINARY_CLOUD_NAME=tu-cloud-name
+CLOUDINARY_API_KEY=tu-api-key
+CLOUDINARY_API_SECRET=tu-api-secret
 
+# Correo
 MAIL_MAILER=smtp
-MAIL_HOST=tu_servidor_smtp
+MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=tu_usuario
-MAIL_PASSWORD=tu_contraseña
+MAIL_USERNAME=tu-email@gmail.com
+MAIL_PASSWORD=tu-password
 MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=no-reply@tudominio.com
-MAIL_FROM_NAME="${APP_NAME}"
+MAIL_FROM_ADDRESS=tu-email@gmail.com
+MAIL_FROM_NAME="Sistema de Gestión"
+
+# Configuración adicional
+SESSION_DRIVER=cookie
+SESSION_LIFETIME=120
+FILESYSTEM_DISK=public
+QUEUE_CONNECTION=sync
 ```
 
-5. **Permisos de Archivos**
+5. **Variables de Entorno Importantes**
 
 ```bash
 sudo chown -R www-data:www-data storage bootstrap/cache

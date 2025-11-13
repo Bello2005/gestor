@@ -23,9 +23,9 @@
 >
     <!-- Sidebar Header -->
     <div class="flex items-center justify-between h-20 px-6 border-b border-matter-light">
-        <div class="flex items-center gap-3 transition-all duration-300" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0'">
+        <div class="flex items-center gap-3 transition-all duration-300 flex-1 min-w-0" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0'">
             <!-- Quantum Logo -->
-            <div class="relative">
+            <div class="relative flex-shrink-0">
                 <svg width="40" height="40" viewBox="0 0 120 120" class="animate-float">
                     <defs>
                         <linearGradient id="quantumGradientSidebar" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -56,7 +56,7 @@
                 </svg>
             </div>
 
-            <div class="flex flex-col">
+            <div class="flex flex-col min-w-0">
                 <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-quantum-500 to-void-500 bg-clip-text text-transparent">
                     QUANTUM
                 </span>
@@ -67,7 +67,7 @@
         </div>
 
         <!-- Collapsed Logo (Icon Only) -->
-        <div class="flex items-center justify-center transition-all duration-300" :class="!sidebarOpen ? 'opacity-100' : 'opacity-0 absolute'">
+        <div class="flex items-center justify-center transition-all duration-300 flex-1" :class="!sidebarOpen ? 'opacity-100' : 'opacity-0 absolute pointer-events-none'">
             <svg width="32" height="32" viewBox="0 0 120 120">
                 <defs>
                     <linearGradient id="quantumGradientCollapsed" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -118,9 +118,10 @@
             </span>
         </a>
 
-        <!-- Auditoría -->
-        <a href="#"
-           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group text-gray-400 hover:text-white hover:bg-matter-light">
+        <!-- Auditoría (Admin only) -->
+        @if(Auth::user()->hasRole('admin'))
+        <a href="{{ route('audit.index') }}"
+           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group {{ Request::routeIs('audit.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
             <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
@@ -128,6 +129,7 @@
                 Auditoría
             </span>
         </a>
+        @endif
 
         <!-- Usuarios (Admin/Director only) -->
         @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('director'))
@@ -165,8 +167,8 @@
         <div class="my-4 border-t border-matter-light"></div>
 
         <!-- Configuración -->
-        <a href="#"
-           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group text-gray-400 hover:text-white hover:bg-matter-light">
+        <a href="{{ route('configuration.index') }}"
+           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group {{ Request::routeIs('configuration.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
             <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -175,6 +177,20 @@
                 Configuración
             </span>
         </a>
+
+        <!-- Divider -->
+        <div class="my-4 border-t border-matter-light"></div>
+
+        <!-- Suscripción -->
+        <button @click="$dispatch('open-subscription-modal')"
+           class="w-full flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group bg-gradient-to-r from-quantum-500/20 via-void-500/20 to-quantum-500/20 border border-quantum-500/30 hover:border-quantum-500/50 text-white hover:shadow-quantum hover:scale-105">
+            <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 text-quantum-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="font-bold transition-all duration-300 bg-gradient-to-r from-quantum-500 to-void-500 bg-clip-text text-transparent" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0'">
+                Adquiere Suscripción
+            </span>
+        </button>
     </nav>
 
     <!-- User Profile Section -->

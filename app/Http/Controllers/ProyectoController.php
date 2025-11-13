@@ -12,14 +12,12 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class ProyectoController extends Controller
 {
     /**
-     * Helper para construir la URL completa de Cloudinary desde un public_id
-     * Usa solo 'image' porque es el único tipo público en Cloudinary FREE
+     * Helper para guardar archivos en almacenamiento local
      */
-    private function getCloudinaryUrl($publicId)
+    private function saveFile($file, $path)
     {
-        $cloudName = config('filesystems.disks.cloudinary.cloud');
-        // Solo usamos 'image' porque 'raw' requiere signed URLs en plan FREE
-        return "https://res.cloudinary.com/{$cloudName}/image/upload/{$publicId}";
+        // Guardar en almacenamiento público local
+        return Storage::disk('public')->putFile($path, $file);
     }
 
     public function exportPdf(Request $request)
@@ -300,26 +298,26 @@ class ProyectoController extends Controller
 
             $data = $validated;
 
-            // Subir archivo de proyecto a Cloudinary
+            // Subir archivo de proyecto a almacenamiento local
             if ($request->hasFile('archivo_proyecto')) {
                 $file = $request->file('archivo_proyecto');
-                $publicId = Storage::disk('cloudinary')->putFile('proyectos/archivos', $file);
-                $data['cargar_archivo_proyecto'] = $this->getCloudinaryUrl($publicId);
+                $path = $this->saveFile($file, 'proyectos/archivos');
+                $data['cargar_archivo_proyecto'] = $path;
             }
 
-            // Subir contrato a Cloudinary
+            // Subir contrato a almacenamiento local
             if ($request->hasFile('archivo_contrato')) {
                 $file = $request->file('archivo_contrato');
-                $publicId = Storage::disk('cloudinary')->putFile('proyectos/contratos', $file);
-                $data['cargar_contrato_o_convenio'] = $this->getCloudinaryUrl($publicId);
+                $path = $this->saveFile($file, 'proyectos/contratos');
+                $data['cargar_contrato_o_convenio'] = $path;
             }
 
-            // Subir evidencias a Cloudinary
+            // Subir evidencias a almacenamiento local
             if ($request->hasFile('evidencias')) {
                 $evidencias = [];
                 foreach ($request->file('evidencias') as $evidencia) {
-                    $publicId = Storage::disk('cloudinary')->putFile('proyectos/evidencias', $evidencia);
-                    $evidencias[] = $this->getCloudinaryUrl($publicId);
+                    $path = $this->saveFile($evidencia, 'proyectos/evidencias');
+                    $evidencias[] = $path;
                 }
                 $data['cargar_evidencias'] = $evidencias;
             }
@@ -404,29 +402,37 @@ class ProyectoController extends Controller
                 'plazo' => 'nullable|numeric|min:0',
                 'valor_total' => 'nullable|numeric|min:0',
                 'estado' => 'nullable|string|in:activo,inactivo,cerrado',
-                'evidencias.*' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:10240' // Solo imágenes (Cloudinary FREE)
+                'evidencias.*' => 'nullable|mimes:pdf,doc,docx,jpeg,jpg,png,webp|max:10240'
             ]);
 
-            // Actualizar archivo de proyecto en Cloudinary
+            // Actualizar archivo de proyecto en almacenamiento local
             if ($request->hasFile('archivo_proyecto')) {
+                // Eliminar archivo anterior si existe
+                if ($proyecto->cargar_archivo_proyecto && Storage::disk('public')->exists($proyecto->cargar_archivo_proyecto)) {
+                    Storage::disk('public')->delete($proyecto->cargar_archivo_proyecto);
+                }
                 $file = $request->file('archivo_proyecto');
-                $publicId = Storage::disk('cloudinary')->putFile('proyectos/archivos', $file);
-                $validated['cargar_archivo_proyecto'] = $this->getCloudinaryUrl($publicId);
+                $path = $this->saveFile($file, 'proyectos/archivos');
+                $validated['cargar_archivo_proyecto'] = $path;
             }
 
-            // Actualizar contrato en Cloudinary
+            // Actualizar contrato en almacenamiento local
             if ($request->hasFile('archivo_contrato')) {
+                // Eliminar archivo anterior si existe
+                if ($proyecto->cargar_contrato_o_convenio && Storage::disk('public')->exists($proyecto->cargar_contrato_o_convenio)) {
+                    Storage::disk('public')->delete($proyecto->cargar_contrato_o_convenio);
+                }
                 $file = $request->file('archivo_contrato');
-                $publicId = Storage::disk('cloudinary')->putFile('proyectos/contratos', $file);
-                $validated['cargar_contrato_o_convenio'] = $this->getCloudinaryUrl($publicId);
+                $path = $this->saveFile($file, 'proyectos/contratos');
+                $validated['cargar_contrato_o_convenio'] = $path;
             }
 
-            // Actualizar evidencias en Cloudinary (agregar nuevas a las existentes)
+            // Actualizar evidencias en almacenamiento local (agregar nuevas a las existentes)
             if ($request->hasFile('evidencias')) {
                 $evidencias = $proyecto->cargar_evidencias ?? [];
                 foreach ($request->file('evidencias') as $evidencia) {
-                    $publicId = Storage::disk('cloudinary')->putFile('proyectos/evidencias', $evidencia);
-                    $evidencias[] = $this->getCloudinaryUrl($publicId);
+                    $path = $this->saveFile($evidencia, 'proyectos/evidencias');
+                    $evidencias[] = $path;
                 }
                 $validated['cargar_evidencias'] = $evidencias;
             }

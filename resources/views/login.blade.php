@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>QUANTUM - Gestión a la Velocidad del Pensamiento</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
+
     <!-- Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -265,16 +269,8 @@
                             </div>
                         </div>
 
-                        <!-- Remember & Forgot -->
-                        <div class="flex items-center justify-between">
-                            <label class="flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    name="remember"
-                                    class="w-4 h-4 rounded border-matter-light bg-matter text-quantum-500 focus:ring-2 focus:ring-quantum-500 focus:ring-offset-0"
-                                >
-                                <span class="ml-2 text-sm text-gray-300">Recordarme</span>
-                            </label>
+                        <!-- Forgot Password -->
+                        <div class="flex items-center justify-end">
                             <a href="{{ route('password.request') }}" class="text-sm text-quantum-400 hover:text-quantum-300 transition-colors">
                                 ¿Olvidaste tu contraseña?
                             </a>

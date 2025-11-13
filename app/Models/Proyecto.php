@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Traits\Auditable;
 
 class Proyecto extends Model
@@ -117,5 +118,54 @@ class Proyecto extends Model
     public function getFechaEjecucionFormattedAttribute()
     {
         return $this->fecha_de_ejecucion ? Carbon::parse($this->fecha_de_ejecucion)->format('d/m/Y') : '';
+    }
+
+    /**
+     * Helper para obtener la URL de un archivo
+     * Maneja tanto URLs de Cloudinary como rutas locales
+     */
+    private function getFileUrl($path)
+    {
+        if (!$path) {
+            return null;
+        }
+
+        // Si es una URL completa (Cloudinary), devolverla tal cual
+        if (strpos($path, 'http://') === 0 || strpos($path, 'https://') === 0) {
+            return $path;
+        }
+
+        // Si es una ruta local, usar Storage::disk('public')->url()
+        return Storage::disk('public')->url($path);
+    }
+
+    /**
+     * Accessor para obtener la URL del archivo del proyecto
+     */
+    public function getArchivoProyectoUrlAttribute()
+    {
+        return $this->getFileUrl($this->cargar_archivo_proyecto);
+    }
+
+    /**
+     * Accessor para obtener la URL del contrato/convenio
+     */
+    public function getContratoConvenioUrlAttribute()
+    {
+        return $this->getFileUrl($this->cargar_contrato_o_convenio);
+    }
+
+    /**
+     * Accessor para obtener las URLs de las evidencias
+     */
+    public function getEvidenciasUrlsAttribute()
+    {
+        if (!$this->cargar_evidencias || !is_array($this->cargar_evidencias)) {
+            return [];
+        }
+
+        return array_map(function($evidencia) {
+            return $this->getFileUrl($evidencia);
+        }, $this->cargar_evidencias);
     }
 }

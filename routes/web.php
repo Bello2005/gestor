@@ -15,6 +15,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ConfigurationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +89,11 @@ Route::middleware('auth')->group(function () {
     
     // Estadísticas
     Route::get('/estadistica', [EstadisticaController::class, 'index'])->name('estadistica');
+
+    // Configuración
+    Route::get('/configuracion', [ConfigurationController::class, 'index'])->name('configuration.index');
+    Route::post('/configuracion/profile', [ConfigurationController::class, 'updateProfile'])->name('configuration.profile.update');
+    Route::post('/configuracion/password', [ConfigurationController::class, 'updatePassword'])->name('configuration.password.update');
 });
 
 // Rutas protegidas por autenticación y rol de administrador

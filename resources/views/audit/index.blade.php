@@ -4,6 +4,9 @@
 
 @section('content')
 <div x-data="{
+    init() {
+        this.filterOpen = window.innerWidth >= 1280;
+    },
     filterOpen: true,
     showDetails: null,
     selectedOperation: '{{ request('operation', 'all') }}',
@@ -99,21 +102,22 @@
     </div>
 
     <!-- Main Content: Filters + Timeline -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
 
         <!-- Filters Sidebar - Torre Eiffel Base -->
-        <div class="lg:col-span-1">
-            <div class="card-quantum p-6 sticky top-24">
+        <div class="xl:col-span-1">
+            <div class="card-quantum p-6 xl:sticky xl:top-24">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-xl font-bold text-white">Filtros</h3>
-                    <button @click="filterOpen = !filterOpen" class="lg:hidden text-gray-400 hover:text-white">
+                    <button @click="filterOpen = !filterOpen" class="xl:hidden text-gray-400 hover:text-white">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
 
-                <form action="{{ route('audit.index') }}" method="GET" class="space-y-6" x-show="filterOpen" x-transition>
+                <div x-show="filterOpen" x-cloak x-transition class="xl:!block">
+                    <form action="{{ route('audit.index') }}" method="GET" class="space-y-6">
 
                     <!-- Table Filter -->
                     <div>
@@ -201,7 +205,7 @@
         </div>
 
         <!-- Timeline - Torre Eiffel Structure -->
-        <div class="lg:col-span-3">
+        <div class="xl:col-span-3">
             @if($audits->isEmpty())
                 <!-- Empty State -->
                 <div class="card-quantum p-12 text-center">
@@ -217,12 +221,12 @@
                 <!-- Timeline Container -->
                 <div class="relative space-y-6">
                     <!-- Vertical Line (Torre Eiffel) -->
-                    <div class="hidden lg:block absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-quantum-500 via-void-500 to-photon-500"></div>
+                    <div class="hidden xl:block absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-quantum-500 via-void-500 to-photon-500"></div>
 
                     @foreach($audits as $index => $audit)
-                        <div class="relative pl-0 lg:pl-16 group animate-slideUp" style="animation-delay: {{ $index * 50 }}ms;">
+                        <div class="relative pl-0 xl:pl-16 group animate-slideUp" style="animation-delay: {{ $index * 50 }}ms;">
                             <!-- Timeline Dot -->
-                            <div class="hidden lg:flex absolute left-3.5 top-6 w-5 h-5 rounded-full border-4 border-space
+                            <div class="hidden xl:flex absolute left-3.5 top-6 w-5 h-5 rounded-full border-4 border-space
                                         {{ $audit->operation === 'INSERT' ? 'bg-green-500' : ($audit->operation === 'UPDATE' ? 'bg-blue-500' : 'bg-red-500') }}
                                         group-hover:scale-150 transition-transform duration-300 shadow-lg z-10">
                             </div>
@@ -279,7 +283,7 @@
 
                                 <!-- Card Body -->
                                 <div class="p-6">
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                                         <!-- User Info -->
                                         <div class="flex items-center gap-3">
                                             <div class="w-12 h-12 bg-gradient-to-br from-quantum-500/20 to-void-500/20 rounded-full flex items-center justify-center">

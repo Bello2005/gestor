@@ -26,7 +26,7 @@ Una vez allí, inicia sesión con las credenciales proporcionadas.
 
 Si tienes alguna pregunta o necesitas ayuda:
 - Contacta al equipo de soporte
-- Escribe a {{ config('mail.from.address', 'soporte@uniclaretiana.edu.co') }}
+- Escribe a {{ config('mail.from.address', 'soporte@quantum.co') }}
 - Consulta con tu administrador del sistema
 
 Saludos,<br>

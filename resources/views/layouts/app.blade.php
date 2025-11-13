@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
     <style>
         /* Font Awesome fallback icons */

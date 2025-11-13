@@ -27,11 +27,11 @@ return new class extends Migration
             $table->index('table_name');
             $table->index('changed_by');
             
-            // Clave foránea
-            $table->foreign('changed_by')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('set null');
+            // Clave foránea - se crea después para evitar problemas con transacciones
+            // $table->foreign('changed_by')
+            //       ->references('id')
+            //       ->on('users')
+            //       ->onDelete('set null');
         });
     }
 

@@ -43,7 +43,7 @@ class AccessRequestController extends Controller
 
     public function index()
     {
-        $requests = AccessRequest::orderBy('created_at', 'desc')->get();
+        $requests = AccessRequest::orderBy('created_at', 'desc')->paginate(10);
         return view('access-requests.index', compact('requests'));
     }
 
@@ -54,6 +54,25 @@ class AccessRequestController extends Controller
             return response()->json([
                 'error' => 'La solicitud ya ha sido procesada anteriormente'
             ], 422);
+        }
+
+        // Verificar si el email ya existe en la tabla users
+        $existingUser = User::where('email', $request->email)->first();
+        if ($existingUser) {
+            // Si el usuario ya existe, actualizar la solicitud de acceso como aprobada
+            $request->update([
+                'status' => 'approved',
+                'reviewed_at' => now(),
+                'admin_comment' => "Solicitud aprobada. El usuario '{$existingUser->name}' ya existe en el sistema con este email."
+            ]);
+
+            Log::info("Solicitud de acceso aprobada para {$request->email}, pero el usuario ya existe en el sistema");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'La solicitud ha sido marcada como aprobada, pero el usuario ya existe en el sistema.',
+                'details' => "El usuario '{$existingUser->name}' ya está registrado con este email. No se creó un nuevo usuario."
+            ]);
         }
 
         try {

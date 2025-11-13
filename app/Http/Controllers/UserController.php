@@ -31,6 +31,12 @@ class UserController extends Controller
         return view('users.index', compact('usuarios', 'roles'));
     }
 
+    public function create()
+    {
+        // Redirigir a la vista de usuarios donde está el modal de creación
+        return redirect()->route('users.index');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
