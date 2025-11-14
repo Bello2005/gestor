@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         // NO configurar PGSSLROOTCERT, PGSSLCERT, PGSSLKEY
         // Al no configurarlos, PostgreSQL usará SSL sin buscar certificados del cliente
         if (config('database.default') === 'pgsql') {
-            putenv('PGSSLMODE=' . env('DB_SSLMODE', 'require'));
+            putenv('PGSSLMODE=' . env('DB_SSLMODE', 'prefer'));
             // NO configurar certificados - si están configuradas, eliminarlas
             // Esto asegura que PostgreSQL no intente leer archivos de certificado
             if (getenv('PGSSLCERT')) {

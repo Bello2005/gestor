@@ -6,7 +6,7 @@ set -e
 # IMPORTANTE: NO configurar PGSSLROOTCERT, PGSSLCERT, PGSSLKEY
 # Si se configuran, PostgreSQL intentará leerlos como archivos reales
 # Al no configurarlos, PostgreSQL usará SSL sin buscar certificados del cliente
-export PGSSLMODE=${DB_SSLMODE:-require}
+export PGSSLMODE=${DB_SSLMODE:-prefer}
 # NO configurar estas variables - dejar que PostgreSQL use valores por defecto
 unset PGSSLCERT
 unset PGSSLKEY

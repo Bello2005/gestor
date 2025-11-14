@@ -7,7 +7,7 @@ export HOME=/var/www
 # Configurar variables de entorno PostgreSQL para SSL sin certificados
 # NO configurar PGSSLROOTCERT, PGSSLCERT, PGSSLKEY
 # PostgreSQL usará SSL sin buscar certificados del cliente
-export PGSSLMODE=${DB_SSLMODE:-require}
+export PGSSLMODE=${DB_SSLMODE:-prefer}
 unset PGSSLCERT
 unset PGSSLKEY
 unset PGSSLROOTCERT

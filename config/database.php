@@ -96,8 +96,9 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             // Neon requiere SSL pero NO requiere certificado del cliente
-            // require = SSL obligatorio, pero sin verificar certificado del cliente
-            'sslmode' => env('DB_SSLMODE', 'require'),
+            // prefer = intenta SSL si está disponible, pero no falla si no hay certificado del cliente
+            // Esto es perfecto para Neon que requiere SSL pero no certificado del cliente
+            'sslmode' => env('DB_SSLMODE', 'prefer'),
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ],
