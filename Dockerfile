@@ -46,6 +46,12 @@ COPY routes ./routes
 RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views storage/app/public bootstrap/cache \
  && chown -R www-data:www-data storage bootstrap/cache
 
+# CRÍTICO: Crear directorio de certificados PostgreSQL para evitar error de permisos
+# PostgreSQL busca certificados en ~/.postgresql/ cuando usa sslmode=require
+RUN mkdir -p /root/.postgresql /var/www/.postgresql \
+ && chmod 755 /root/.postgresql /var/www/.postgresql \
+ && chown -R www-data:www-data /var/www/.postgresql
+
 # Copiar configuración de PHP-FPM
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 

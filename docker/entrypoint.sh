@@ -3,11 +3,18 @@ set -e
 
 # Configurar PostgreSQL para SSL sin certificados de cliente
 # Neon.tech requiere SSL pero NO requiere certificados del cliente
-export PGSSLMODE=require
-# Deshabilitar archivos de certificado del cliente
+# IMPORTANTE: Las variables de entorno deben estar disponibles para todos los procesos
+export PGSSLMODE=${DB_SSLMODE:-require}
+# Configurar variables para evitar que PostgreSQL busque certificados del cliente
+# /dev/null indica que no hay certificado del cliente
 export PGSSLCERT=/dev/null
 export PGSSLKEY=/dev/null
 export PGSSLROOTCERT=/dev/null
+
+# Asegurar que los directorios existen (ya creados en Dockerfile, pero por si acaso)
+mkdir -p /root/.postgresql /var/www/.postgresql || true
+chmod 755 /root/.postgresql /var/www/.postgresql || true
+chown -R www-data:www-data /var/www/.postgresql || true
 
 # crear carpetas Laravel que pueden faltar
 mkdir -p /var/www/storage /var/www/storage/logs /var/www/storage/framework/{cache,sessions,views} /var/www/bootstrap/cache /var/log/nginx /var/run

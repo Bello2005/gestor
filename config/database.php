@@ -95,7 +95,9 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => 'require',
+            // Neon requiere SSL pero NO requiere certificado del cliente
+            // require = SSL obligatorio, pero sin verificar certificado del cliente
+            'sslmode' => env('DB_SSLMODE', 'require'),
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ],

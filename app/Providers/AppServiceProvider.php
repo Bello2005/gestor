@@ -29,10 +29,10 @@ class AppServiceProvider extends ServiceProvider
         // Configurar variables de entorno de PostgreSQL para evitar error de certificado
         // Esto asegura que las variables estén disponibles cuando Laravel crea la conexión
         if (config('database.default') === 'pgsql') {
-            putenv('PGSSLMODE=' . env('DB_SSLMODE', 'prefer'));
-            putenv('PGSSLCERT=');
-            putenv('PGSSLKEY=');
-            putenv('PGSSLROOTCERT=');
+            putenv('PGSSLMODE=' . env('DB_SSLMODE', 'require'));
+            putenv('PGSSLCERT=/dev/null');
+            putenv('PGSSLKEY=/dev/null');
+            putenv('PGSSLROOTCERT=/dev/null');
         }
     }
 }
