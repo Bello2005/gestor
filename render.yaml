@@ -19,25 +19,17 @@ services:
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        fromDatabase:
-          name: gestor-db
-          property: host
+        value: ep-sweet-meadow-acu8tl0p-pooler.sa-east-1.aws.neon.tech
       - key: DB_PORT
-        fromDatabase:
-          name: gestor-db
-          property: port
+        value: "5432"
       - key: DB_DATABASE
-        fromDatabase:
-          name: gestor-db
-          property: database
+        value: neondb
       - key: DB_USERNAME
-        fromDatabase:
-          name: gestor-db
-          property: user
+        value: neondb_owner
       - key: DB_PASSWORD
-        fromDatabase:
-          name: gestor-db
-          property: password
+        value: npg_3jSRL2fqIoec
+      - key: DB_SSLMODE
+        value: prefer
       - key: SESSION_DRIVER
         value: cookie
       - key: CACHE_DRIVER
