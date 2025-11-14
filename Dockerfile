@@ -67,6 +67,11 @@ COPY tailwind.config.js ./
 COPY postcss.config.js ./
 COPY resources ./resources
 
+# Copiar directorio public (sin build, que está excluido por .dockerignore)
+# Esto asegura que archivos como index.php, favicon, etc. estén presentes
+# El .dockerignore excluye public/build, así que no se copia si existe en el repo
+COPY public ./public
+
 # Instalar dependencias de Node y compilar assets
 # Nota: Necesitamos devDependencies para Vite build
 RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
@@ -75,16 +80,22 @@ RUN npm run build
 # Verificar que el manifest se generó correctamente
 RUN test -f public/build/manifest.json || (echo "ERROR: Vite manifest not generated!" && exit 1)
 
+# Verificar que los assets se generaron
+RUN test -d public/build/assets || (echo "ERROR: Vite assets not generated!" && exit 1)
+
 # Limpiar node_modules para reducir tamaño de imagen
 RUN rm -rf node_modules
 
-# ahora copiar el resto del proyecto
-# NOTA: public/build está excluido por .dockerignore, preservando el generado arriba
+# Copiar el resto del proyecto
+# IMPORTANTE: .dockerignore excluye public/build, preservando el generado arriba
+# Copiamos public de forma selectiva, excluyendo build si existe en el repo
 COPY . .
 
 # Asegurar que el directorio build existe y tiene permisos correctos
 # Esto preserva el directorio build generado durante el build anterior
-RUN mkdir -p public/build && chown -R www-data:www-data public/build storage bootstrap/cache
+RUN mkdir -p public/build && \
+    chown -R www-data:www-data public/build storage bootstrap/cache && \
+    chmod -R 755 public/build
 
 # configs
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
