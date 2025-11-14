@@ -29,7 +29,7 @@ services:
       - key: DB_PASSWORD
         value: npg_3jSRL2fqIoec
       - key: DB_SSLMODE
-        value: require
+        value: prefer
       - key: SESSION_DRIVER
         value: cookie
       - key: CACHE_DRIVER

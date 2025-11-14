@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,15 @@ class AppServiceProvider extends ServiceProvider
         // Forzar HTTPS en production y development (no en local)
         if ($this->app->environment('production', 'development')) {
             URL::forceScheme('https');
+        }
+
+        // Configurar variables de entorno de PostgreSQL para evitar error de certificado
+        // Esto asegura que las variables estén disponibles cuando Laravel crea la conexión
+        if (config('database.default') === 'pgsql') {
+            putenv('PGSSLMODE=' . env('DB_SSLMODE', 'prefer'));
+            putenv('PGSSLCERT=');
+            putenv('PGSSLKEY=');
+            putenv('PGSSLROOTCERT=');
         }
     }
 }
