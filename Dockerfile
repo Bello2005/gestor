@@ -78,7 +78,14 @@ RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 RUN npm run build
 
 # Verificar que el manifest se generó correctamente
-RUN test -f public/build/manifest.json || (echo "ERROR: Vite manifest not generated!" && exit 1)
+# Vite 7 puede generar el manifest en .vite/manifest.json, moverlo si es necesario
+RUN if [ -f public/build/.vite/manifest.json ]; then \
+        mv public/build/.vite/manifest.json public/build/manifest.json && \
+        echo "Manifest movido desde .vite/manifest.json"; \
+    fi
+
+# Verificar que el manifest existe en la ubicación esperada por Laravel
+RUN test -f public/build/manifest.json || (echo "ERROR: Vite manifest not found in public/build/manifest.json!" && ls -la public/build/ && exit 1)
 
 # Verificar que los assets se generaron
 RUN test -d public/build/assets || (echo "ERROR: Vite assets not generated!" && exit 1)
