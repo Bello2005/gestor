@@ -1,0 +1,63 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependencies (se instalan en el contenedor)
+node_modules
+vendor
+
+# Build artifacts (se generan durante el build)
+public/build
+public/hot
+
+# Storage (se crea en el contenedor)
+storage/*
+!storage/.gitkeep
+storage/logs/*
+!storage/logs/.gitkeep
+storage/framework/cache/*
+!storage/framework/cache/.gitkeep
+storage/framework/sessions/*
+!storage/framework/sessions/.gitkeep
+storage/framework/views/*
+!storage/framework/views/.gitkeep
+
+# Cache
+bootstrap/cache/*
+!bootstrap/cache/.gitkeep
+
+# IDE
+.idea
+.vscode
+.fleet
+.nova
+.phpactor.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log
+yarn-error.log
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+

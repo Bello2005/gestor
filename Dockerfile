@@ -72,13 +72,18 @@ COPY resources ./resources
 RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 RUN npm run build
 
+# Verificar que el manifest se generó correctamente
+RUN test -f public/build/manifest.json || (echo "ERROR: Vite manifest not generated!" && exit 1)
+
 # Limpiar node_modules para reducir tamaño de imagen
 RUN rm -rf node_modules
 
 # ahora copiar el resto del proyecto
+# NOTA: public/build está excluido por .dockerignore, preservando el generado arriba
 COPY . .
 
 # Asegurar que el directorio build existe y tiene permisos correctos
+# Esto preserva el directorio build generado durante el build anterior
 RUN mkdir -p public/build && chown -R www-data:www-data public/build storage bootstrap/cache
 
 # configs
