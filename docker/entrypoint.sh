@@ -12,6 +12,10 @@ unset PGSSLCERT
 unset PGSSLKEY
 unset PGSSLROOTCERT
 
+# Asegurar permisos de lectura en /root/.postgresql para www-data
+# PostgreSQL busca certificados en ~/.postgresql/ del usuario que ejecuta el proceso
+chmod o+rx /root/.postgresql 2>/dev/null || true
+
 # Los directorios ya están creados en Dockerfile, solo verificar /var/www/.postgresql
 mkdir -p /var/www/.postgresql || true
 chmod 755 /var/www/.postgresql || true

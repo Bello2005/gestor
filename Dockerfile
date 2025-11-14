@@ -48,8 +48,10 @@ RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions sto
 
 # CRÍTICO: Crear directorio de certificados PostgreSQL para evitar error de permisos
 # PostgreSQL busca certificados en ~/.postgresql/ cuando usa sslmode=require
+# Dar permisos de lectura a todos para que www-data pueda acceder
 RUN mkdir -p /root/.postgresql /var/www/.postgresql \
  && chmod 755 /root/.postgresql /var/www/.postgresql \
+ && chmod o+rx /root/.postgresql \
  && chown -R www-data:www-data /var/www/.postgresql
 
 # Copiar configuración de PHP-FPM
