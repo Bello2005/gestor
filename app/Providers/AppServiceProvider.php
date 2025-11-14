@@ -26,13 +26,22 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Configurar variables de entorno de PostgreSQL para evitar error de certificado
-        // Esto asegura que las variables estén disponibles cuando Laravel crea la conexión
+        // Configurar variables de entorno de PostgreSQL para SSL sin certificados del cliente
+        // NO configurar PGSSLROOTCERT, PGSSLCERT, PGSSLKEY
+        // Al no configurarlos, PostgreSQL usará SSL sin buscar certificados del cliente
         if (config('database.default') === 'pgsql') {
             putenv('PGSSLMODE=' . env('DB_SSLMODE', 'require'));
-            putenv('PGSSLCERT=/dev/null');
-            putenv('PGSSLKEY=/dev/null');
-            putenv('PGSSLROOTCERT=/dev/null');
+            // NO configurar certificados - si están configuradas, eliminarlas
+            // Esto asegura que PostgreSQL no intente leer archivos de certificado
+            if (getenv('PGSSLCERT')) {
+                putenv('PGSSLCERT');
+            }
+            if (getenv('PGSSLKEY')) {
+                putenv('PGSSLKEY');
+            }
+            if (getenv('PGSSLROOTCERT')) {
+                putenv('PGSSLROOTCERT');
+            }
         }
     }
 }
