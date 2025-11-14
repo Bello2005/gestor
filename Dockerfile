@@ -78,7 +78,8 @@ COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY docker/queue-worker.sh /usr/local/bin/queue-worker.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/queue-worker.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 EXPOSE 10000
