@@ -474,5 +474,97 @@
             @endforeach
         @endif
     </script>
+
+    {{-- Modal: Forzar cambio de contraseña temporal --}}
+    @auth
+        @if(auth()->user()->is_temporary_password)
+        <div x-data="{
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+            loading: false,
+            error: '',
+            async submit() {
+                this.error = '';
+                if (this.newPassword.length < 8) {
+                    this.error = 'La nueva contraseña debe tener al menos 8 caracteres';
+                    return;
+                }
+                if (this.newPassword !== this.confirmPassword) {
+                    this.error = 'Las contraseñas no coinciden';
+                    return;
+                }
+                this.loading = true;
+                try {
+                    const res = await fetch('{{ route("password.change.temporary") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            current_password: this.currentPassword,
+                            new_password: this.newPassword,
+                            new_password_confirmation: this.confirmPassword
+                        })
+                    });
+                    const data = await res.json();
+                    if (!res.ok) {
+                        this.error = data.error || data.message || 'Error al cambiar la contraseña';
+                        this.loading = false;
+                        return;
+                    }
+                    window.location.reload();
+                } catch (e) {
+                    this.error = 'Error de conexión';
+                    this.loading = false;
+                }
+            }
+        }" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <div class="card-quantum max-w-md w-full p-8">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-quantum-500/20 to-void-500/20 rounded-full mb-4">
+                        <svg class="w-8 h-8 text-quantum-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Cambiar Contraseña</h2>
+                    <p class="text-gray-400 text-sm">Por seguridad, debes cambiar tu contraseña temporal antes de continuar.</p>
+                </div>
+
+                <template x-if="error">
+                    <div class="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-quantum">
+                        <p class="text-red-400 text-sm" x-text="error"></p>
+                    </div>
+                </template>
+
+                <form @submit.prevent="submit" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Contraseña actual (temporal)</label>
+                        <input type="password" x-model="currentPassword" required class="input-quantum w-full" placeholder="La contraseña que recibiste por correo">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Nueva contraseña</label>
+                        <input type="password" x-model="newPassword" required minlength="8" class="input-quantum w-full" placeholder="Mínimo 8 caracteres">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Confirmar nueva contraseña</label>
+                        <input type="password" x-model="confirmPassword" required class="input-quantum w-full" placeholder="Repite la nueva contraseña">
+                    </div>
+                    <button type="submit" :disabled="loading" class="btn-quantum w-full flex items-center justify-center gap-2 mt-2">
+                        <template x-if="loading">
+                            <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </template>
+                        <span x-text="loading ? 'Guardando...' : 'Guardar Nueva Contraseña'"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endif
+    @endauth
 </body>
 </html>
