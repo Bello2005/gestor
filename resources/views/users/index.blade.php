@@ -531,7 +531,7 @@
                 <input type="hidden" name="invalidate_sessions" value="1">
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Motivo <span class="text-gray-500 font-normal">(opcional)</span></label>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Motivo <span class="text-gray-500 font-normal">(obligatorio)</span></label>
                     <textarea name="motivo" rows="3"
                               class="input-quantum w-full resize-none"
                               placeholder="Motivo del reset de contraseña..."></textarea>
