@@ -9,69 +9,56 @@ class RolesSeeder extends Seeder
 {
     public function run()
     {
-        // Deshabilitar restricciones de clave foránea
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        
-        // Limpiar tablas existentes
-        DB::table('role_user')->truncate();
-        DB::table('roles')->truncate();
-        
-        // Habilitar restricciones de clave foránea
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-        // Insertar roles básicos
-        DB::table('roles')->insert([
+        // Insertar roles (upsert by slug)
+        $roles = [
             [
-                'name' => 'admin',
+                'name' => 'Administrador',
                 'slug' => 'admin',
-                'description' => 'Administrador del sistema',
-                'created_at' => now(),
-                'updated_at' => now()
+                'description' => 'Control total del sistema. Exento del flujo de solicitudes de acceso.',
             ],
             [
-                'name' => 'supervisor',
-                'slug' => 'supervisor',
-                'description' => 'Supervisor de proyectos',
-                'created_at' => now(),
-                'updated_at' => now()
+                'name' => 'Gestor',
+                'slug' => 'gestor',
+                'description' => 'Gestor de proyectos. Bonificación de confianza en evaluación de riesgo.',
             ],
             [
-                'name' => 'usuario',
-                'slug' => 'usuario',
-                'description' => 'Usuario regular',
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        ]);
+                'name' => 'Colaborador',
+                'slug' => 'colaborador',
+                'description' => 'Miembro del equipo. Evaluación de riesgo completa.',
+            ],
+        ];
 
-        // Asignar rol de admin al primer usuario de prueba
-        DB::table('role_user')->insert([
-            [
-                'user_id' => DB::table('users')->where('email', 'test1@uniclaretiana.edu.co')->value('id'),
-                'role_id' => DB::table('roles')->where('name', 'admin')->value('id'),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        ]);
+        foreach ($roles as $role) {
+            $existing = DB::table('roles')->where('slug', $role['slug'])->first();
+            if ($existing) {
+                DB::table('roles')->where('id', $existing->id)->update(array_merge($role, ['updated_at' => now()]));
+            } else {
+                DB::table('roles')->insert(array_merge($role, ['created_at' => now(), 'updated_at' => now()]));
+            }
+        }
 
-        // Asignar rol de supervisor al segundo usuario de prueba
-        DB::table('role_user')->insert([
-            [
-                'user_id' => DB::table('users')->where('email', 'test2@uniclaretiana.edu.co')->value('id'),
-                'role_id' => DB::table('roles')->where('name', 'supervisor')->value('id'),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        ]);
+        // Asignar roles a usuarios de prueba (si existen)
+        $assignments = [
+            'test1@uniclaretiana.edu.co' => 'admin',
+            'test2@uniclaretiana.edu.co' => 'gestor',
+            'test3@uniclaretiana.edu.co' => 'colaborador',
+        ];
 
-        // Asignar rol de usuario al tercer usuario de prueba
-        DB::table('role_user')->insert([
-            [
-                'user_id' => DB::table('users')->where('email', 'test3@uniclaretiana.edu.co')->value('id'),
-                'role_id' => DB::table('roles')->where('name', 'usuario')->value('id'),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        ]);
+        foreach ($assignments as $email => $slug) {
+            $userId = DB::table('users')->where('email', $email)->value('id');
+            $roleId = DB::table('roles')->where('slug', $slug)->value('id');
+
+            if ($userId && $roleId) {
+                $exists = DB::table('role_user')->where('user_id', $userId)->where('role_id', $roleId)->exists();
+                if (!$exists) {
+                    DB::table('role_user')->insert([
+                        'user_id' => $userId,
+                        'role_id' => $roleId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
     }
 }

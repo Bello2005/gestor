@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccessRequest;
+use App\Models\ResourceAccessRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Proyecto;
 use App\Models\User;
@@ -16,21 +18,27 @@ class DashboardController extends Controller
         $totalProjects = Proyecto::count();
         $activeProjects = Proyecto::where('estado', 'activo')->count();
         $totalUsers = User::count();
-
-        // Active users (usuarios que han actualizado su perfil recientemente)
         $activeUsers = User::where('updated_at', '>=', now()->subWeek())->count();
 
-        // Proyectos recientes (últimos 5)
         $recentProjects = Proyecto::orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 
-        // Tareas pendientes (esto depende de tu modelo de tareas)
-        // Por ahora lo dejo en 0, puedes actualizarlo cuando tengas el modelo de tareas
+        $recentActivity = [];
+
+        // Role-specific data
+        $isAdmin = $user->isAdmin();
+        $isGestor = $user->isGestor();
+
+        $pendingAccessRequests = 0;
+        $pendingAccountRequests = 0;
         $pendingTasks = 0;
 
-        // Actividad reciente (puedes implementar un modelo de Activity Log después)
-        $recentActivity = [];
+        if ($isAdmin) {
+            $pendingAccessRequests = ResourceAccessRequest::where('status', 'pendiente')->count();
+            $pendingAccountRequests = AccessRequest::where('status', 'pending')->count();
+            $pendingTasks = $pendingAccessRequests + $pendingAccountRequests;
+        }
 
         return view('dashboard', compact(
             'totalProjects',
@@ -39,7 +47,11 @@ class DashboardController extends Controller
             'totalUsers',
             'activeUsers',
             'recentProjects',
-            'recentActivity'
+            'recentActivity',
+            'isAdmin',
+            'isGestor',
+            'pendingAccessRequests',
+            'pendingAccountRequests'
         ));
     }
 }

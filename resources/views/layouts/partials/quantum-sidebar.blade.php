@@ -119,7 +119,7 @@
         </a>
 
         <!-- Auditoría (Admin only) -->
-        @if(Auth::user()->hasRole('admin'))
+        @if(Auth::user()->isAdmin())
         <a href="{{ route('audit.index') }}"
            class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group {{ Request::routeIs('audit.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
             <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,8 +131,8 @@
         </a>
         @endif
 
-        <!-- Usuarios (Admin/Director only) -->
-        @if(Auth::user()->hasRole('admin') || Auth::user()->hasRole('director'))
+        <!-- Usuarios (Admin only) -->
+        @if(Auth::user()->isAdmin())
         <a href="{{ route('users.index') }}"
            class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group {{ Request::routeIs('users.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
             <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@
         @endif
 
         <!-- Solicitudes de Acceso (Admin only) -->
-        @if(Auth::user()->hasRole('admin'))
+        @if(Auth::user()->isAdmin())
         <a href="{{ route('access-requests.index') }}"
            class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group relative {{ Request::routeIs('access-requests.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
             <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,6 +160,30 @@
                 {{ $pendingRequestsCount }}
             </span>
             @endif
+        </a>
+        @endif
+
+        <!-- Solicitudes de Acceso a Recursos (todos los usuarios) -->
+        <a href="{{ route('solicitudes-acceso.index') }}"
+           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group relative {{ Request::routeIs('solicitudes-acceso.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
+            <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+            </svg>
+            <span class="font-medium transition-all duration-300" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0'">
+                Control de Acceso
+            </span>
+        </a>
+
+        <!-- Análisis de Riesgo (Admin only) -->
+        @if(Auth::user()->isAdmin())
+        <a href="{{ route('analytics.riesgo') }}"
+           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group {{ Request::routeIs('analytics.riesgo') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
+            <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <span class="font-medium transition-all duration-300" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0'">
+                Análisis de Riesgo
+            </span>
         </a>
         @endif
 
@@ -209,15 +233,11 @@
                 </p>
                 <p class="text-xs text-gray-400 truncate">
                     @php
-                        $userRole = 'Usuario';
-                        if (Auth::user()->hasRole('admin')) {
+                        $userRole = 'Colaborador';
+                        if (Auth::user()->isAdmin()) {
                             $userRole = 'Administrador';
-                        } elseif (Auth::user()->hasRole('director')) {
-                            $userRole = 'Director';
-                        } elseif (Auth::user()->hasRole('coordinador')) {
-                            $userRole = 'Coordinador';
-                        } elseif (Auth::user()->hasRole('empleado')) {
-                            $userRole = 'Empleado';
+                        } elseif (Auth::user()->isGestor()) {
+                            $userRole = 'Gestor';
                         }
                     @endphp
                     {{ $userRole }}

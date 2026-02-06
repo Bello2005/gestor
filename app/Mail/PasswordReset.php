@@ -28,7 +28,7 @@ class PasswordReset extends Mailable
     public function build()
     {
         return $this->markdown('emails.password-reset')
-                    ->subject('Recuperación de Contraseña - ' . config('app.name'))
+                    ->subject('QUANTUM - Restablecer contraseña')
                     ->priority(1);
     }
 }

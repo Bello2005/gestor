@@ -167,6 +167,20 @@
                         @enderror
                     </div>
 
+                    <!-- Nivel de Criticidad -->
+                    <div class="space-y-2">
+                        <label for="nivel_criticidad" class="block text-sm font-medium text-gray-300">
+                            Nivel de Criticidad
+                            <span class="text-xs text-gray-500 ml-1">(evaluación de riesgo)</span>
+                        </label>
+                        <select id="nivel_criticidad" name="nivel_criticidad" class="input-quantum w-full">
+                            <option value="bajo" {{ old('nivel_criticidad', $proyecto->nivel_criticidad) == 'bajo' ? 'selected' : '' }}>Bajo</option>
+                            <option value="medio" {{ old('nivel_criticidad', $proyecto->nivel_criticidad ?? 'medio') == 'medio' ? 'selected' : '' }}>Medio</option>
+                            <option value="alto" {{ old('nivel_criticidad', $proyecto->nivel_criticidad) == 'alto' ? 'selected' : '' }}>Alto</option>
+                            <option value="critico" {{ old('nivel_criticidad', $proyecto->nivel_criticidad) == 'critico' ? 'selected' : '' }}>Crítico</option>
+                        </select>
+                    </div>
+
                     <!-- Valor Total -->
                     <div class="space-y-2">
                         <label for="valor_total" class="block text-sm font-medium text-gray-300">Valor Total ($)</label>

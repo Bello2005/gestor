@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Database\PostgresConnection;
+use Illuminate\Database\Connection;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +15,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Usar conexión PostgreSQL personalizada que maneja booleans correctamente
+        Connection::resolverFor('pgsql', function ($connection, $database, $prefix, $config) {
+            return new PostgresConnection($connection, $database, $prefix, $config);
+        });
     }
 
     /**

@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('access:revoke-expired')->hourly();
+        $schedule->command('access:notify-expiring --days=3')->dailyAt('08:00');
     }
 
     /**

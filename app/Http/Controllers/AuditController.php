@@ -96,7 +96,6 @@ class AuditController extends Controller
                 'ID Registro',
                 'Usuario',
                 'Dirección IP',
-                'Navegador',
                 'Valores Anteriores',
                 'Valores Nuevos',
                 'Fecha'
@@ -110,9 +109,8 @@ class AuditController extends Controller
                     $audit->record_id,
                     $audit->user_name,
                     $audit->ip_address,
-                    $audit->user_agent,
-                    $audit->old_values,
-                    $audit->new_values,
+                    json_encode($audit->old_values, JSON_UNESCAPED_UNICODE),
+                    json_encode($audit->new_values, JSON_UNESCAPED_UNICODE),
                     $audit->created_at
                 ]);
             }

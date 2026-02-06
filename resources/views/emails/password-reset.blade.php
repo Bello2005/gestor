@@ -1,32 +1,28 @@
 @component('mail::message')
-# Recuperación de Contraseña
+# Restablecer Contraseña
 
-¡Hola {{ $user->name }}!
+Hola **{{ $user->name }}**,
 
-Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para crear una nueva contraseña.
+Recibimos una solicitud para restablecer tu contraseña en QUANTUM.
 
 @component('mail::panel')
-**IMPORTANTE:** 
-- Este enlace es válido solo por 1 hora
-- Solo puede ser usado una vez
-- Si no solicitaste este cambio, por favor ignora este correo
-- Por seguridad, usa una contraseña fuerte y única
+**Ten en cuenta:**
+- Este enlace es válido por **1 hora**
+- Solo puede ser usado **una vez**
+- Si no solicitaste este cambio, ignora este correo
 @endcomponent
 
 @component('mail::button', ['url' => $resetUrl])
-Restablecer Contraseña
+Restablecer Mi Contraseña
 @endcomponent
 
-Si el botón no funciona, puedes copiar y pegar esta URL en tu navegador:
+Si el botón no funciona, copia y pega esta URL en tu navegador:
 {{ $resetUrl }}
 
-Si tienes problemas para acceder:
-- Asegúrate de copiar la contraseña exactamente como aparece
-- Verifica que no haya espacios adicionales
-- Contacta al soporte técnico si persisten los problemas: {{ config('mail.from.address', 'soporte@uniclaretiana.edu.co') }}
+¿Problemas? Escribe a {{ config('mail.from.address') }}
 
 Saludos,<br>
-{{ config('app.name') }}
+**QUANTUM** — Control de Acceso Basado en Riesgo
 
-<small>Si no solicitaste este restablecimiento de contraseña, por favor ignora este correo o contacta al administrador del sistema.</small>
+<small>Si no solicitaste este restablecimiento, puedes ignorar este correo con seguridad. Tu contraseña actual no será modificada.</small>
 @endcomponent

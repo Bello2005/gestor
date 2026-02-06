@@ -190,6 +190,20 @@
 
     <!-- Quick Actions & Activity (1/3 width) -->
     <div class="space-y-6">
+        @if(isset($pendingAccessRequests) && $pendingAccessRequests > 0)
+        <a href="{{ route('solicitudes-acceso.index') }}?status=pendiente" class="block card-quantum p-4 border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <span class="text-lg font-bold text-amber-400">{{ $pendingAccessRequests }}</span>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-amber-400">Solicitudes de acceso pendientes</p>
+                    <p class="text-xs text-gray-400">Requieren tu aprobación</p>
+                </div>
+            </div>
+        </a>
+        @endif
+
         <!-- Quick Actions -->
         <div class="card-quantum p-6">
             <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-3">
@@ -206,7 +220,7 @@
                     <span class="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Nuevo Proyecto</span>
                 </a>
 
-                @if(Auth::user()->hasRole('admin'))
+                @if(isset($isAdmin) && $isAdmin)
                 <a href="{{ route('users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-quantum bg-matter-light hover:bg-void-500/20 hover:border hover:border-void-500/30 transition-all duration-200 group">
                     <div class="p-2 rounded-lg bg-void-500/20 group-hover:bg-void-500/30 transition-colors">
                         <svg class="w-4 h-4 text-void-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,13 +230,36 @@
                     <span class="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Crear Usuario</span>
                 </a>
 
-                <a href="{{ route('access-requests.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-quantum bg-matter-light hover:bg-photon-500/20 hover:border hover:border-photon-500/30 transition-all duration-200 group">
+                <a href="{{ route('access-requests.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-quantum bg-matter-light hover:bg-photon-500/20 hover:border hover:border-photon-500/30 transition-all duration-200 group relative">
                     <div class="p-2 rounded-lg bg-photon-500/20 group-hover:bg-photon-500/30 transition-colors">
                         <svg class="w-4 h-4 text-photon-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                     </div>
                     <span class="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Ver Solicitudes</span>
+                    @if(isset($pendingAccountRequests) && $pendingAccountRequests > 0)
+                    <span class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-photon-500 text-space rounded-full">{{ $pendingAccountRequests }}</span>
+                    @endif
+                </a>
+
+                <a href="{{ route('analytics.riesgo') }}" class="flex items-center gap-3 px-4 py-3 rounded-quantum bg-matter-light hover:bg-amber-500/20 hover:border hover:border-amber-500/30 transition-all duration-200 group">
+                    <div class="p-2 rounded-lg bg-amber-500/20 group-hover:bg-amber-500/30 transition-colors">
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <span class="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Análisis de Riesgo</span>
+                </a>
+                @endif
+
+                @if(isset($isGestor) && $isGestor)
+                <a href="{{ route('solicitudes-acceso.create') }}" class="flex items-center gap-3 px-4 py-3 rounded-quantum bg-matter-light hover:bg-blue-500/20 hover:border hover:border-blue-500/30 transition-all duration-200 group">
+                    <div class="p-2 rounded-lg bg-blue-500/20 group-hover:bg-blue-500/30 transition-colors">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                    </div>
+                    <span class="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Solicitar Acceso</span>
                 </a>
                 @endif
             </div>

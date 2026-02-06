@@ -4,23 +4,7 @@
 
 @section('content')
 <div x-data="{
-    activeTab: 'profile',
-    showPasswordSuccess: false,
-    showProfileSuccess: false,
-    preferences: {
-        theme: localStorage.getItem('userTheme') || 'dark',
-        notifications: localStorage.getItem('userNotifications') !== 'false',
-        language: localStorage.getItem('userLanguage') || 'es',
-        timezone: localStorage.getItem('userTimezone') || Intl.DateTimeFormat().resolvedOptions().timeZone
-    },
-    savePreferences() {
-        localStorage.setItem('userTheme', this.preferences.theme);
-        localStorage.setItem('userNotifications', this.preferences.notifications);
-        localStorage.setItem('userLanguage', this.preferences.language);
-        localStorage.setItem('userTimezone', this.preferences.timezone);
-        // Mostrar notificación de éxito
-        alert('Preferencias guardadas exitosamente');
-    }
+    activeTab: ['profile', 'security'].includes(window.location.hash.replace('#', '')) ? window.location.hash.replace('#', '') : 'profile'
 }" class="space-y-6 animate-fadeIn">
 
     <!-- Header Elegance -->
@@ -66,14 +50,6 @@
                 <span class="font-medium">Seguridad</span>
             </button>
 
-            <button @click="activeTab = 'preferences'"
-                    :class="activeTab === 'preferences' ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white' : 'text-gray-400 hover:text-white hover:bg-matter-light'"
-                    class="flex-1 px-6 py-3 rounded-quantum transition-all duration-200 flex items-center justify-center gap-2 group">
-                <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                </svg>
-                <span class="font-medium">Preferencias</span>
-            </button>
         </div>
     </div>
 
@@ -303,141 +279,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Preferences Tab -->
-    <div x-show="activeTab === 'preferences'"
-         x-cloak
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-4"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         class="space-y-6">
-
-        <div class="card-quantum p-8">
-            <div class="mb-8 text-center">
-                <div class="w-20 h-20 bg-gradient-to-br from-quantum-500/20 to-void-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-quantum-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-white mb-2">Preferencias de Usuario</h3>
-                <p class="text-gray-400">Personaliza tu experiencia QUANTUM</p>
-            </div>
-
-            <form @submit.prevent="savePreferences" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Tema oscuro/claro -->
-                    <div class="p-6 border border-matter-light rounded-quantum bg-matter-light/50 hover:bg-matter-light transition-colors">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-gradient-to-br from-quantum-500/20 to-void-500/20 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-quantum-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-semibold mb-1">Tema</h4>
-                                    <p class="text-gray-400 text-xs">Oscuro / Claro</p>
-                                </div>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" 
-                                       :checked="preferences.theme === 'light'" 
-                                       @change="preferences.theme = preferences.theme === 'dark' ? 'light' : 'dark'" 
-                                       class="sr-only peer">
-                                <div class="w-14 h-7 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-quantum-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-quantum-500"></div>
-                            </label>
-                        </div>
-                        <p class="text-gray-500 text-xs" x-text="preferences.theme === 'dark' ? 'Modo oscuro activado' : 'Modo claro activado'"></p>
-                    </div>
-
-                    <!-- Notificaciones -->
-                    <div class="p-6 border border-matter-light rounded-quantum bg-matter-light/50 hover:bg-matter-light transition-colors">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 bg-gradient-to-br from-yellow-500/20 to-amber-500/20 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-semibold mb-1">Notificaciones</h4>
-                                    <p class="text-gray-400 text-xs">Activar / Desactivar</p>
-                                </div>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" x-model="preferences.notifications" class="sr-only peer">
-                                <div class="w-14 h-7 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-yellow-500"></div>
-                            </label>
-                        </div>
-                        <p class="text-gray-500 text-xs" x-text="preferences.notifications ? 'Notificaciones activadas' : 'Notificaciones desactivadas'"></p>
-                    </div>
-
-                    <!-- Idioma -->
-                    <div class="p-6 border border-matter-light rounded-quantum bg-matter-light/50 hover:bg-matter-light transition-colors">
-                        <div class="mb-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-semibold mb-1">Idioma</h4>
-                                    <p class="text-gray-400 text-xs">Selecciona tu idioma</p>
-                                </div>
-                            </div>
-                            <select x-model="preferences.language" class="input-quantum w-full text-sm">
-                                <option value="es">Español</option>
-                                <option value="en">English</option>
-                                <option value="pt">Português</option>
-                            </select>
-                        </div>
-                        <p class="text-gray-500 text-xs" x-text="preferences.language === 'es' ? 'Español seleccionado' : preferences.language === 'en' ? 'English selected' : 'Português selecionado'"></p>
-                    </div>
-
-                    <!-- Zona horaria -->
-                    <div class="p-6 border border-matter-light rounded-quantum bg-matter-light/50 hover:bg-matter-light transition-colors">
-                        <div class="mb-4">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-12 h-12 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-semibold mb-1">Zona Horaria</h4>
-                                    <p class="text-gray-400 text-xs">Selecciona tu zona horaria</p>
-                                </div>
-                            </div>
-                            <select x-model="preferences.timezone" class="input-quantum w-full text-sm">
-                                <option value="America/Bogota">Bogotá (GMT-5)</option>
-                                <option value="America/Mexico_City">Ciudad de México (GMT-6)</option>
-                                <option value="America/Buenos_Aires">Buenos Aires (GMT-3)</option>
-                                <option value="America/Lima">Lima (GMT-5)</option>
-                                <option value="America/Santiago">Santiago (GMT-3)</option>
-                                <option value="America/Caracas">Caracas (GMT-4)</option>
-                                <option value="America/New_York">New York (GMT-5)</option>
-                                <option value="America/Los_Angeles">Los Angeles (GMT-8)</option>
-                                <option value="Europe/Madrid">Madrid (GMT+1)</option>
-                                <option value="Europe/London">London (GMT+0)</option>
-                                <option value="UTC">UTC (GMT+0)</option>
-                            </select>
-                        </div>
-                        <p class="text-gray-500 text-xs" x-text="'Zona horaria: ' + preferences.timezone"></p>
-                    </div>
-                </div>
-
-                <div class="flex justify-end pt-6 border-t border-matter-light">
-                    <button type="submit" class="btn-quantum bg-gradient-to-r from-quantum-500 to-void-500">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Guardar Preferencias
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
 

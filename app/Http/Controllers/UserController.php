@@ -47,10 +47,9 @@ class UserController extends Controller
         ]);
 
         $user = User::create([
-            'name' => $request->name,
+            'full_name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'is_temporary_password' => false
         ]);
 
         $user->roles()->sync($request->roles);
@@ -129,8 +128,12 @@ class UserController extends Controller
                 ]);
 
                 // Si se solicita invalidar sesiones
-                if ($request->invalidate_sessions == 1) {
-                    DB::table('sessions')->where('user_id', $user->id)->delete();
+                try {
+                    if ($request->invalidate_sessions == 1) {
+                        DB::table('sessions')->where('user_id', $user->id)->delete();
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Could not invalidate sessions:', ['error' => $e->getMessage()]);
                 }
 
                 return response()->json([
@@ -140,7 +143,7 @@ class UserController extends Controller
             } else {
                 // Enviar enlace por correo
                 $token = Str::random(60);
-                
+
                 // Guardar token en la base de datos
                 DB::table('password_reset_tokens')->updateOrInsert(
                     ['email' => $user->email],
@@ -150,12 +153,12 @@ class UserController extends Controller
                     ]
                 );
 
+                $emailWarning = '';
                 try {
-                    // Enviar correo en cola (background) para evitar timeout
-                    Mail::to($user->email)->queue(new PasswordReset($user, $token));
+                    Mail::to($user->email)->send(new PasswordReset($user, $token));
                 } catch (\Exception $e) {
                     \Log::error('Error queueing password reset email:', ['error' => $e->getMessage()]);
-                    throw new \Exception('Error al encolar el correo de restablecimiento: ' . $e->getMessage());
+                    $emailWarning = ' (Advertencia: no se pudo encolar el correo, verifica la configuración de email)';
                 }
 
                 // Registrar historial
@@ -166,13 +169,17 @@ class UserController extends Controller
                     'token' => $token
                 ]);
 
-                if ($request->invalidate_sessions == 1) {
-                    DB::table('sessions')->where('user_id', $user->id)->delete();
+                try {
+                    if ($request->invalidate_sessions == 1) {
+                        DB::table('sessions')->where('user_id', $user->id)->delete();
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Could not invalidate sessions:', ['error' => $e->getMessage()]);
                 }
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Se ha enviado un enlace de restablecimiento al correo del usuario'
+                    'message' => 'Se ha enviado un enlace de restablecimiento al correo del usuario' . $emailWarning
                 ]);
             }
         } catch (\Illuminate\Validation\ValidationException $e) {

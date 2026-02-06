@@ -16,6 +16,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ConfigurationController;
+use App\Http\Controllers\ResourceAccessRequestController;
+use App\Http\Controllers\RiskAnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +96,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/configuracion', [ConfigurationController::class, 'index'])->name('configuration.index');
     Route::post('/configuracion/profile', [ConfigurationController::class, 'updateProfile'])->name('configuration.profile.update');
     Route::post('/configuracion/password', [ConfigurationController::class, 'updatePassword'])->name('configuration.password.update');
+
+    // Solicitudes de Acceso a Recursos (todos los usuarios autenticados)
+    Route::resource('solicitudes-acceso', ResourceAccessRequestController::class)
+        ->only(['index', 'create', 'store', 'show']);
+    Route::post('/solicitudes-acceso/preview-risk', [ResourceAccessRequestController::class, 'previewRisk'])
+        ->name('solicitudes-acceso.preview-risk');
 });
 
 // Rutas protegidas por autenticación y rol de administrador
@@ -109,10 +117,21 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{audit}', [AuditController::class, 'show'])->name('show');
     });
     
-    // Solicitudes de acceso (admin)
+    // Solicitudes de acceso de cuenta (admin)
     Route::get('/access-requests', [AccessRequestController::class, 'index'])->name('access-requests.index');
     Route::put('/access-requests/{request}/approve', [AccessRequestController::class, 'approve'])->name('access-requests.approve');
     Route::put('/access-requests/{request}/reject', [AccessRequestController::class, 'reject'])->name('access-requests.reject');
+
+    // Solicitudes de Acceso a Recursos (acciones admin)
+    Route::put('/solicitudes-acceso/{resourceAccessRequest}/approve', [ResourceAccessRequestController::class, 'approve'])
+        ->name('solicitudes-acceso.approve');
+    Route::put('/solicitudes-acceso/{resourceAccessRequest}/reject', [ResourceAccessRequestController::class, 'reject'])
+        ->name('solicitudes-acceso.reject');
+    Route::put('/solicitudes-acceso/{resourceAccessRequest}/revoke', [ResourceAccessRequestController::class, 'revoke'])
+        ->name('solicitudes-acceso.revoke');
+
+    // Analítica de Riesgo
+    Route::get('/analytics/riesgo', [RiskAnalyticsController::class, 'index'])->name('analytics.riesgo');
 });
 
 // temporal — borra después

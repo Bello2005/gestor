@@ -179,12 +179,8 @@
                                 <span class="px-3 py-1 bg-gradient-to-r from-red-500/20 to-rose-500/20 border border-red-500/30 text-red-400 rounded-quantum text-xs font-semibold uppercase tracking-wider">
                                     {{ $role->name }}
                                 </span>
-                            @elseif($role->slug === 'director')
+                            @elseif($role->slug === 'gestor')
                                 <span class="px-3 py-1 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-400 rounded-quantum text-xs font-semibold uppercase tracking-wider">
-                                    {{ $role->name }}
-                                </span>
-                            @elseif($role->slug === 'coordinador')
-                                <span class="px-3 py-1 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400 rounded-quantum text-xs font-semibold uppercase tracking-wider">
                                     {{ $role->name }}
                                 </span>
                             @else
@@ -407,7 +403,7 @@
                     <div class="space-y-2">
                         @foreach($roles as $role)
                         <label class="flex items-center gap-3 p-2.5 rounded-lg bg-matter-light hover:bg-matter-light/80 cursor-pointer transition-colors group">
-                            <input type="checkbox" :id="`editRole${currentUser}_${role->id}`" name="roles[]" value="{{ $role->id }}"
+                            <input type="checkbox" :id="'editRole' + currentUser + '_{{ $role->id }}'" name="roles[]" value="{{ $role->id }}"
                                    class="edit-role w-4 h-4 rounded border-matter-light bg-matter text-quantum-500 focus:ring-quantum-500 focus:ring-2">
                             <span class="text-sm text-white flex-1 font-medium group-hover:text-quantum-400 transition-colors">{{ $role->name }}</span>
                             <span class="text-[10px] text-gray-500 uppercase font-mono px-2 py-0.5 bg-space-500 rounded">{{ $role->slug }}</span>
@@ -963,13 +959,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!confirm('¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')) {
                 return;
             }
-            const formData = new FormData(e.target);
             fetch(e.target.action, {
-                method: 'DELETE',
-                body: formData,
+                method: 'POST',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ _method: 'DELETE' })
             })
             .then(response => response.json())
             .then(data => {

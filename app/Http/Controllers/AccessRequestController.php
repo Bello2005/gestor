@@ -21,7 +21,12 @@ class AccessRequestController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:access_requests|unique:users',
+            'email' => [
+                'required',
+                'email',
+                'unique:users',
+                \Illuminate\Validation\Rule::unique('access_requests')->where(fn ($query) => $query->where('status', 'pending')),
+            ],
             'phone' => 'nullable|string|max:20',
             'reason' => 'required|string'
         ]);
@@ -80,12 +85,13 @@ class AccessRequestController extends Controller
             // Crear el usuario con contraseña temporal hasheada
             $temporaryPassword = 'password123';
             $user = User::create([
-                'name' => $request->name,
+                'full_name' => $request->name,
                 'email' => $request->email,
-                'password' => bcrypt($temporaryPassword), // Usar bcrypt explícitamente
-                'is_temporary_password' => true
-            ]);                // Asignar rol de usuario normal
-                $userRole = DB::table('roles')->where('slug', 'user')->first();
+                'password' => bcrypt($temporaryPassword),
+                'is_temporary_password' => true,
+            ]);
+                // Asignar rol de usuario normal
+                $userRole = DB::table('roles')->where('slug', 'colaborador')->first();
                 if (!$userRole) {
                     throw new \Exception('No se encontró el rol de usuario');
                 }
@@ -109,7 +115,7 @@ class AccessRequestController extends Controller
                 Log::info("Encolando email de bienvenida para {$user->email}");
 
                 $mailable = new AccessRequestApproved($user, 'password123');
-                Mail::to($user->email)->queue($mailable);
+                Mail::to($user->email)->send($mailable);
 
                 Log::info("Email de bienvenida encolado exitosamente para {$user->email}");
 

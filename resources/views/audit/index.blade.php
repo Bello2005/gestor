@@ -203,6 +203,7 @@
                 </form>
             </div>
         </div>
+        </div>
 
         <!-- Timeline - Torre Eiffel Structure -->
         <div class="xl:col-span-3">

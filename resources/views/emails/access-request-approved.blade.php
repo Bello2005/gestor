@@ -1,34 +1,28 @@
 @component('mail::message')
-# Solicitud de Acceso Aprobada
+# Bienvenido a QUANTUM
 
-¡Hola {{ $user->name }}!
+Hola **{{ $user->name }}**,
 
-Nos complace informarte que tu solicitud de acceso al sistema ha sido aprobada. Puedes acceder al sistema utilizando las siguientes credenciales:
+Tu solicitud de acceso ha sido aprobada. Estas son tus credenciales:
 
 @component('mail::panel')
-**URL del sistema:** https://gestor-0o3w.onrender.com
 **Email:** {{ $user->email }}
 **Contraseña temporal:** {{ $temporaryPassword }}
 @endcomponent
 
 @component('mail::panel')
-**IMPORTANTE:** Por tu seguridad, el sistema te solicitará cambiar tu contraseña temporal la primera vez que inicies sesión. Este paso es obligatorio para garantizar la seguridad de tu cuenta.
+**Importante:** Por seguridad, deberás cambiar tu contraseña temporal la primera vez que inicies sesión.
 @endcomponent
 
-@component('mail::button', ['url' => 'https://gestor-0o3w.onrender.com/'])
-Ir al Sistema
+@component('mail::button', ['url' => config('app.url')])
+Iniciar Sesión en QUANTUM
 @endcomponent
 
-También puedes acceder directamente copiando esta URL en tu navegador:
-https://gestor-0o3w.onrender.com/
+Si el botón no funciona, copia y pega esta URL en tu navegador:
+{{ config('app.url') }}
 
-Una vez allí, inicia sesión con las credenciales proporcionadas.
-
-Si tienes alguna pregunta o necesitas ayuda:
-- Contacta al equipo de soporte
-- Escribe a {{ config('mail.from.address', 'soporte@quantum.co') }}
-- Consulta con tu administrador del sistema
+¿Necesitas ayuda? Escribe a {{ config('mail.from.address') }}
 
 Saludos,<br>
-{{ config('app.name') }}
+**QUANTUM** — Control de Acceso Basado en Riesgo
 @endcomponent

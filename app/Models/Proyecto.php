@@ -28,6 +28,7 @@ class Proyecto extends Model
         'cargar_contrato_o_convenio',
         'cargar_evidencias',
         'estado',
+        'nivel_criticidad',
     ];
 
     protected $casts = [
