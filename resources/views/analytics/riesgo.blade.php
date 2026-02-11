@@ -1,276 +1,216 @@
 @extends('layouts.quantum')
 
-@section('title', 'Análisis de Riesgo')
+@section('title', 'Vigilancia & Riesgo')
 
 @section('content')
-<div class="space-y-6 animate-fadeIn">
+<div x-data="vigilanceDashboard()" class="space-y-6 animate-fadeIn">
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-quantum-500 via-void-500 to-photon-500 bg-clip-text text-transparent">
-                Análisis de Riesgo
-            </h1>
-            <p class="text-gray-400 mt-2">Inteligencia adaptativa sobre control de accesos</p>
-        </div>
-    </div>
-
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Total Requests -->
-        <div class="card-quantum p-6 group hover:scale-105 transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm uppercase tracking-wider mb-1">Total Solicitudes</p>
-                    <p class="text-3xl font-bold text-white">{{ $totalRequests }}</p>
-                </div>
-                <div class="w-14 h-14 bg-gradient-to-br from-quantum-500/20 to-void-500/20 rounded-quantum flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7 text-quantum-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-quantum-500/20 to-void-500/20 rounded-quantum flex items-center justify-center">
+                    <svg class="w-6 h-6 text-quantum-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                     </svg>
                 </div>
-            </div>
-        </div>
-
-        <!-- Avg Risk Score -->
-        <div class="card-quantum p-6 group hover:scale-105 transition-all duration-300">
-            <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-400 text-sm uppercase tracking-wider mb-1">Score Promedio</p>
-                    <p class="text-3xl font-bold {{ $avgRiskScore <= 25 ? 'text-green-400' : ($avgRiskScore <= 50 ? 'text-amber-400' : ($avgRiskScore <= 75 ? 'text-orange-400' : 'text-red-400')) }}">
-                        {{ $avgRiskScore }}
-                    </p>
-                </div>
-                <div class="w-14 h-14 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-quantum flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Auto-approved % -->
-        <div class="card-quantum p-6 group hover:scale-105 transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm uppercase tracking-wider mb-1">Auto-aprobados</p>
-                    <p class="text-3xl font-bold text-green-400">{{ $autoApprovedPct }}%</p>
-                </div>
-                <div class="w-14 h-14 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-quantum flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending High Risk -->
-        <div class="card-quantum p-6 group hover:scale-105 transition-all duration-300 {{ $pendingHighRisk > 0 ? 'border-red-500/50' : '' }}">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-400 text-sm uppercase tracking-wider mb-1">Alto Riesgo Pendiente</p>
-                    <p class="text-3xl font-bold {{ $pendingHighRisk > 0 ? 'text-red-400 animate-pulse' : 'text-gray-400' }}">{{ $pendingHighRisk }}</p>
-                </div>
-                <div class="w-14 h-14 bg-gradient-to-br from-red-500/20 to-rose-500/20 rounded-quantum flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-7 h-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
+                    <h1 class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-quantum-500 via-void-500 to-photon-500 bg-clip-text text-transparent">
+                        Vigilancia & Riesgo
+                    </h1>
+                    <p class="text-gray-400 mt-1">Panel integral de seguimiento, cumplimiento y riesgo de proyectos</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Tab Navigation: móvil = una palabra por tab; PC = títulos largos -->
+    <div class="card-quantum p-2">
+        <div class="flex flex-nowrap gap-1.5 sm:gap-2 overflow-x-auto">
+            <button @click="switchTab('general')"
+                    :class="activeTab === 'general' ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-lg shadow-quantum-500/10' : 'text-gray-400 hover:text-white hover:bg-matter-light'"
+                    class="sm:flex-1 shrink-0 px-4 sm:px-5 py-3 sm:min-w-[140px] rounded-quantum transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 group whitespace-nowrap">
+                <svg class="w-6 h-6 sm:w-5 sm:h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                </svg>
+                <span class="font-medium sm:hidden">General</span>
+                <span class="font-medium hidden sm:inline">Panel General</span>
+            </button>
 
-        <!-- Risk Distribution Donut -->
-        <div class="card-quantum p-6">
-            <h3 class="text-xl font-bold text-white mb-6">Distribución por Nivel de Riesgo</h3>
-            @php
-                $total = array_sum($riskDistribution);
-                $colors = ['bajo' => '#10b981', 'medio' => '#f59e0b', 'alto' => '#f97316', 'critico' => '#ef4444'];
-                $labels = ['bajo' => 'Bajo', 'medio' => 'Medio', 'alto' => 'Alto', 'critico' => 'Crítico'];
-                $circumference = 2 * M_PI * 60;
-                $offset = 0;
-            @endphp
-            <div class="flex flex-col items-center">
-                <div class="relative">
-                    <svg width="200" height="200" viewBox="0 0 200 200">
-                        <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="24"/>
-                        @foreach(['bajo', 'medio', 'alto', 'critico'] as $level)
-                            @if(isset($riskDistribution[$level]) && $riskDistribution[$level] > 0)
-                                @php
-                                    $pct = $total > 0 ? $riskDistribution[$level] / $total : 0;
-                                    $dashLength = $pct * $circumference;
-                                @endphp
-                                <circle cx="100" cy="100" r="60" fill="none"
-                                    stroke="{{ $colors[$level] }}" stroke-width="24"
-                                    stroke-dasharray="{{ $dashLength }} {{ $circumference - $dashLength }}"
-                                    stroke-dashoffset="{{ -$offset }}"
-                                    transform="rotate(-90 100 100)"
-                                    class="transition-all duration-1000"/>
-                                @php $offset += $dashLength; @endphp
-                            @endif
-                        @endforeach
-                        <text x="100" y="95" text-anchor="middle" fill="white" font-size="28" font-weight="bold">{{ $total }}</text>
-                        <text x="100" y="115" text-anchor="middle" fill="#9ca3af" font-size="12">solicitudes</text>
+            <button @click="switchTab('seguimiento')"
+                    :class="activeTab === 'seguimiento' ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-lg shadow-quantum-500/10' : 'text-gray-400 hover:text-white hover:bg-matter-light'"
+                    class="sm:flex-1 shrink-0 px-4 sm:px-5 py-3 sm:min-w-[140px] rounded-quantum transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 group whitespace-nowrap">
+                <svg class="w-6 h-6 sm:w-5 sm:h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+                <span class="font-medium">Seguimiento</span>
+            </button>
+
+            <button @click="switchTab('riesgo')"
+                    :class="activeTab === 'riesgo' ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-lg shadow-quantum-500/10' : 'text-gray-400 hover:text-white hover:bg-matter-light'"
+                    class="sm:flex-1 shrink-0 px-4 sm:px-5 py-3 sm:min-w-[140px] rounded-quantum transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 group whitespace-nowrap">
+                <svg class="w-6 h-6 sm:w-5 sm:h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span class="font-medium sm:hidden">Riesgo</span>
+                <span class="font-medium hidden sm:inline">Análisis de Riesgo</span>
+            </button>
+
+            <button @click="switchTab('alertas')"
+                    :class="activeTab === 'alertas' ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-lg shadow-quantum-500/10' : 'text-gray-400 hover:text-white hover:bg-matter-light'"
+                    class="sm:flex-1 shrink-0 px-4 sm:px-5 py-3 sm:min-w-[140px] rounded-quantum transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 group whitespace-nowrap">
+                <span class="relative inline-flex shrink-0">
+                    <svg class="w-6 h-6 sm:w-5 sm:h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                     </svg>
-                </div>
-                <div class="flex flex-wrap justify-center gap-4 mt-4">
-                    @foreach(['bajo', 'medio', 'alto', 'critico'] as $level)
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full" style="background: {{ $colors[$level] }}"></div>
-                            <span class="text-sm text-gray-300">{{ $labels[$level] }}: {{ $riskDistribution[$level] ?? 0 }}</span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <!-- Access Type Ratio + Approval Times -->
-        <div class="space-y-6">
-            <!-- Temporal vs Permanent -->
-            <div class="card-quantum p-6">
-                <h3 class="text-xl font-bold text-white mb-4">Tipo de Acceso</h3>
-                @php $accessTotal = $temporalCount + $permanentCount; @endphp
-                <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-300">Temporal</span>
-                            <span class="text-quantum-400 font-semibold">{{ $temporalCount }} ({{ $accessTotal > 0 ? round($temporalCount/$accessTotal*100) : 0 }}%)</span>
-                        </div>
-                        <div class="w-full h-3 bg-matter-light rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-quantum-500 to-void-500 rounded-full transition-all duration-1000" style="width: {{ $accessTotal > 0 ? ($temporalCount/$accessTotal*100) : 0 }}%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-gray-300">Permanente</span>
-                            <span class="text-orange-400 font-semibold">{{ $permanentCount }} ({{ $accessTotal > 0 ? round($permanentCount/$accessTotal*100) : 0 }}%)</span>
-                        </div>
-                        <div class="w-full h-3 bg-matter-light rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-1000" style="width: {{ $accessTotal > 0 ? ($permanentCount/$accessTotal*100) : 0 }}%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Approval Times -->
-            <div class="card-quantum p-6">
-                <h3 class="text-xl font-bold text-white mb-4">Tiempo Promedio de Aprobación</h3>
-                <div class="space-y-3">
-                    @foreach(['bajo' => 'Bajo', 'medio' => 'Medio', 'alto' => 'Alto', 'critico' => 'Crítico'] as $level => $label)
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <div class="w-3 h-3 rounded-full" style="background: {{ $colors[$level] }}"></div>
-                                <span class="text-sm text-gray-300">{{ $label }}</span>
-                            </div>
-                            <span class="text-sm font-semibold text-white">
-                                {{ isset($approvalTimes[$level]) ? $approvalTimes[$level] . 'h' : '—' }}
-                            </span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tables Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        <!-- Most Exposed Projects -->
-        <div class="card-quantum p-6">
-            <h3 class="text-xl font-bold text-white mb-4">Proyectos Más Expuestos</h3>
-            @if($exposedProjects->isEmpty())
-                <p class="text-gray-400 text-center py-8">Sin datos aún</p>
-            @else
-                <div class="space-y-3">
-                    @foreach($exposedProjects as $i => $project)
-                        @php
-                            $critColors = ['bajo' => 'green', 'medio' => 'amber', 'alto' => 'orange', 'critico' => 'red'];
-                            $critColor = $critColors[$project->nivel_criticidad ?? 'medio'] ?? 'gray';
-                            $maxPerms = $exposedProjects->max('permission_count');
-                            $barWidth = $maxPerms > 0 ? ($project->permission_count / $maxPerms * 100) : 0;
-                        @endphp
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <span class="text-sm font-medium text-white truncate">{{ $project->nombre_del_proyecto }}</span>
-                                    <span class="px-2 py-0.5 text-xs rounded-full bg-{{ $critColor }}-500/20 text-{{ $critColor }}-400 border border-{{ $critColor }}-500/30 flex-shrink-0">
-                                        {{ ucfirst($project->nivel_criticidad ?? 'medio') }}
-                                    </span>
-                                </div>
-                                <span class="text-sm font-bold text-quantum-400 flex-shrink-0 ml-2">{{ $project->permission_count }}</span>
-                            </div>
-                            <div class="w-full h-2 bg-matter-light rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-quantum-500 to-void-500 rounded-full transition-all duration-1000" style="width: {{ $barWidth }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
-
-        <!-- Top Permission Accumulators -->
-        <div class="card-quantum p-6">
-            <h3 class="text-xl font-bold text-white mb-4">Mayor Acumulación de Permisos</h3>
-            @if($topAccumulators->isEmpty())
-                <p class="text-gray-400 text-center py-8">Sin datos aún</p>
-            @else
-                <div class="space-y-3">
-                    @foreach($topAccumulators as $i => $user)
-                        @php
-                            $maxPerms = $topAccumulators->max('permission_count');
-                            $barWidth = $maxPerms > 0 ? ($user->permission_count / $maxPerms * 100) : 0;
-                            $riskColor = $user->permission_count > 10 ? 'red' : ($user->permission_count > 5 ? 'orange' : 'green');
-                        @endphp
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-quantum-500 to-void-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                        {{ substr($user->name, 0, 1) }}
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-medium text-white truncate">{{ $user->name }}</p>
-                                        <p class="text-xs text-gray-400 truncate">{{ $user->email }}</p>
-                                    </div>
-                                </div>
-                                <span class="text-sm font-bold text-{{ $riskColor }}-400 flex-shrink-0 ml-2">{{ $user->permission_count }}</span>
-                            </div>
-                            <div class="w-full h-2 bg-matter-light rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-{{ $riskColor }}-500 to-{{ $riskColor }}-400 rounded-full transition-all duration-1000" style="width: {{ $barWidth }}%"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Monthly Trend -->
-    @if($monthlyTrend->isNotEmpty())
-    <div class="card-quantum p-6">
-        <h3 class="text-xl font-bold text-white mb-4">Tendencia Mensual de Riesgo</h3>
-        <div class="overflow-x-auto">
-            <div class="flex items-end gap-4 h-48 min-w-[400px]">
-                @foreach($monthlyTrend as $month)
-                    @php
-                        $barHeight = $month->avg_score > 0 ? max(($month->avg_score / 100) * 100, 5) : 5;
-                        $barColor = $month->avg_score <= 25 ? 'from-green-500 to-emerald-400' : ($month->avg_score <= 50 ? 'from-amber-500 to-yellow-400' : ($month->avg_score <= 75 ? 'from-orange-500 to-amber-400' : 'from-red-500 to-rose-400'));
-                    @endphp
-                    <div class="flex-1 flex flex-col items-center gap-2">
-                        <span class="text-xs font-semibold {{ $month->avg_score <= 25 ? 'text-green-400' : ($month->avg_score <= 50 ? 'text-amber-400' : ($month->avg_score <= 75 ? 'text-orange-400' : 'text-red-400')) }}">
-                            {{ round($month->avg_score) }}
+                    @if(($alertCounts['total'] ?? 0) > 0)
+                        <span class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-semibold bg-red-500 text-white rounded-full ring-2 ring-matter {{ ($alertCounts['critico'] ?? 0) > 0 ? 'animate-pulse' : '' }} px-1" aria-label="{{ $alertCounts['total'] }} alertas pendientes">
+                            {{ $alertCounts['total'] > 99 ? '99+' : $alertCounts['total'] }}
                         </span>
-                        <div class="w-full bg-gradient-to-t {{ $barColor }} rounded-t-lg transition-all duration-1000 hover:opacity-80" style="height: {{ $barHeight }}%"></div>
-                        <span class="text-xs text-gray-400">{{ \Carbon\Carbon::parse($month->month . '-01')->format('M') }}</span>
-                        <span class="text-xs text-gray-500">{{ $month->total }} sol.</span>
-                    </div>
-                @endforeach
-            </div>
+                    @endif
+                </span>
+                <span class="font-medium">Alertas</span>
+            </button>
         </div>
     </div>
-    @endif
+
+    <!-- Tab 1: Panel General -->
+    <div x-show="activeTab === 'general'"
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="space-y-6">
+        @include('analytics.partials._panel_general')
+    </div>
+
+    <!-- Tab 2: Seguimiento -->
+    <div x-show="activeTab === 'seguimiento'"
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="space-y-6">
+        @include('analytics.partials._seguimiento')
+    </div>
+
+    <!-- Tab 3: Análisis de Riesgo -->
+    <div x-show="activeTab === 'riesgo'"
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="space-y-6">
+        @include('analytics.partials._analisis_riesgo')
+    </div>
+
+    <!-- Tab 4: Alertas -->
+    <div x-show="activeTab === 'alertas'"
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="space-y-6">
+        @include('analytics.partials._alertas')
+    </div>
 
 </div>
+
+<script>
+function vigilanceDashboard() {
+    return {
+        activeTab: '{{ $activeTab ?? "general" }}',
+
+        // Tab 2: Seguimiento
+        seguimientoLoaded: false,
+        seguimientoData: [],
+        seguimientoLoading: false,
+        seguimientoFilters: { estado: '', criticidad: '' },
+        expandedProject: null,
+
+        switchTab(tab) {
+            this.activeTab = tab;
+            if (tab === 'seguimiento' && !this.seguimientoLoaded) {
+                this.loadSeguimiento();
+            }
+        },
+
+        async loadSeguimiento() {
+            this.seguimientoLoading = true;
+            try {
+                const params = new URLSearchParams();
+                if (this.seguimientoFilters.estado) params.set('estado', this.seguimientoFilters.estado);
+                if (this.seguimientoFilters.criticidad) params.set('criticidad', this.seguimientoFilters.criticidad);
+
+                const response = await fetch(`/analytics/seguimiento?${params.toString()}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                });
+                const data = await response.json();
+                this.seguimientoData = data.projects || [];
+                this.seguimientoLoaded = true;
+            } catch (error) {
+                console.error('Error cargando seguimiento:', error);
+                if (window.showToast) {
+                    window.showToast('Error al cargar datos de seguimiento', 'error');
+                }
+            } finally {
+                this.seguimientoLoading = false;
+            }
+        },
+
+        applyFilters() {
+            this.seguimientoLoaded = false;
+            this.loadSeguimiento();
+        },
+
+        toggleProject(id) {
+            this.expandedProject = this.expandedProject === id ? null : id;
+        },
+
+        getSemaforoColor(semaforo) {
+            const colors = { verde: 'bg-green-500', amarillo: 'bg-amber-500', rojo: 'bg-red-500' };
+            return colors[semaforo] || 'bg-gray-500';
+        },
+
+        getSemaforoGlow(semaforo) {
+            const glows = { verde: 'shadow-green-500/40', amarillo: 'shadow-amber-500/40', rojo: 'shadow-red-500/40' };
+            return glows[semaforo] || '';
+        },
+
+        getEstadoClasses(estado) {
+            const classes = {
+                activo: 'bg-green-500/20 text-green-400 border-green-500/30',
+                cerrado: 'bg-red-500/20 text-red-400 border-red-500/30',
+                inactivo: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+            };
+            return classes[estado] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        },
+
+        getCriticidadClasses(crit) {
+            const classes = {
+                bajo: 'bg-green-500/20 text-green-400 border-green-500/30',
+                medio: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+                alto: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+                critico: 'bg-red-500/20 text-red-400 border-red-500/30',
+            };
+            return classes[crit] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        },
+
+        getTimeBarColor(pct) {
+            if (pct > 90) return 'bg-red-500';
+            if (pct > 70) return 'bg-amber-500';
+            return 'bg-quantum-500';
+        },
+
+        getDaysColor(days, isOverdue) {
+            if (isOverdue || days < 0) return 'text-red-400 font-bold';
+            if (days <= 30) return 'text-amber-400';
+            return 'text-gray-300';
+        }
+    }
+}
+</script>
 @endsection

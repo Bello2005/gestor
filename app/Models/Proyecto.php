@@ -29,6 +29,7 @@ class Proyecto extends Model
         'cargar_evidencias',
         'estado',
         'nivel_criticidad',
+        'plazo_unidad',
     ];
 
     protected $casts = [
@@ -107,6 +108,20 @@ class Proyecto extends Model
             Log::error('Error guardando evidencias: ' . $e->getMessage());
             $this->attributes['cargar_evidencias'] = '[]';
         }
+    }
+
+    /**
+     * Calcula la fecha de fin del proyecto basada en fecha de ejecución + plazo
+     */
+    public function getFechaFinAttribute(): ?Carbon
+    {
+        if (!$this->fecha_de_ejecucion || !$this->plazo) {
+            return null;
+        }
+        $unit = $this->plazo_unidad ?? 'meses';
+        return ($unit === 'dias')
+            ? $this->fecha_de_ejecucion->copy()->addDays((int) $this->plazo)
+            : $this->fecha_de_ejecucion->copy()->addMonths((int) $this->plazo);
     }
 
     // Accessor para formatear el valor total

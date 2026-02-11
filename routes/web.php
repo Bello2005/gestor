@@ -130,8 +130,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::put('/solicitudes-acceso/{resourceAccessRequest}/revoke', [ResourceAccessRequestController::class, 'revoke'])
         ->name('solicitudes-acceso.revoke');
 
-    // Analítica de Riesgo
+    // Vigilancia & Riesgo
     Route::get('/analytics/riesgo', [RiskAnalyticsController::class, 'index'])->name('analytics.riesgo');
+    Route::get('/analytics/seguimiento', [RiskAnalyticsController::class, 'seguimiento'])->name('analytics.seguimiento');
+    Route::get('/analytics/alertas', [RiskAnalyticsController::class, 'alertas'])->name('analytics.alertas');
 });
 
 // temporal — borra después

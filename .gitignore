@@ -46,4 +46,6 @@ php.ini
 *.vscode/
 yarn-error.log
 npm-debug.log
-public/build
+
+# Cursor / IDE
+.cursor/

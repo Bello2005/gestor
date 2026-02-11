@@ -4,11 +4,73 @@ namespace App\Http\Controllers;
 
 use App\Models\ResourceAccessRequest;
 use App\Models\UserPermission;
+use App\Services\ProjectVigilanceService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RiskAnalyticsController extends Controller
 {
-    public function index()
+    public function __construct(
+        private ProjectVigilanceService $vigilanceService
+    ) {}
+
+    /**
+     * Dashboard principal — carga Tab 1 (Panel General) + Tab 3 (Riesgo) + alertas
+     */
+    public function index(Request $request)
+    {
+        $activeTab = $request->get('tab', 'general');
+
+        // Tab 1: Panel General
+        $overviewKpis = $this->vigilanceService->getOverviewKpis();
+        $healthMatrix = $this->vigilanceService->getProjectHealthMatrix();
+
+        // Tab 3: Análisis de Riesgo (lógica existente)
+        $riskData = $this->getRiskAnalyticsData();
+
+        // Tab 4: Alertas (para badge + contenido)
+        $alerts = $this->vigilanceService->getAlerts();
+        $alertCounts = [
+            'critico' => count($alerts['critico'] ?? []),
+            'alto' => count($alerts['alto'] ?? []),
+            'medio' => count($alerts['medio'] ?? []),
+            'informativo' => count($alerts['informativo'] ?? []),
+            'total' => array_sum(array_map('count', $alerts)),
+        ];
+
+        return view('analytics.riesgo', array_merge(
+            $overviewKpis,
+            $riskData,
+            compact('healthMatrix', 'activeTab', 'alerts', 'alertCounts')
+        ));
+    }
+
+    /**
+     * Endpoint JSON para Tab 2 (Seguimiento)
+     */
+    public function seguimiento(Request $request)
+    {
+        $filters = $request->only(['estado', 'criticidad']);
+        $projects = $this->vigilanceService->getTrackingTable($filters);
+
+        return response()->json([
+            'projects' => $projects,
+        ]);
+    }
+
+    /**
+     * Endpoint JSON para refrescar alertas (Tab 4)
+     */
+    public function alertas()
+    {
+        $alerts = $this->vigilanceService->getAlerts();
+        return response()->json($alerts);
+    }
+
+    /**
+     * Lógica existente de análisis de riesgo extraída a método privado
+     */
+    private function getRiskAnalyticsData(): array
     {
         // KPIs
         $totalRequests = ResourceAccessRequest::count();
@@ -77,10 +139,10 @@ class RiskAnalyticsController extends Controller
             ->orderBy('month')
             ->get();
 
-        return view('analytics.riesgo', compact(
+        return compact(
             'totalRequests', 'avgRiskScore', 'autoApprovedPct', 'pendingHighRisk',
             'riskDistribution', 'exposedProjects', 'approvalTimes', 'topAccumulators',
             'temporalCount', 'permanentCount', 'monthlyTrend'
-        ));
+        );
     }
 }

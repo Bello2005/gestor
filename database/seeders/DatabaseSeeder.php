@@ -13,7 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UsersSeeder::class,
-            RolesSeeder::class
+            RolesSeeder::class,
+            // BombardSeeder::class,  // Descomentar para llenar la DB con muchos datos de prueba (usuarios, proyectos, audit, etc.). Rutas de archivos vacías.
         ]);
     }
 }
