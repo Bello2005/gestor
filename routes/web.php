@@ -132,6 +132,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Vigilancia & Riesgo
     Route::get('/analytics/riesgo', [RiskAnalyticsController::class, 'index'])->name('analytics.riesgo');
+    Route::get('/analytics/panel-general', [RiskAnalyticsController::class, 'panelGeneral'])->name('analytics.panel-general');
+    Route::get('/analytics/riesgo-data', [RiskAnalyticsController::class, 'riesgoData'])->name('analytics.riesgo-data');
     Route::get('/analytics/seguimiento', [RiskAnalyticsController::class, 'seguimiento'])->name('analytics.seguimiento');
     Route::get('/analytics/alertas', [RiskAnalyticsController::class, 'alertas'])->name('analytics.alertas');
 });

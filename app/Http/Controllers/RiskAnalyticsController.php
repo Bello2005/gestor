@@ -20,13 +20,15 @@ class RiskAnalyticsController extends Controller
     public function index(Request $request)
     {
         $activeTab = $request->get('tab', 'general');
+        $generalFilters = $request->only(['estado', 'criticidad']);
+        $riskFilters = $request->only(['risk_level', 'status']);
 
         // Tab 1: Panel General
-        $overviewKpis = $this->vigilanceService->getOverviewKpis();
-        $healthMatrix = $this->vigilanceService->getProjectHealthMatrix();
+        $overviewKpis = $this->vigilanceService->getOverviewKpis($generalFilters);
+        $healthMatrix = $this->vigilanceService->getProjectHealthMatrix($generalFilters);
 
         // Tab 3: Análisis de Riesgo (lógica existente)
-        $riskData = $this->getRiskAnalyticsData();
+        $riskData = $this->getRiskAnalyticsData($riskFilters);
 
         // Tab 4: Alertas (para badge + contenido)
         $alerts = $this->vigilanceService->getAlerts();
@@ -38,11 +40,49 @@ class RiskAnalyticsController extends Controller
             'total' => array_sum(array_map('count', $alerts)),
         ];
 
+        $pendingRequests = ResourceAccessRequest::with(['user', 'permission', 'proyecto'])
+            ->where('status', 'pendiente')
+            ->orderByDesc('risk_score')
+            ->limit(20)
+            ->get();
+
         return view('analytics.riesgo', array_merge(
             $overviewKpis,
             $riskData,
-            compact('healthMatrix', 'activeTab', 'alerts', 'alertCounts')
+            compact('healthMatrix', 'activeTab', 'alerts', 'alertCounts', 'pendingRequests')
         ));
+    }
+
+    /**
+     * Endpoint HTML fragment para Tab 1 (Panel General) — filtros vía query
+     */
+    public function panelGeneral(Request $request)
+    {
+        $filters = $request->only(['estado', 'criticidad']);
+        $overviewKpis = $this->vigilanceService->getOverviewKpis($filters);
+        $healthMatrix = $this->vigilanceService->getProjectHealthMatrix($filters);
+
+        return response(
+            view('analytics.partials._panel_general', array_merge($overviewKpis, compact('healthMatrix')))->render()
+        )->header('Content-Type', 'text/html; charset=UTF-8');
+    }
+
+    /**
+     * Endpoint HTML fragment para Tab 3 (Análisis de Riesgo) — filtros vía query
+     */
+    public function riesgoData(Request $request)
+    {
+        $filters = $request->only(['risk_level', 'status']);
+        $riskData = $this->getRiskAnalyticsData($filters);
+        $pendingRequests = ResourceAccessRequest::with(['user', 'permission', 'proyecto'])
+            ->where('status', 'pendiente')
+            ->orderByDesc('risk_score')
+            ->limit(20)
+            ->get();
+
+        return response(
+            view('analytics.partials._analisis_riesgo', array_merge($riskData, compact('pendingRequests')))->render()
+        )->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
     /**
@@ -59,28 +99,39 @@ class RiskAnalyticsController extends Controller
     }
 
     /**
-     * Endpoint JSON para refrescar alertas (Tab 4)
+     * Endpoint HTML fragment para Tab 4 (Alertas)
      */
     public function alertas()
     {
         $alerts = $this->vigilanceService->getAlerts();
-        return response()->json($alerts);
+
+        return response(
+            view('analytics.partials._alertas', compact('alerts'))->render()
+        )->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
     /**
      * Lógica existente de análisis de riesgo extraída a método privado
      */
-    private function getRiskAnalyticsData(): array
+    private function getRiskAnalyticsData(array $filters = []): array
     {
+        $baseQuery = ResourceAccessRequest::query();
+        if (!empty($filters['risk_level'])) {
+            $baseQuery->where('risk_level', $filters['risk_level']);
+        }
+        if (!empty($filters['status'])) {
+            $baseQuery->where('status', $filters['status']);
+        }
+
         // KPIs
-        $totalRequests = ResourceAccessRequest::count();
-        $avgRiskScore = (int) ResourceAccessRequest::avg('risk_score');
-        $autoApprovedCount = ResourceAccessRequest::whereHas('riskAuditLogs', fn($q) => $q->where('action', 'auto_approved'))->count();
+        $totalRequests = (clone $baseQuery)->count();
+        $avgRiskScore = (int) (clone $baseQuery)->avg('risk_score');
+        $autoApprovedCount = (clone $baseQuery)->whereHas('riskAuditLogs', fn($q) => $q->where('action', 'auto_approved'))->count();
         $autoApprovedPct = $totalRequests > 0 ? round(($autoApprovedCount / $totalRequests) * 100) : 0;
-        $pendingHighRisk = ResourceAccessRequest::pending()->highRisk()->count();
+        $pendingHighRisk = (clone $baseQuery)->pending()->highRisk()->count();
 
         // Risk distribution (for donut chart)
-        $riskDistribution = ResourceAccessRequest::select('risk_level', DB::raw('count(*) as total'))
+        $riskDistribution = (clone $baseQuery)->select('risk_level', DB::raw('count(*) as total'))
             ->whereNotNull('risk_level')
             ->groupBy('risk_level')
             ->pluck('total', 'risk_level')
@@ -97,7 +148,8 @@ class RiskAnalyticsController extends Controller
             ->get();
 
         // Average approval time by risk level (in hours)
-        $approvalTimes = ResourceAccessRequest::select(
+        $approvalTimes = (clone $baseQuery)
+            ->select(
                 'risk_level',
                 DB::raw('AVG(EXTRACT(EPOCH FROM (approved_at - created_at)) / 3600) as avg_hours')
             )
@@ -128,7 +180,8 @@ class RiskAnalyticsController extends Controller
         $permanentCount = UserPermission::where('is_active', true)->where('is_temporary', false)->count();
 
         // Monthly trend (last 6 months)
-        $monthlyTrend = ResourceAccessRequest::select(
+        $monthlyTrend = (clone $baseQuery)
+            ->select(
                 DB::raw("TO_CHAR(created_at, 'YYYY-MM') as month"),
                 DB::raw('AVG(risk_score) as avg_score'),
                 DB::raw('COUNT(*) as total')

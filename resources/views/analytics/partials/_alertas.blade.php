@@ -1,4 +1,4 @@
-{{-- Tab 4: Alertas — Panel de alertas agrupadas por severidad --}}
+{{-- Tab 4: Alertas — Panel de alertas (filtro severidad en riesgo.blade.php, x-show usa alertaSeveridadFilter) --}}
 
 @php
     $severityConfig = [
@@ -53,7 +53,7 @@
     <!-- Alert Groups -->
     @foreach($severityConfig as $level => $config)
         @if(!empty($alerts[$level]))
-        <div class="space-y-3">
+        <div class="space-y-3" x-show="!alertaSeveridadFilter || alertaSeveridadFilter === '{{ $level }}'" x-transition>
             <!-- Group Header -->
             <div class="flex items-center gap-3">
                 <span class="w-3 h-3 rounded-full bg-{{ $config['color'] }}-500 shadow-lg shadow-{{ $config['color'] }}-500/30 {{ $config['pulse'] && count($alerts[$level]) > 0 ? 'animate-pulse' : '' }}"></span>

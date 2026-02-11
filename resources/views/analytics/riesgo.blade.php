@@ -81,7 +81,45 @@
          x-transition:enter-start="opacity-0 translate-y-4"
          x-transition:enter-end="opacity-100 translate-y-0"
          class="space-y-6">
-        @include('analytics.partials._panel_general')
+        <!-- Filtros (como Seguimiento) -->
+        <div class="card-quantum p-4">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    <span class="text-sm font-medium text-gray-300">Filtros</span>
+                </div>
+                <select x-model="generalFilters.estado" @change="applyGeneralFilters()"
+                        class="bg-matter border border-matter-light rounded-quantum px-4 py-2 text-sm text-gray-300 focus:ring-quantum-500 focus:border-quantum-500 min-w-[150px]">
+                    <option value="">Todos los estados</option>
+                    <option value="activo">Activo</option>
+                    <option value="cerrado">Cerrado</option>
+                    <option value="inactivo">Inactivo</option>
+                </select>
+                <select x-model="generalFilters.criticidad" @change="applyGeneralFilters()"
+                        class="bg-matter border border-matter-light rounded-quantum px-4 py-2 text-sm text-gray-300 focus:ring-quantum-500 focus:border-quantum-500 min-w-[150px]">
+                    <option value="">Toda criticidad</option>
+                    <option value="bajo">Bajo</option>
+                    <option value="medio">Medio</option>
+                    <option value="alto">Alto</option>
+                    <option value="critico">Crítico</option>
+                </select>
+                <button @click="applyGeneralFilters()"
+                        class="ml-auto px-4 py-2 rounded-quantum text-sm text-gray-400 hover:text-white hover:bg-matter-light transition-all duration-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+        <template x-if="generalLoading">
+            @include('analytics.partials._quantum_spinner', ['message' => 'Cargando panel general...'])
+        </template>
+        <div x-show="!generalLoading" x-ref="generalContent">
+            @include('analytics.partials._panel_general')
+        </div>
     </div>
 
     <!-- Tab 2: Seguimiento -->
@@ -101,7 +139,47 @@
          x-transition:enter-start="opacity-0 translate-y-4"
          x-transition:enter-end="opacity-100 translate-y-0"
          class="space-y-6">
-        @include('analytics.partials._analisis_riesgo')
+        <!-- Filtros (como Seguimiento) -->
+        <div class="card-quantum p-4">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    <span class="text-sm font-medium text-gray-300">Filtros</span>
+                </div>
+                <select x-model="riskFilters.risk_level" @change="applyRiskFilters()"
+                        class="bg-matter border border-matter-light rounded-quantum px-4 py-2 text-sm text-gray-300 focus:ring-quantum-500 focus:border-quantum-500 min-w-[150px]">
+                    <option value="">Todos los niveles</option>
+                    <option value="bajo">Bajo</option>
+                    <option value="medio">Medio</option>
+                    <option value="alto">Alto</option>
+                    <option value="critico">Crítico</option>
+                </select>
+                <select x-model="riskFilters.status" @change="applyRiskFilters()"
+                        class="bg-matter border border-matter-light rounded-quantum px-4 py-2 text-sm text-gray-300 focus:ring-quantum-500 focus:border-quantum-500 min-w-[180px]">
+                    <option value="">Todos los estados</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="aprobada">Aprobada</option>
+                    <option value="rechazada">Rechazada</option>
+                    <option value="expirada">Expirada</option>
+                    <option value="revocada">Revocada</option>
+                </select>
+                <button @click="applyRiskFilters()"
+                        class="ml-auto px-4 py-2 rounded-quantum text-sm text-gray-400 hover:text-white hover:bg-matter-light transition-all duration-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+        <template x-if="riskLoading">
+            @include('analytics.partials._quantum_spinner', ['message' => 'Cargando análisis de riesgo...'])
+        </template>
+        <div x-show="!riskLoading" x-ref="riskContent">
+            @include('analytics.partials._analisis_riesgo')
+        </div>
     </div>
 
     <!-- Tab 4: Alertas -->
@@ -111,7 +189,38 @@
          x-transition:enter-start="opacity-0 translate-y-4"
          x-transition:enter-end="opacity-100 translate-y-0"
          class="space-y-6">
-        @include('analytics.partials._alertas')
+        <!-- Filtros -->
+        <div class="card-quantum p-4">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    <span class="text-sm font-medium text-gray-300">Filtros</span>
+                </div>
+                <select x-model="alertaSeveridadFilter"
+                        class="bg-matter border border-matter-light rounded-quantum px-4 py-2 text-sm text-gray-300 focus:ring-quantum-500 focus:border-quantum-500 min-w-[180px]">
+                    <option value="">Todas las severidades</option>
+                    <option value="critico">Crítico</option>
+                    <option value="alto">Alto</option>
+                    <option value="medio">Medio</option>
+                    <option value="informativo">Informativo</option>
+                </select>
+                <button @click="loadAlertas()"
+                        class="ml-auto px-4 py-2 rounded-quantum text-sm text-gray-400 hover:text-white hover:bg-matter-light transition-all duration-200 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+        <template x-if="alertasLoading">
+            @include('analytics.partials._quantum_spinner', ['message' => 'Cargando alertas...'])
+        </template>
+        <div x-show="!alertasLoading" x-ref="alertasContent">
+            @include('analytics.partials._alertas')
+        </div>
     </div>
 
 </div>
@@ -121,6 +230,10 @@ function vigilanceDashboard() {
     return {
         activeTab: '{{ $activeTab ?? "general" }}',
 
+        // Tab 1: Panel General
+        generalLoading: false,
+        generalFilters: { estado: '', criticidad: '' },
+
         // Tab 2: Seguimiento
         seguimientoLoaded: false,
         seguimientoData: [],
@@ -128,10 +241,88 @@ function vigilanceDashboard() {
         seguimientoFilters: { estado: '', criticidad: '' },
         expandedProject: null,
 
+        // Tab 3: Análisis de Riesgo
+        riskLoading: false,
+        riskFilters: { risk_level: '', status: '' },
+
+        // Tab 4: Alertas
+        alertaSeveridadFilter: '',
+        alertasLoading: false,
+
         switchTab(tab) {
             this.activeTab = tab;
             if (tab === 'seguimiento' && !this.seguimientoLoaded) {
                 this.loadSeguimiento();
+            }
+        },
+
+        async loadPanelGeneral() {
+            this.generalLoading = true;
+            try {
+                const params = new URLSearchParams();
+                if (this.generalFilters.estado) params.set('estado', this.generalFilters.estado);
+                if (this.generalFilters.criticidad) params.set('criticidad', this.generalFilters.criticidad);
+                const response = await fetch(`/analytics/panel-general?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                if (this.$refs.generalContent) this.$refs.generalContent.innerHTML = html;
+            } catch (e) {
+                console.error('Error cargando panel general:', e);
+                if (window.showToast) window.showToast('Error al cargar panel general', 'error');
+            } finally {
+                this.generalLoading = false;
+            }
+        },
+
+        applyGeneralFilters() {
+            this.loadPanelGeneral();
+        },
+
+        async loadRiskAnalysis() {
+            this.riskLoading = true;
+            try {
+                const params = new URLSearchParams();
+                if (this.riskFilters.risk_level) params.set('risk_level', this.riskFilters.risk_level);
+                if (this.riskFilters.status) params.set('status', this.riskFilters.status);
+                const response = await fetch(`/analytics/riesgo-data?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                if (this.$refs.riskContent) {
+                    this.$refs.riskContent.innerHTML = html;
+                    if (typeof Alpine !== 'undefined' && Alpine.initTree) Alpine.initTree(this.$refs.riskContent);
+                }
+            } catch (e) {
+                console.error('Error cargando análisis de riesgo:', e);
+                if (window.showToast) window.showToast('Error al cargar análisis de riesgo', 'error');
+            } finally {
+                this.riskLoading = false;
+            }
+        },
+
+        applyRiskFilters() {
+            this.loadRiskAnalysis();
+        },
+
+        async loadAlertas() {
+            this.alertasLoading = true;
+            try {
+                const params = new URLSearchParams();
+                if (this.alertaSeveridadFilter) params.set('severidad', this.alertaSeveridadFilter);
+                const response = await fetch(`/analytics/alertas?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const html = await response.text();
+                if (this.$refs.alertasContent) {
+                    this.$refs.alertasContent.innerHTML = html;
+                    if (typeof Alpine !== 'undefined' && Alpine.initTree) Alpine.initTree(this.$refs.alertasContent);
+                }
+            } catch (e) {
+                console.error('Error cargando alertas:', e);
+                if (window.showToast) window.showToast('Error al cargar alertas', 'error');
+            } finally {
+                this.alertasLoading = false;
             }
         },
 

@@ -262,6 +262,50 @@ stdout_logfile=/ruta/a/tu/proyecto/storage/logs/worker.log
 sudo certbot --nginx -d tudominio.com
 ```
 
+## 📊 Módulo Vigilancia & Riesgo
+
+Dashboard analítico para monitoreo de riesgo, seguimiento de proyectos y alertas normativas. Accesible desde el sidebar en **Vigilancia & Riesgo**.
+
+### Tabs principales
+
+| Tab | Descripción |
+|-----|-------------|
+| **Panel General** | KPIs globales y matriz de salud de proyectos con filtros por estado y criticidad. |
+| **Seguimiento** | Tabla interactiva de proyectos con semáforo, avance y días restantes. Carga datos vía AJAX. |
+| **Análisis de Riesgo** | Distribución de riesgo (donut), tendencia mensual (Chart.js), tiempos de aprobación, proyectos expuestos y solicitudes pendientes con aprobación/rechazo inline. |
+| **Alertas** | Alertas agrupadas por severidad (crítico, alto, medio, informativo) basadas en normativa colombiana (DNP-SPI, Ley 1474/2011). |
+
+### Características técnicas
+
+- **Filtros AJAX sin recarga**: todos los tabs cargan datos de forma asíncrona con spinner de carga Quantum.
+- **Chart.js (CDN)**: gráfico de tendencia mensual de riesgo tipo línea con gradiente, tooltips enriquecidos (score + solicitudes), punto destacado para el mes actual y estado vacío descriptivo.
+- **Progressive Disclosure**: las solicitudes pendientes se muestran mediante un CTA compacto que expande la tabla completa al hacer click, evitando saturar el panel.
+- **Aprobación/Rechazo inline**: modales para aprobar o rechazar solicitudes de acceso directamente desde el tab de Análisis de Riesgo.
+- **Quantum Spinner**: componente reutilizable de loading (`_quantum_spinner.blade.php`) con animación multi-anillo y gradientes coherentes con la paleta del sistema.
+
+### Endpoints AJAX
+
+| Ruta | Método | Retorna |
+|------|--------|---------|
+| `/analytics/panel-general` | GET | HTML fragment (Panel General) |
+| `/analytics/seguimiento` | GET | JSON (proyectos de seguimiento) |
+| `/analytics/riesgo-data` | GET | HTML fragment (Análisis de Riesgo) |
+| `/analytics/alertas` | GET | HTML fragment (Alertas) |
+
+### Archivos clave
+
+```
+app/Http/Controllers/RiskAnalyticsController.php   — Controller principal
+app/Services/ProjectVigilanceService.php            — Lógica de KPIs, alertas y seguimiento
+resources/views/analytics/riesgo.blade.php          — Vista principal + Alpine.js component
+resources/views/analytics/partials/
+  ├── _panel_general.blade.php                      — Tab Panel General
+  ├── _seguimiento.blade.php                        — Tab Seguimiento
+  ├── _analisis_riesgo.blade.php                    — Tab Análisis de Riesgo
+  ├── _alertas.blade.php                            — Tab Alertas
+  └── _quantum_spinner.blade.php                    — Spinner reutilizable
+```
+
 ## 🔒 Seguridad
 
 -   Mantener todas las dependencias actualizadas

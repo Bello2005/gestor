@@ -237,9 +237,6 @@
                         </svg>
                     </div>
                     <span class="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">Ver Solicitudes</span>
-                    @if(isset($pendingAccountRequests) && $pendingAccountRequests > 0)
-                    <span class="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-photon-500 text-space rounded-full">{{ $pendingAccountRequests }}</span>
-                    @endif
                 </a>
 
                 <a href="{{ route('analytics.riesgo') }}" class="flex items-center gap-3 px-4 py-3 rounded-quantum bg-matter-light hover:bg-amber-500/20 hover:border hover:border-amber-500/30 transition-all duration-200 group">

@@ -14,12 +14,22 @@ class ProjectVigilanceService
     /**
      * KPIs del Panel General (Tab 1)
      */
-    public function getOverviewKpis(): array
+    public function getOverviewKpis(array $filters = []): array
     {
-        $totalProjects = Proyecto::count();
-        $activeProjects = Proyecto::where('estado', 'activo')->count();
+        $query = Proyecto::query();
+        if (!empty($filters['estado'])) {
+            $query->where('estado', $filters['estado']);
+        } else {
+            $query->whereIn('estado', ['activo', 'cerrado', 'inactivo']);
+        }
+        if (!empty($filters['criticidad'])) {
+            $query->where('nivel_criticidad', $filters['criticidad']);
+        }
 
-        $activeProjectsList = Proyecto::where('estado', 'activo')->get();
+        $totalProjects = $query->count();
+        $activeProjects = (clone $query)->where('estado', 'activo')->count();
+
+        $activeProjectsList = (clone $query)->where('estado', 'activo')->get();
         $lastUploads = $this->getLastEvidenceUploads($activeProjectsList->pluck('id'));
 
         // Proyectos activos sin evidencias actualizadas en >30 días
@@ -53,11 +63,19 @@ class ProjectVigilanceService
     /**
      * Matriz de salud de proyectos activos (Tab 1)
      */
-    public function getProjectHealthMatrix(): Collection
+    public function getProjectHealthMatrix(array $filters = []): Collection
     {
-        $projects = Proyecto::where('estado', 'activo')
-            ->orderBy('nombre_del_proyecto')
-            ->get();
+        $query = Proyecto::query();
+        if (!empty($filters['estado'])) {
+            $query->where('estado', $filters['estado']);
+        } else {
+            $query->whereIn('estado', ['activo', 'cerrado', 'inactivo']);
+        }
+        if (!empty($filters['criticidad'])) {
+            $query->where('nivel_criticidad', $filters['criticidad']);
+        }
+
+        $projects = $query->orderBy('nombre_del_proyecto')->get();
 
         $lastUploads = $this->getLastEvidenceUploads($projects->pluck('id'));
 

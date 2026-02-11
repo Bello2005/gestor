@@ -1,4 +1,4 @@
-{{-- Tab 1: Panel General — KPIs de salud + Matriz de proyectos --}}
+{{-- Tab 1: Panel General — KPIs de salud + Matriz de proyectos (contenido; filtros en riesgo.blade.php) --}}
 
 <!-- KPI Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
