@@ -148,7 +148,7 @@
         {{-- Scroll wrapper: uses flexbox with min-h to center when short, scroll when tall --}}
         <div class="min-h-full flex items-start md:items-center justify-center p-3 sm:p-4 md:p-6">
             <div @click.away="subscriptionModalOpen = false"
-                 x-data="{ annual: false }"
+                 x-data="{ annual: true }"
                  class="card-quantum max-w-5xl w-full p-5 sm:p-6 lg:p-8 my-4 sm:my-6 relative"
                  x-transition:enter="transition ease-out duration-400"
                  x-transition:enter-start="opacity-0 scale-95 translate-y-4"
@@ -172,9 +172,9 @@
                     <p class="text-gray-400 text-sm sm:text-base max-w-lg mx-auto">Herramientas especializadas en cumplimiento normativo colombiano, gestion de riesgos y vigilancia de proyectos</p>
 
                     {{-- Segmented Control Toggle --}}
-                    <div class="inline-flex items-center mt-5 sm:mt-6 p-1 rounded-xl bg-matter-light/80 border border-matter-light relative">
+                    {{-- <div class="inline-flex items-center mt-5 sm:mt-6 p-1 rounded-xl bg-matter-light/80 border border-matter-light relative">
                         {{-- Sliding background indicator --}}
-                        <div class="absolute top-1 bottom-1 rounded-lg transition-all duration-300 ease-in-out bg-gradient-to-r from-quantum-500 to-void-500 shadow-lg shadow-quantum-500/25"
+                        {{-- <div class="absolute top-1 bottom-1 rounded-lg transition-all duration-300 ease-in-out bg-gradient-to-r from-quantum-500 to-void-500 shadow-lg shadow-quantum-500/25"
                              :class="annual ? 'left-[calc(50%)] right-1' : 'left-1 right-[calc(50%)]'"
                              style="z-index: 0;"></div>
 
@@ -188,7 +188,7 @@
                                 :class="annual ? 'text-white' : 'text-gray-400 hover:text-gray-300'">
                             Anual
                         </button>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <!-- Plans Grid -->
