@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Prorroga;
 use App\Models\ResourceAccessRequest;
 use App\Models\UserPermission;
 use App\Services\ProjectVigilanceService;
@@ -46,10 +47,16 @@ class RiskAnalyticsController extends Controller
             ->limit(20)
             ->get();
 
+        // Tab 5: Prórrogas badge count
+        $prorrogaCounts = [
+            'pendiente' => Prorroga::where('estado', 'pendiente')->count(),
+            'total'     => Prorroga::count(),
+        ];
+
         return view('analytics.riesgo', array_merge(
             $overviewKpis,
             $riskData,
-            compact('healthMatrix', 'activeTab', 'alerts', 'alertCounts', 'pendingRequests')
+            compact('healthMatrix', 'activeTab', 'alerts', 'alertCounts', 'pendingRequests', 'prorrogaCounts')
         ));
     }
 

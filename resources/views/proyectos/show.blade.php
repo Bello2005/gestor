@@ -6,12 +6,7 @@
 @section('title', 'Detalle del Proyecto')
 
 @section('content')
-<div x-data="{
-    exportMenuOpen: false,
-    showDeleteModal: false,
-    imageModal: false,
-    currentImage: ''
-}" class="space-y-6 animate-fadeIn">
+<div x-data="showProyectoData()" class="space-y-6 animate-fadeIn">
 
     <!-- Header Breadcrumb & Actions -->
     <div class="flex flex-col gap-4">
@@ -350,5 +345,402 @@
         </div>
     </div>
     @endif
+
+    <!-- Solicitudes de Prórroga -->
+    <div class="card-quantum p-6 space-y-6">
+        <div class="flex items-center justify-between pb-4 border-b border-matter-light">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-quantum-500/20 to-void-500/20 rounded-quantum flex items-center justify-center">
+                    <svg class="w-5 h-5 text-quantum-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white">Solicitudes de Prórroga</h2>
+                    <p class="text-xs text-gray-500">Gestión de extensiones de plazo del proyecto</p>
+                </div>
+            </div>
+            @unless(auth()->user()->hasRole('admin'))
+            <button @click="openProrrogaModal()"
+                    class="btn-quantum flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Solicitar Prórroga
+            </button>
+            @endunless
+        </div>
+
+        {{-- Prórroga info resumen --}}
+        @if(($proyecto->prorroga_dias_aprobados ?? 0) > 0)
+        <div class="p-3 bg-quantum-500/5 border border-quantum-500/20 rounded-quantum flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-quantum-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                <span class="text-sm text-gray-300">Plazo extendido por prórroga aprobada</span>
+            </div>
+            <div class="text-right">
+                <span class="text-sm font-bold text-quantum-400">+{{ $proyecto->prorroga_dias_aprobados }} días</span>
+                <div class="text-xs text-gray-500">
+                    Original: {{ $proyecto->fecha_fin_original?->format('d/m/Y') ?? 'N/A' }}
+                    &rarr; Actual: {{ $proyecto->fecha_fin?->format('d/m/Y') ?? 'N/A' }}
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- Lista de prórrogas --}}
+        <template x-if="!prorrogasLoaded">
+            <div class="text-center py-6">
+                <svg class="w-6 h-6 text-gray-500 mx-auto animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <p class="text-sm text-gray-500 mt-2">Cargando solicitudes...</p>
+            </div>
+        </template>
+
+        <template x-if="prorrogasLoaded && prorrogasList.length === 0">
+            <div class="text-center py-8">
+                <svg class="w-12 h-12 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-gray-400">No hay solicitudes de prórroga para este proyecto</p>
+                <p class="text-sm text-gray-500 mt-1">Puede solicitar una extensión de plazo si el proyecto lo requiere</p>
+            </div>
+        </template>
+
+        <template x-if="prorrogasLoaded && prorrogasList.length > 0">
+            <div class="space-y-3">
+                <template x-for="pr in prorrogasList" :key="pr.id">
+                    <div class="p-4 bg-matter-light/20 border border-matter-light/30 rounded-quantum space-y-3">
+                        {{-- Header --}}
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-full text-xs font-medium"
+                                      :class="{
+                                          'bg-amber-500/20 text-amber-400 border border-amber-500/30': pr.estado_color === 'amber',
+                                          'bg-green-500/20 text-green-400 border border-green-500/30': pr.estado_color === 'green',
+                                          'bg-red-500/20 text-red-400 border border-red-500/30': pr.estado_color === 'red',
+                                      }"
+                                      x-text="pr.estado_label"></span>
+                                <span class="text-xs text-gray-500" x-text="pr.tipo_solicitud === 'prorroga' ? 'Prórroga' : 'Suspensión'"></span>
+                            </div>
+                            <span class="text-xs text-gray-500" x-text="pr.created_at"></span>
+                        </div>
+
+                        {{-- Details --}}
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                            <div>
+                                <span class="text-xs text-gray-500 block">Causa</span>
+                                <span class="text-gray-300" x-text="pr.causa_tipo_label"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Días solicitados</span>
+                                <span class="text-white font-medium" x-text="pr.dias_solicitados"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Fecha original</span>
+                                <span class="text-gray-300" x-text="pr.fecha_fin_original"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-gray-500 block">Fecha propuesta</span>
+                                <span class="text-quantum-400 font-medium" x-text="pr.fecha_fin_propuesta"></span>
+                            </div>
+                        </div>
+
+                        {{-- Justificación --}}
+                        <div>
+                            <span class="text-xs text-gray-500 block mb-1">Justificación</span>
+                            <p class="text-sm text-gray-300 bg-matter-light/30 p-2 rounded" x-text="pr.justificacion"></p>
+                        </div>
+
+                        {{-- Solicitante --}}
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>Solicitado por: <span class="text-gray-400" x-text="pr.solicitante"></span></span>
+                            <template x-if="pr.has_evidencia">
+                                <a :href="pr.evidencia_url" target="_blank"
+                                   class="inline-flex items-center gap-1 text-quantum-400 hover:text-quantum-300">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                    </svg>
+                                    <span x-text="pr.evidencia_nombre || 'Ver evidencia'"></span>
+                                </a>
+                            </template>
+                        </div>
+
+                        {{-- Decision comment --}}
+                        <template x-if="pr.decision_comentario && pr.estado !== 'pendiente'">
+                            <div class="p-2 rounded text-xs"
+                                 :class="pr.estado === 'aprobada' ? 'bg-green-500/5 border border-green-500/20' : 'bg-red-500/5 border border-red-500/20'">
+                                <span class="font-medium" :class="pr.estado === 'aprobada' ? 'text-green-400' : 'text-red-400'"
+                                      x-text="pr.estado === 'aprobada' ? 'Aprobado por: ' : 'Rechazado por: '"></span>
+                                <span class="text-gray-400" x-text="pr.aprobador || 'Admin'"></span>
+                                <p class="text-gray-400 mt-1" x-text="pr.decision_comentario"></p>
+                            </div>
+                        </template>
+
+                        {{-- Admin actions --}}
+                        @if(auth()->user()->hasRole('admin') ?? false)
+                        <template x-if="pr.estado === 'pendiente'">
+                            <div class="flex gap-2 pt-2 border-t border-matter-light/20">
+                                <button @click="approveProrroga(pr.id)"
+                                        class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-quantum text-sm font-medium bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    Aprobar
+                                </button>
+                                <button @click="rejectProrroga(pr.id)"
+                                        class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-quantum text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    Rechazar
+                                </button>
+                            </div>
+                        </template>
+                        @endif
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+
+    {{-- Modal de Prórroga --}}
+    @include('analytics.partials._modal_prorroga')
 </div>
+
+<script>
+function showProyectoData() {
+    return {
+        exportMenuOpen: false,
+        showDeleteModal: false,
+        imageModal: false,
+        currentImage: '',
+
+        // Prórrogas
+        prorrogaModalOpen: false,
+        prorrogaProjectId: {{ $proyecto->id }},
+        prorrogaProjectName: '{{ addslashes($proyecto->nombre_del_proyecto) }}',
+        prorrogaProjectFechaFin: '{{ $proyecto->fecha_fin?->format("d/m/Y") ?? "" }}',
+        prorrogaForm: {
+            tipo_solicitud: 'prorroga',
+            causa_tipo: '',
+            causa_subtipo: '',
+            dias_solicitados: '',
+            justificacion: '',
+            impacto_descripcion: '',
+            departamento_afectado: '',
+            referencia_ideam: '',
+            referencia_declaratoria: '',
+        },
+        prorrogaSubmitting: false,
+        prorrogaFile: null,
+        prorrogaErrors: {},
+        prorrogasList: [],
+        prorrogasLoaded: false,
+
+        get causaSubtipoOptions() {
+            const map = {
+                'fuerza_mayor': [
+                    { value: 'climatica', label: 'Evento Climático (lluvias, sequía, heladas)' },
+                    { value: 'sismica', label: 'Evento Sísmico' },
+                    { value: 'inundacion', label: 'Inundación' },
+                    { value: 'deslizamiento', label: 'Deslizamiento de tierra' },
+                    { value: 'otro_natural', label: 'Otro evento natural' },
+                ],
+                'caso_fortuito': [
+                    { value: 'orden_publico', label: 'Alteración de orden público' },
+                    { value: 'paro', label: 'Paro / Protesta social' },
+                    { value: 'pandemia', label: 'Pandemia / Emergencia sanitaria' },
+                    { value: 'otro_humano', label: 'Otro evento humano' },
+                ],
+                'necesidad_servicio': [
+                    { value: 'cambio_alcance', label: 'Cambio de alcance' },
+                    { value: 'disponibilidad_presupuestal', label: 'Disponibilidad presupuestal' },
+                    { value: 'ajuste_diseno', label: 'Ajuste de diseño técnico' },
+                ],
+                'mutuo_acuerdo': [
+                    { value: 'conveniencia_partes', label: 'Conveniencia de las partes' },
+                ],
+            };
+            return map[this.prorrogaForm.causa_tipo] || [];
+        },
+
+        get prorrogaFechaFinPropuesta() {
+            if (!this.prorrogaProjectFechaFin || !this.prorrogaForm.dias_solicitados) return '';
+            const parts = this.prorrogaProjectFechaFin.split('/');
+            if (parts.length !== 3) return '';
+            const date = new Date(parts[2], parts[1] - 1, parts[0]);
+            date.setDate(date.getDate() + parseInt(this.prorrogaForm.dias_solicitados));
+            return String(date.getDate()).padStart(2, '0') + '/' + String(date.getMonth() + 1).padStart(2, '0') + '/' + date.getFullYear();
+        },
+
+        openProrrogaModal() {
+            this.prorrogaForm = {
+                tipo_solicitud: 'prorroga', causa_tipo: '', causa_subtipo: '',
+                dias_solicitados: '', justificacion: '', impacto_descripcion: '',
+                departamento_afectado: '', referencia_ideam: '', referencia_declaratoria: '',
+            };
+            this.prorrogaFile = null;
+            this.prorrogaErrors = {};
+            this.prorrogaModalOpen = true;
+        },
+
+        closeProrrogaModal() {
+            this.prorrogaModalOpen = false;
+        },
+
+        async loadProrrogas() {
+            try {
+                const response = await fetch(`/prorrogas/proyecto/{{ $proyecto->id }}`, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await response.json();
+                this.prorrogasList = data.prorrogas || [];
+                this.prorrogasLoaded = true;
+            } catch (e) {
+                console.error('Error cargando prórrogas:', e);
+            }
+        },
+
+        async submitProrroga() {
+            this.prorrogaSubmitting = true;
+            this.prorrogaErrors = {};
+
+            // ─── Client-side validation ───────────────────────────
+            const errors = {};
+            if (!this.prorrogaForm.tipo_solicitud) {
+                errors.tipo_solicitud = ['Seleccione el tipo de solicitud.'];
+            }
+            if (!this.prorrogaForm.causa_tipo) {
+                errors.causa_tipo = ['Seleccione la causa principal.'];
+            }
+            const dias = Number(this.prorrogaForm.dias_solicitados);
+            if (!this.prorrogaForm.dias_solicitados || isNaN(dias) || dias < 1) {
+                errors.dias_solicitados = ['Ingrese los días solicitados (mínimo 1).'];
+            } else if (dias > 365) {
+                errors.dias_solicitados = ['Los días solicitados no pueden exceder 365.'];
+            }
+            const justLen = (this.prorrogaForm.justificacion || '').length;
+            if (justLen < 30) {
+                errors.justificacion = ['La justificación debe tener al menos 30 caracteres (' + justLen + '/30).'];
+            }
+
+            if (Object.keys(errors).length > 0) {
+                this.prorrogaErrors = errors;
+                const errorList = Object.values(errors).flat();
+                errorList.forEach(function(msg) {
+                    window.showToast(msg, 'warning', 6000);
+                });
+                this.prorrogaSubmitting = false;
+                return;
+            }
+
+            // ─── Build FormData ───────────────────────────────────
+            const formData = new FormData();
+            formData.append('proyecto_id', String(this.prorrogaProjectId || ''));
+            formData.append('tipo_solicitud', String(this.prorrogaForm.tipo_solicitud || ''));
+            formData.append('causa_tipo', String(this.prorrogaForm.causa_tipo || ''));
+            if (this.prorrogaForm.causa_subtipo) formData.append('causa_subtipo', String(this.prorrogaForm.causa_subtipo));
+            formData.append('dias_solicitados', String(dias));
+            formData.append('justificacion', String(this.prorrogaForm.justificacion || ''));
+            if (this.prorrogaForm.impacto_descripcion) formData.append('impacto_descripcion', String(this.prorrogaForm.impacto_descripcion));
+            if (this.prorrogaForm.departamento_afectado) formData.append('departamento_afectado', String(this.prorrogaForm.departamento_afectado));
+            if (this.prorrogaForm.referencia_ideam) formData.append('referencia_ideam', String(this.prorrogaForm.referencia_ideam));
+            if (this.prorrogaForm.referencia_declaratoria) formData.append('referencia_declaratoria', String(this.prorrogaForm.referencia_declaratoria));
+            if (this.prorrogaFile) formData.append('evidencia', this.prorrogaFile);
+
+            try {
+                const response = await fetch('/prorrogas', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    window.showToast('Error al procesar la respuesta del servidor.', 'error');
+                    return;
+                }
+
+                if (!response.ok) {
+                    if (response.status === 422 && data.errors) {
+                        this.prorrogaErrors = data.errors;
+                        const errorList = Object.values(data.errors).flat();
+                        errorList.forEach(function(msg) {
+                            window.showToast(msg, 'error', 7000);
+                        });
+                        return;
+                    } else {
+                        window.showToast(data.error || data.message || 'Error al enviar la solicitud.', 'error');
+                        return;
+                    }
+                }
+
+                this.closeProrrogaModal();
+                window.showToast(data.message || 'Solicitud de prórroga enviada exitosamente.', 'success');
+                this.loadProrrogas();
+            } catch (e) {
+                console.error('Error al enviar prórroga:', e);
+                window.showToast('Error de conexión. Verifique su red e intente de nuevo.', 'error');
+            } finally {
+                this.prorrogaSubmitting = false;
+            }
+        },
+
+        @if(auth()->user()->hasRole('admin') ?? false)
+        async approveProrroga(prorrogaId) {
+            if (typeof Swal === 'undefined') return;
+            const result = await Swal.fire({
+                title: 'Aprobar Prórroga',
+                html: '<textarea id="swal-comentario" class="swal2-textarea" placeholder="Justificación (mín. 10 caracteres)..." style="min-height:80px"></textarea>',
+                icon: 'question', showCancelButton: true, confirmButtonText: 'Aprobar', cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#10b981', background: '#1a1a2e', color: '#e5e7eb',
+                preConfirm: () => { const c = document.getElementById('swal-comentario').value; if (!c || c.length < 10) { Swal.showValidationMessage('Mínimo 10 caracteres'); return false; } return c; }
+            });
+            if (!result.isConfirmed) return;
+            try {
+                const response = await fetch(`/prorrogas/${prorrogaId}/approve`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
+                    body: JSON.stringify({ decision_comentario: result.value }),
+                });
+                const data = await response.json();
+                if (response.ok) { if (window.showToast) window.showToast(data.message, 'success'); this.loadProrrogas(); location.reload(); }
+                else { if (window.showToast) window.showToast(data.error || 'Error', 'error'); }
+            } catch (e) { if (window.showToast) window.showToast('Error de conexión', 'error'); }
+        },
+        async rejectProrroga(prorrogaId) {
+            if (typeof Swal === 'undefined') return;
+            const result = await Swal.fire({
+                title: 'Rechazar Prórroga',
+                html: '<textarea id="swal-comentario" class="swal2-textarea" placeholder="Motivo (mín. 10 caracteres)..." style="min-height:80px"></textarea>',
+                icon: 'warning', showCancelButton: true, confirmButtonText: 'Rechazar', cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#ef4444', background: '#1a1a2e', color: '#e5e7eb',
+                preConfirm: () => { const c = document.getElementById('swal-comentario').value; if (!c || c.length < 10) { Swal.showValidationMessage('Mínimo 10 caracteres'); return false; } return c; }
+            });
+            if (!result.isConfirmed) return;
+            try {
+                const response = await fetch(`/prorrogas/${prorrogaId}/reject`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' },
+                    body: JSON.stringify({ decision_comentario: result.value }),
+                });
+                const data = await response.json();
+                if (response.ok) { if (window.showToast) window.showToast(data.message, 'success'); this.loadProrrogas(); }
+                else { if (window.showToast) window.showToast(data.error || 'Error', 'error'); }
+            } catch (e) { if (window.showToast) window.showToast('Error de conexión', 'error'); }
+        },
+        @endif
+
+        init() {
+            this.loadProrrogas();
+        }
+    };
+}
+</script>
 @endsection

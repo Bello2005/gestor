@@ -80,7 +80,16 @@
                             class="hover:bg-matter-light/20 transition-colors duration-150 cursor-pointer"
                             :class="expandedProject === project.id ? 'bg-matter-light/20' : ''">
                             <td class="py-3 px-4">
-                                <span x-text="project.nombre" class="text-sm font-medium text-white truncate block max-w-[200px]"></span>
+                                <div class="flex items-center gap-1.5">
+                                    <span x-text="project.nombre" class="text-sm font-medium text-white truncate block max-w-[200px]"></span>
+                                    <template x-if="project.has_prorroga">
+                                        <span class="flex-shrink-0" title="Tiene prórroga aprobada">
+                                            <svg class="w-3.5 h-3.5 text-quantum-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </span>
+                                    </template>
+                                </div>
                             </td>
                             <td class="py-3 px-4 hidden xl:table-cell">
                                 <span x-text="project.entidad" class="text-sm text-gray-400 truncate block max-w-[150px]"></span>
@@ -170,7 +179,7 @@
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Timeline Visual -->
                     <div class="space-y-3">
                         <h5 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Línea de Tiempo</h5>
@@ -193,6 +202,23 @@
                                 <span class="font-bold" :class="getDaysColor(project.days_remaining, project.is_overdue)"
                                       x-text="project.days_remaining !== null ? (project.is_overdue ? 'Vencido (' + Math.abs(project.days_remaining) + ' días)' : project.days_remaining + ' días') : 'N/A'"></span>
                             </div>
+                            {{-- Prórroga info --}}
+                            <template x-if="project.has_prorroga">
+                                <div class="mt-2 p-2 bg-quantum-500/5 border border-quantum-500/20 rounded-quantum space-y-1">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-gray-500">Fecha original</span>
+                                        <span class="text-gray-400" x-text="project.fecha_fin_original"></span>
+                                    </div>
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-quantum-400 font-medium">Fecha ajustada</span>
+                                        <span class="text-quantum-400 font-medium" x-text="project.fecha_fin_ajustada"></span>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-quantum-500/20 text-quantum-400"
+                                              x-text="'+' + project.prorroga_dias_aprobados + ' días de prórroga'"></span>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
 
@@ -233,6 +259,83 @@
                                 <span :class="project.last_upload_date ? 'text-gray-300' : 'text-red-400'" x-text="project.last_upload_date || 'Sin registros'"></span>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Prórrogas -->
+                    <div class="space-y-3" x-init="loadProrrogasForProject(project.id)">
+                        <h5 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Prórrogas</h5>
+
+                        {{-- Loading --}}
+                        <template x-if="prorrogasLoading && !prorrogasCache[project.id]">
+                            <div class="text-center py-3">
+                                <svg class="w-5 h-5 text-gray-500 mx-auto animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                            </div>
+                        </template>
+
+                        {{-- Empty --}}
+                        <template x-if="prorrogasCache[project.id] && prorrogasCache[project.id].length === 0">
+                            <p class="text-sm text-gray-500 italic">Sin solicitudes de prórroga</p>
+                        </template>
+
+                        {{-- List --}}
+                        <template x-if="prorrogasCache[project.id] && prorrogasCache[project.id].length > 0">
+                            <div class="space-y-2 max-h-48 overflow-y-auto">
+                                <template x-for="pr in prorrogasCache[project.id]" :key="pr.id">
+                                    <div class="p-2 bg-matter-light/30 rounded-quantum text-xs space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-medium"
+                                                  :class="{
+                                                      'bg-amber-500/20 text-amber-400': pr.estado_color === 'amber',
+                                                      'bg-green-500/20 text-green-400': pr.estado_color === 'green',
+                                                      'bg-red-500/20 text-red-400': pr.estado_color === 'red',
+                                                  }"
+                                                  x-text="pr.estado_label"></span>
+                                            <span class="text-gray-500" x-text="pr.created_at"></span>
+                                        </div>
+                                        <div class="text-gray-300">
+                                            <span x-text="pr.causa_tipo_label"></span> &mdash;
+                                            <span class="font-medium text-white" x-text="pr.dias_solicitados + ' días'"></span>
+                                        </div>
+                                        <div class="text-gray-500 truncate" x-text="pr.justificacion"></div>
+                                        {{-- Approve/Reject buttons for pending --}}
+                                        <template x-if="pr.estado === 'pendiente'">
+                                            <div class="flex gap-2 mt-1">
+                                                <button @click.stop="approveProrroga(pr.id)"
+                                                        class="flex-1 px-2 py-1 rounded text-[10px] font-medium bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 transition-all">
+                                                    Aprobar
+                                                </button>
+                                                <button @click.stop="rejectProrroga(pr.id)"
+                                                        class="flex-1 px-2 py-1 rounded text-[10px] font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-all">
+                                                    Rechazar
+                                                </button>
+                                            </div>
+                                        </template>
+                                        {{-- Evidence link --}}
+                                        <template x-if="pr.has_evidencia">
+                                            <a :href="pr.evidencia_url" target="_blank" @click.stop
+                                               class="inline-flex items-center gap-1 text-quantum-400 hover:text-quantum-300 mt-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                                </svg>
+                                                <span x-text="pr.evidencia_nombre || 'Evidencia'"></span>
+                                            </a>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        {{-- Solicitar prórroga button --}}
+                        <button @click.stop="openProrrogaModal(project)"
+                                class="w-full flex items-center justify-center gap-2 px-3 py-2 mt-2 bg-quantum-500/10 border border-quantum-500/30 rounded-quantum text-xs text-quantum-400 hover:bg-quantum-500/20 transition-all">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Solicitar Prórroga
+                        </button>
                     </div>
 
                     <!-- Acciones -->

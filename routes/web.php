@@ -18,6 +18,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ResourceAccessRequestController;
 use App\Http\Controllers\RiskAnalyticsController;
+use App\Http\Controllers\ProrrogaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +103,10 @@ Route::middleware('auth')->group(function () {
         ->only(['index', 'create', 'store', 'show']);
     Route::post('/solicitudes-acceso/preview-risk', [ResourceAccessRequestController::class, 'previewRisk'])
         ->name('solicitudes-acceso.preview-risk');
+
+    // Prórrogas (crear y consultar — gestores y admins)
+    Route::post('/prorrogas', [ProrrogaController::class, 'store'])->name('prorrogas.store');
+    Route::get('/prorrogas/proyecto/{proyecto}', [ProrrogaController::class, 'porProyecto'])->name('prorrogas.por-proyecto');
 });
 
 // Rutas protegidas por autenticación y rol de administrador
@@ -136,6 +141,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/analytics/riesgo-data', [RiskAnalyticsController::class, 'riesgoData'])->name('analytics.riesgo-data');
     Route::get('/analytics/seguimiento', [RiskAnalyticsController::class, 'seguimiento'])->name('analytics.seguimiento');
     Route::get('/analytics/alertas', [RiskAnalyticsController::class, 'alertas'])->name('analytics.alertas');
+    Route::get('/analytics/prorrogas', [ProrrogaController::class, 'index'])->name('analytics.prorrogas');
+
+    // Prórrogas (aprobar y rechazar — solo admin)
+    Route::put('/prorrogas/{prorroga}/approve', [ProrrogaController::class, 'approve'])->name('prorrogas.approve');
+    Route::put('/prorrogas/{prorroga}/reject', [ProrrogaController::class, 'reject'])->name('prorrogas.reject');
 });
 
 // temporal — borra después

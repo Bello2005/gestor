@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Prorroga;
 use App\Models\Proyecto;
 use App\Models\ResourceAccessRequest;
 use App\Models\UserPermission;
@@ -138,6 +139,8 @@ class ProjectVigilanceService
                 ? ((int) $project->plazo) . ' ' . ($plazoUnit === 'dias' ? 'días' : 'meses')
                 : 'N/A';
 
+            $prorrogaDias = (int) ($project->prorroga_dias_aprobados ?? 0);
+
             return [
                 'id' => $project->id,
                 'nombre' => $project->nombre_del_proyecto,
@@ -155,6 +158,10 @@ class ProjectVigilanceService
                 'days_since_upload' => $daysSinceUpload,
                 'compliance' => $worstSemaforo,
                 'url' => route('proyectos.show', $project->id),
+                'has_prorroga' => $prorrogaDias > 0,
+                'prorroga_dias_aprobados' => $prorrogaDias,
+                'fecha_fin_original' => $project->fecha_fin_original?->format('d/m/Y'),
+                'fecha_fin_ajustada' => $prorrogaDias > 0 ? $project->fecha_fin?->format('d/m/Y') : null,
             ];
         })->toArray();
     }
@@ -297,6 +304,25 @@ class ProjectVigilanceService
             }
         }
 
+        // Prórrogas pendientes de aprobación
+        $pendingProrrogas = Prorroga::where('estado', 'pendiente')
+            ->with('proyecto:id,nombre_del_proyecto')
+            ->get();
+
+        foreach ($pendingProrrogas as $prorroga) {
+            $alerts['medio'][] = [
+                'type' => 'prorroga_pendiente',
+                'severity' => 'medio',
+                'title' => 'Solicitud de prórroga pendiente',
+                'message' => "Prórroga de {$prorroga->dias_solicitados} días para \"{$prorroga->proyecto->nombre_del_proyecto}\" pendiente de aprobación.",
+                'proyecto_id' => $prorroga->proyecto_id,
+                'proyecto_nombre' => $prorroga->proyecto->nombre_del_proyecto,
+                'icon' => 'clock',
+                'action_url' => route('analytics.riesgo') . '?tab=seguimiento',
+                'action_label' => 'Revisar',
+            ];
+        }
+
         // Solicitudes de riesgo pendientes
         $pendingCritical = ResourceAccessRequest::pending()
             ->where('risk_level', 'critico')
@@ -430,14 +456,14 @@ class ProjectVigilanceService
     }
 
     /**
-     * Calcular métricas de tiempo del proyecto
+     * Calcular métricas de tiempo del proyecto (usa accessor que incluye prórrogas aprobadas)
      */
     private function calculateTimeMetrics(Proyecto $project): array
     {
         $startDate = $project->fecha_de_ejecucion;
-        $plazo = $project->plazo ? (float) $project->plazo : null;
+        $endDate = $project->fecha_fin; // Accessor: plazo base + prorroga_dias_aprobados
 
-        if (!$startDate || !$plazo) {
+        if (!$startDate || !$endDate) {
             return [
                 'time_elapsed_pct' => 0,
                 'days_remaining' => null,
@@ -445,11 +471,6 @@ class ProjectVigilanceService
                 'is_overdue' => false,
             ];
         }
-
-        $unit = $project->plazo_unidad ?? 'meses';
-        $endDate = ($unit === 'dias')
-            ? $startDate->copy()->addDays((int) $plazo)
-            : $startDate->copy()->addMonths((int) $plazo);
 
         $totalDays = $startDate->diffInDays($endDate);
         $elapsedDays = $startDate->diffInDays(now());

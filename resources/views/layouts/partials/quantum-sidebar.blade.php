@@ -207,12 +207,25 @@
 
         <!-- Suscripción -->
         <button @click="$dispatch('open-subscription-modal')"
-           class="w-full flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group bg-gradient-to-r from-quantum-500/20 via-void-500/20 to-quantum-500/20 border border-quantum-500/30 hover:border-quantum-500/50 text-white hover:shadow-quantum hover:scale-105">
-            <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110 text-quantum-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span class="font-bold transition-all duration-300 bg-gradient-to-r from-quantum-500 to-void-500 bg-clip-text text-transparent" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0'">
-                Adquiere Suscripción
+           class="w-full flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-300 group relative overflow-hidden border border-photon-500/40 hover:border-photon-500/70 text-white hover:shadow-lg hover:shadow-photon-500/20 hover:scale-[1.03] active:scale-[0.98]"
+           style="background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(139,92,246,0.15) 50%, rgba(0,186,199,0.15) 100%);">
+            {{-- Animated shimmer effect --}}
+            <span class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"></span>
+            {{-- Icon --}}
+            <div class="relative flex-shrink-0">
+                <svg class="w-5 h-5 transition-transform duration-300 group-hover:scale-110 text-photon-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                <span class="absolute -top-1 -right-1 w-2 h-2 bg-photon-500 rounded-full animate-ping"></span>
+                <span class="absolute -top-1 -right-1 w-2 h-2 bg-photon-500 rounded-full"></span>
+            </div>
+            {{-- Text --}}
+            <span class="font-bold text-sm transition-all duration-300 bg-gradient-to-r from-photon-500 via-amber-300 to-photon-500 bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'">
+                Mejorar Plan
+            </span>
+            {{-- PRO badge when collapsed --}}
+            <span class="absolute -top-1 -right-1 text-[8px] font-black px-1.5 py-0.5 bg-gradient-to-r from-photon-500 to-amber-400 text-space-500 rounded-full uppercase tracking-widest transition-all duration-300" :class="sidebarOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'">
+                PRO
             </span>
         </button>
     </nav>
@@ -268,6 +281,11 @@
 
 .animate-float {
     animation: float 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% center; }
+    100% { background-position: -200% center; }
 }
 
 [x-cloak] {

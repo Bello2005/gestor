@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -30,6 +31,7 @@ class Proyecto extends Model
         'estado',
         'nivel_criticidad',
         'plazo_unidad',
+        'prorroga_dias_aprobados',
     ];
 
     protected $casts = [
@@ -111,9 +113,30 @@ class Proyecto extends Model
     }
 
     /**
-     * Calcula la fecha de fin del proyecto basada en fecha de ejecución + plazo
+     * Calcula la fecha de fin del proyecto basada en fecha de ejecución + plazo + prórrogas aprobadas
      */
     public function getFechaFinAttribute(): ?Carbon
+    {
+        if (!$this->fecha_de_ejecucion || !$this->plazo) {
+            return null;
+        }
+        $unit = $this->plazo_unidad ?? 'meses';
+        $baseEnd = ($unit === 'dias')
+            ? $this->fecha_de_ejecucion->copy()->addDays((int) $this->plazo)
+            : $this->fecha_de_ejecucion->copy()->addMonths((int) $this->plazo);
+
+        $prorrogaDias = (int) ($this->prorroga_dias_aprobados ?? 0);
+        if ($prorrogaDias > 0) {
+            $baseEnd->addDays($prorrogaDias);
+        }
+
+        return $baseEnd;
+    }
+
+    /**
+     * Fecha de fin original SIN prórrogas (para comparación visual)
+     */
+    public function getFechaFinOriginalAttribute(): ?Carbon
     {
         if (!$this->fecha_de_ejecucion || !$this->plazo) {
             return null;
@@ -122,6 +145,11 @@ class Proyecto extends Model
         return ($unit === 'dias')
             ? $this->fecha_de_ejecucion->copy()->addDays((int) $this->plazo)
             : $this->fecha_de_ejecucion->copy()->addMonths((int) $this->plazo);
+    }
+
+    public function prorrogas(): HasMany
+    {
+        return $this->hasMany(Prorroga::class);
     }
 
     // Accessor para formatear el valor total
