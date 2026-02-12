@@ -102,7 +102,7 @@
         }
     </style>
 </head>
-<body class="quantum-bg min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+<body class="quantum-bg min-h-screen flex items-start sm:items-center justify-center px-4 py-6 sm:p-4 relative overflow-y-auto overflow-x-hidden">
 
     <!-- Animated particles background -->
     <div class="particles" id="particles"></div>
@@ -176,9 +176,9 @@
 
             <!-- Right Side - Login Form -->
             <div class="w-full">
-                <div class="glass-card rounded-quantum-xl p-8 md:p-12 scale-in">
+                <div class="glass-card rounded-quantum-xl p-5 sm:p-8 md:p-12 scale-in">
                     <!-- Header -->
-                    <div class="mb-8">
+                    <div class="mb-5 sm:mb-8">
                         <!-- Mobile Logo -->
                         <div class="md:hidden flex justify-center mb-6">
                             <svg width="60" height="60" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -201,12 +201,12 @@
                             </svg>
                         </div>
 
-                        <h2 class="text-3xl font-bold text-white mb-2">Bienvenido de nuevo</h2>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">Bienvenido de nuevo</h2>
                         <p class="text-gray-400">Ingresa tus credenciales para continuar</p>
                     </div>
 
                     <!-- Login Form -->
-                    <form method="POST" action="{{ route('login') }}" class="space-y-6" x-data="{ showPassword: false }">
+                    <form method="POST" action="{{ route('login') }}" class="space-y-4 sm:space-y-6" x-data="{ showPassword: false }">
                         @csrf
 
                         <!-- Email Input -->
@@ -283,7 +283,7 @@
                     </form>
 
                     <!-- Divider -->
-                    <div class="relative my-8">
+                    <div class="relative my-5 sm:my-8">
                         <div class="absolute inset-0 flex items-center">
                             <div class="w-full border-t border-matter-light"></div>
                         </div>
