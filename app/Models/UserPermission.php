@@ -10,6 +10,28 @@ class UserPermission extends Model
 {
     use Auditable;
 
+    protected static function booted()
+    {
+        // Clear user permission cache when permissions are created, updated, or deleted
+        static::created(function ($userPermission) {
+            if ($userPermission->user) {
+                $userPermission->user->clearPermissionCache();
+            }
+        });
+
+        static::updated(function ($userPermission) {
+            if ($userPermission->user) {
+                $userPermission->user->clearPermissionCache();
+            }
+        });
+
+        static::deleted(function ($userPermission) {
+            if ($userPermission->user) {
+                $userPermission->user->clearPermissionCache();
+            }
+        });
+    }
+
     protected $fillable = [
         'user_id',
         'permission_id',

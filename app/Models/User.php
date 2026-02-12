@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\UserPermission;
 
 class User extends Authenticatable
 {
@@ -99,17 +100,62 @@ class User extends Authenticatable
         return $this->userPermissions()->active();
     }
 
+    /**
+     * Cache for loaded permissions to avoid N+1 queries
+     */
+    protected ?\Illuminate\Support\Collection $cachedPermissions = null;
+
+    /**
+     * Load and cache all active permissions for this user
+     * Uses eager loading with join for better performance
+     */
+    protected function loadCachedPermissions(): \Illuminate\Support\Collection
+    {
+        if ($this->cachedPermissions === null) {
+            $this->cachedPermissions = UserPermission::query()
+                ->where('user_id', $this->id)
+                ->where('is_active', true)
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+                })
+                ->with('permission')
+                ->get();
+        }
+        return $this->cachedPermissions;
+    }
+
+    /**
+     * Clear the cached permissions (useful after permission changes)
+     */
+    public function clearPermissionCache(): void
+    {
+        $this->cachedPermissions = null;
+    }
+
     public function hasDirectPermission(string $permissionSlug, ?int $proyectoId = null): bool
     {
-        $query = $this->userPermissions()
-            ->active()
-            ->whereHas('permission', fn($q) => $q->where('slug', $permissionSlug));
+        // Use cached permissions to avoid N+1 queries
+        $permissions = $this->loadCachedPermissions();
 
-        if ($proyectoId) {
-            $query->where(fn($q) => $q->whereNull('proyecto_id')->orWhere('proyecto_id', $proyectoId));
+        // Filter permissions by slug
+        $matchingPermissions = $permissions->filter(function ($userPermission) use ($permissionSlug) {
+            return $userPermission->permission && $userPermission->permission->slug === $permissionSlug;
+        });
+
+        if ($matchingPermissions->isEmpty()) {
+            return false;
         }
 
-        return $query->exists();
+        // If proyecto_id is specified, check for project-specific or global permissions
+        if ($proyectoId !== null) {
+            return $matchingPermissions->contains(function ($userPermission) use ($proyectoId) {
+                return $userPermission->proyecto_id === null || $userPermission->proyecto_id === $proyectoId;
+            });
+        }
+
+        // If no proyecto_id specified, any matching permission is valid
+        return true;
     }
 
     /**
