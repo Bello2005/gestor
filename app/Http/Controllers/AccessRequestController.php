@@ -46,10 +46,35 @@ class AccessRequestController extends Controller
         }
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $requests = AccessRequest::orderBy('created_at', 'desc')->paginate(10);
-        return view('access-requests.index', compact('requests'));
+        $query = AccessRequest::query();
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(fn ($q) => $q->where('name', 'like', "%{$search}%")
+                                       ->orWhere('email', 'like', "%{$search}%"));
+        }
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $requests = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        $stats = [
+            'total'    => AccessRequest::count(),
+            'pending'  => AccessRequest::where('status', 'pending')->count(),
+            'approved' => AccessRequest::where('status', 'approved')->count(),
+            'rejected' => AccessRequest::where('status', 'rejected')->count(),
+        ];
+
+        return view('solicitudes-acceso.index', compact('requests', 'stats'));
     }
 
     public function approve(AccessRequest $request)

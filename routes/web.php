@@ -106,7 +106,7 @@ Route::middleware('auth')->group(function () {
 
     // Solicitudes de Acceso a Recursos (todos los usuarios autenticados)
     Route::resource('solicitudes-acceso', ResourceAccessRequestController::class)
-        ->only(['index', 'create', 'store', 'show']);
+        ->only(['create', 'store', 'show']);
     Route::post('/solicitudes-acceso/preview-risk', [ResourceAccessRequestController::class, 'previewRisk'])
         ->name('solicitudes-acceso.preview-risk');
 
@@ -128,8 +128,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{audit}', [AuditController::class, 'show'])->name('show');
     });
     
-    // Solicitudes de acceso de cuenta (admin)
-    Route::get('/access-requests', [AccessRequestController::class, 'index'])->name('access-requests.index');
+    // Solicitudes de acceso de cuenta (admin) — vista principal
+    Route::get('/solicitudes-acceso', [AccessRequestController::class, 'index'])->name('solicitudes-acceso.index');
+    Route::get('/access-requests', fn () => redirect()->route('solicitudes-acceso.index'))->name('access-requests.index');
     Route::put('/access-requests/{request}/approve', [AccessRequestController::class, 'approve'])->name('access-requests.approve');
     Route::put('/access-requests/{request}/reject', [AccessRequestController::class, 'reject'])->name('access-requests.reject');
 

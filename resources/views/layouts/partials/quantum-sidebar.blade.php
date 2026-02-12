@@ -144,35 +144,23 @@
         </a>
         @endif
 
-        <!-- Solicitudes de Acceso (no admin: gestor/colaborador las gestionan) -->
-        @unless(Auth::user()->isAdmin())
-        <a href="{{ route('access-requests.index') }}"
-           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group relative {{ Request::routeIs('access-requests.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
+        <!-- Solicitudes de Acceso (admin only) -->
+        @if(Auth::user()->isAdmin())
+        <a href="{{ route('solicitudes-acceso.index') }}"
+           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group relative {{ Request::routeIs('solicitudes-acceso.*') || Request::routeIs('access-requests.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
             <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
             </svg>
             <span class="font-medium transition-all duration-300" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0'">
-                Solicitudes
+                Solicitudes de Acceso
             </span>
-            <!-- Pending Badge (if any) -->
             @if(isset($pendingRequestsCount) && $pendingRequestsCount > 0)
             <span class="absolute top-2 right-2 w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-photon-500 text-space-500 rounded-full animate-pulse">
                 {{ $pendingRequestsCount }}
             </span>
             @endif
         </a>
-        @endunless
-
-        <!-- Solicitudes de Acceso a Recursos (todos los usuarios) -->
-        <a href="{{ route('solicitudes-acceso.index') }}"
-           class="flex items-center gap-4 px-4 py-3 rounded-quantum transition-all duration-200 group relative {{ Request::routeIs('solicitudes-acceso.*') ? 'bg-gradient-to-r from-quantum-500/20 to-void-500/20 border border-quantum-500/30 text-white shadow-quantum' : 'text-gray-400 hover:text-white hover:bg-matter-light' }}">
-            <svg class="w-5 h-5 flex-shrink-0 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-            </svg>
-            <span class="font-medium transition-all duration-300" :class="sidebarOpen ? 'opacity-100' : 'opacity-0 w-0'">
-                Control de Acceso
-            </span>
-        </a>
+        @endif
 
         <!-- Vigilancia & Riesgo (Admin only) -->
         @if(Auth::user()->isAdmin())
