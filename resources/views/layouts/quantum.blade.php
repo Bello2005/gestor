@@ -184,10 +184,9 @@
                             Mensual
                         </button>
                         <button @click="annual = true"
-                                class="relative z-10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors duration-300 flex items-center gap-1.5"
+                                class="relative z-10 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors duration-300"
                                 :class="annual ? 'text-white' : 'text-gray-400 hover:text-gray-300'">
                             Anual
-                            <span class="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide rounded bg-green-500/20 text-green-400 border border-green-500/30 leading-none">-20%</span>
                         </button>
                     </div>
                 </div>
@@ -207,12 +206,12 @@
                             <p class="text-[11px] text-gray-500 mb-3">Ideal para pequenos equipos</p>
                             <div>
                                 <div class="flex items-baseline justify-center gap-1">
-                                    <span class="text-3xl sm:text-4xl font-extrabold text-white" x-text="annual ? '$63.900' : '$79.900'">$79.900</span>
+                                    <span class="text-3xl sm:text-4xl font-extrabold text-white" x-text="annual ? '$6.500.000' : '$79.900'">$79.900</span>
                                     <span class="text-gray-500 text-xs">/mes</span>
                                 </div>
                                 <div class="h-5 mt-1">
                                     <p x-show="annual" x-transition.opacity class="text-[11px] text-green-400">
-                                        $766.800/ano <span class="line-through text-gray-600">$958.800</span>
+                                        $78.000.000/ano
                                     </p>
                                 </div>
                             </div>
@@ -277,12 +276,12 @@
                             <p class="text-[11px] text-gray-500 mb-3">Para empresas en crecimiento</p>
                             <div>
                                 <div class="flex items-baseline justify-center gap-1">
-                                    <span class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-quantum-500 to-void-500 bg-clip-text text-transparent" x-text="annual ? '$159.900' : '$199.900'">$199.900</span>
+                                    <span class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-quantum-500 to-void-500 bg-clip-text text-transparent" x-text="annual ? '$8.083.300' : '$199.900'">$199.900</span>
                                     <span class="text-gray-500 text-xs">/mes</span>
                                 </div>
                                 <div class="h-5 mt-1">
                                     <p x-show="annual" x-transition.opacity class="text-[11px] text-green-400">
-                                        $1.918.800/ano <span class="line-through text-gray-600">$2.398.800</span>
+                                        $97.000.000/ano
                                     </p>
                                 </div>
                             </div>
@@ -344,12 +343,12 @@
                             <p class="text-[11px] text-gray-500 mb-3">Para grandes organizaciones</p>
                             <div>
                                 <div class="flex items-baseline justify-center gap-1">
-                                    <span class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-void-500 to-photon-500 bg-clip-text text-transparent" x-text="annual ? '$399.900' : '$499.900'">$499.900</span>
+                                    <span class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-void-500 to-photon-500 bg-clip-text text-transparent" x-text="annual ? '$12.083.300' : '$499.900'">$499.900</span>
                                     <span class="text-gray-500 text-xs">/mes</span>
                                 </div>
                                 <div class="h-5 mt-1">
                                     <p x-show="annual" x-transition.opacity class="text-[11px] text-green-400">
-                                        $4.798.800/ano <span class="line-through text-gray-600">$5.998.800</span>
+                                        $145.000.000/ano
                                     </p>
                                 </div>
                             </div>
