@@ -12,9 +12,11 @@
     passwordDisplayModalOpen: false,
     currentUser: null,
     temporalPassword: '',
-    searchQuery: '',
-    selectedRole: 'all',
+    searchQuery: '{{ request('search', '') }}',
+    selectedRole: '{{ request('role', 'all') }}',
     loading: false,
+    searching: false,
+    searchTimeout: null,
     notification: {
         show: false,
         type: 'success',
@@ -24,6 +26,36 @@
     showNotification(type, message, details = '') {
         this.notification = { show: true, type, message, details };
         setTimeout(() => { this.notification.show = false; }, 5000);
+    },
+    performSearch() {
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.searching = true;
+            const params = new URLSearchParams(window.location.search);
+            if (this.searchQuery) {
+                params.set('search', this.searchQuery);
+            } else {
+                params.delete('search');
+            }
+            if (this.selectedRole && this.selectedRole !== 'all') {
+                params.set('role', this.selectedRole);
+            } else {
+                params.delete('role');
+            }
+            params.delete('page'); // Reset to first page on new search
+            window.location.href = '{{ route('users.index') }}?' + params.toString();
+        }, 500);
+    },
+    performRoleFilter() {
+        this.searching = true;
+        const params = new URLSearchParams(window.location.search);
+        if (this.selectedRole && this.selectedRole !== 'all') {
+            params.set('role', this.selectedRole);
+        } else {
+            params.delete('role');
+        }
+        params.delete('page'); // Reset to first page on filter change
+        window.location.href = '{{ route('users.index') }}?' + params.toString();
     }
 }" class="space-y-6 animate-fadeIn">
 
@@ -129,7 +161,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
-                    <input type="text" x-model="searchQuery"
+                    <input type="text" 
+                           x-model="searchQuery"
+                           @input="performSearch()"
                            placeholder="Buscar por nombre o email..."
                            class="w-full pl-10 pr-4 py-3 bg-matter-light border border-matter-light rounded-quantum text-white placeholder-gray-500 focus:border-quantum-500 focus:ring-2 focus:ring-quantum-500/20 transition-all">
                 </div>
@@ -137,6 +171,7 @@
 
             <!-- Role Filter -->
             <select x-model="selectedRole"
+                    @change="performRoleFilter()"
                     class="px-4 py-3 bg-matter-light border border-matter-light rounded-quantum text-white focus:border-quantum-500 focus:ring-2 focus:ring-quantum-500/20 transition-all">
                 <option value="all">Todos los roles</option>
                 @foreach($roles as $role)
@@ -146,17 +181,20 @@
         </div>
     </div>
 
+    <!-- Loading Spinner -->
+    <template x-if="searching">
+        @include('analytics.partials._quantum_spinner', ['message' => 'Buscando usuarios...'])
+    </template>
+
     <!-- Users Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+    <div x-show="!searching" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         @foreach($usuarios as $index => $usuario)
             @php
                 $userRoles = $usuario->roles->pluck('slug')->toArray();
                 $hasRole = json_encode($userRoles);
             @endphp
             <div class="card-quantum overflow-hidden group hover:scale-105 hover:border-quantum-500/50 transition-all duration-300 animate-slideUp"
-                 style="animation-delay: {{ $index * 50 }}ms;"
-                 x-show="(searchQuery === '' || '{{ strtolower($usuario->name . ' ' . $usuario->email) }}'.includes(searchQuery.toLowerCase())) && (selectedRole === 'all' || {{ json_encode($userRoles) }}.includes(selectedRole))"
-                 x-transition>
+                 style="animation-delay: {{ $index * 50 }}ms;">
 
                 <!-- User Header -->
                 <div class="p-6 bg-gradient-to-br from-quantum-500/5 to-void-500/5 border-b border-matter-light">
@@ -258,7 +296,7 @@
     </div>
 
     <!-- Pagination -->
-    <div class="mt-8">
+    <div x-show="!searching" class="mt-8">
         {{ $usuarios->links() }}
     </div>
 

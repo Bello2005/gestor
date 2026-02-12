@@ -113,6 +113,8 @@ Route::middleware('auth')->group(function () {
     // Prórrogas (crear y consultar — gestores y admins)
     Route::post('/prorrogas', [ProrrogaController::class, 'store'])->name('prorrogas.store');
     Route::get('/prorrogas/proyecto/{proyecto}', [ProrrogaController::class, 'porProyecto'])->name('prorrogas.por-proyecto');
+    Route::get('/prorrogas/{prorroga}/evidencia/download', [ProrrogaController::class, 'downloadEvidencia'])
+        ->name('prorrogas.download.evidencia');
 });
 
 // Rutas protegidas por autenticación y rol de administrador

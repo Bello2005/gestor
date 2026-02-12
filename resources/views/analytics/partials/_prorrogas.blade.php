@@ -232,7 +232,7 @@
                     {{-- Evidence --}}
                     @if($prorroga->evidencia_path)
                     <div class="flex items-center gap-2">
-                        <a href="{{ $prorroga->evidencia_url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-quantum bg-quantum-500/10 text-quantum-400 border border-quantum-500/20 hover:bg-quantum-500/20 transition-all">
+                        <a href="{{ route('prorrogas.download.evidencia', $prorroga) }}" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-quantum bg-quantum-500/10 text-quantum-400 border border-quantum-500/20 hover:bg-quantum-500/20 transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                             </svg>

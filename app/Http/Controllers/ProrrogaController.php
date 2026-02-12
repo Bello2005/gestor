@@ -90,8 +90,31 @@ class ProrrogaController extends Controller
 
                 if ($request->hasFile('evidencia')) {
                     $file = $request->file('evidencia');
-                    $evidenciaPath = Storage::disk('public')->putFile('proyectos/prorrogas', $file);
-                    $evidenciaNombre = $file->getClientOriginalName();
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $nameWithoutExtension = pathinfo($originalName, PATHINFO_FILENAME);
+                    
+                    // Asegurar que el directorio existe
+                    $directory = 'proyectos/prorrogas';
+                    if (!Storage::disk('public')->exists($directory)) {
+                        Storage::disk('public')->makeDirectory($directory);
+                    }
+                    
+                    // Generar hash único corto para evitar conflictos
+                    $hash = substr(md5($originalName . time() . uniqid()), 0, 8);
+                    
+                    // Construir nombre: nombre_original_hash.ext
+                    $filename = $nameWithoutExtension . '_' . $hash . ($extension ? '.' . $extension : '');
+                    
+                    // Guardar con el nombre preservado
+                    $evidenciaPath = Storage::disk('public')->putFileAs($directory, $file, $filename);
+                    $evidenciaNombre = $originalName;
+                    
+                    Log::info('Evidencia guardada exitosamente', [
+                        'prorroga_id' => 'creating',
+                        'evidencia_path' => $evidenciaPath,
+                        'evidencia_nombre' => $evidenciaNombre
+                    ]);
                 }
 
                 $prorroga = Prorroga::create([
@@ -213,12 +236,125 @@ class ProrrogaController extends Controller
                 'decision_comentario'  => $p->decision_comentario,
                 'created_at'           => $p->created_at->format('d/m/Y H:i'),
                 'has_evidencia'        => !empty($p->evidencia_path),
-                'evidencia_url'        => $p->evidencia_url,
+                'evidencia_url'        => !empty($p->evidencia_path) 
+                    ? route('prorrogas.download.evidencia', $p) 
+                    : null,
                 'evidencia_nombre'     => $p->evidencia_nombre_original,
                 'departamento'         => $p->departamento_afectado,
                 'referencia_ideam'     => $p->referencia_ideam,
             ]);
 
         return response()->json(['prorrogas' => $prorrogas]);
+    }
+
+    /**
+     * Descargar evidencia de prórroga
+     */
+    public function downloadEvidencia(Prorroga $prorroga)
+    {
+        try {
+            if (!$prorroga->evidencia_path) {
+                Log::warning('Intento de descargar evidencia sin path', [
+                    'prorroga_id' => $prorroga->id
+                ]);
+                abort(404, 'Evidencia no encontrada');
+            }
+
+            // Si es una URL externa (Cloudinary), redirigir
+            if (str_starts_with($prorroga->evidencia_path, 'http://') || str_starts_with($prorroga->evidencia_path, 'https://')) {
+                return redirect($prorroga->evidencia_path);
+            }
+
+            // Normalizar la ruta (eliminar barras iniciales si las hay)
+            $evidenciaPath = ltrim($prorroga->evidencia_path, '/');
+            
+            // Verificar que el archivo existe
+            $exists = Storage::disk('public')->exists($evidenciaPath);
+            
+            if (!$exists) {
+                // Intentar buscar el archivo con diferentes variaciones de la ruta
+                $basePath = 'proyectos/prorrogas';
+                $basename = basename($evidenciaPath);
+                
+                // Intentar diferentes variaciones de la ruta
+                $possiblePaths = [
+                    $evidenciaPath, // Ruta original
+                    $basePath . '/' . $basename, // Solo el nombre del archivo en el directorio base
+                    str_replace('proyectos/prorrogas/', '', $evidenciaPath), // Sin el prefijo del directorio
+                ];
+                
+                // Eliminar duplicados
+                $possiblePaths = array_unique($possiblePaths);
+                
+                Log::warning('Archivo no encontrado en ruta original', [
+                    'prorroga_id' => $prorroga->id,
+                    'evidencia_path' => $prorroga->evidencia_path,
+                    'normalized_path' => $evidenciaPath,
+                    'possible_paths' => $possiblePaths,
+                    'all_files_in_dir' => Storage::disk('public')->allFiles($basePath)
+                ]);
+                
+                // Intentar con las rutas alternativas
+                foreach ($possiblePaths as $testPath) {
+                    if (Storage::disk('public')->exists($testPath)) {
+                        $path = Storage::disk('public')->path($testPath);
+                        $filename = $prorroga->evidencia_nombre_original ?? $basename;
+                        Log::info('Archivo encontrado en ruta alternativa', [
+                            'prorroga_id' => $prorroga->id,
+                            'found_path' => $testPath
+                        ]);
+                        return response()->download($path, $filename);
+                    }
+                }
+                
+                abort(404, 'Archivo no encontrado en el servidor');
+            }
+
+            $path = Storage::disk('public')->path($evidenciaPath);
+            
+            // Verificar que el archivo físico existe
+            if (!file_exists($path)) {
+                Log::error('Archivo físico no existe aunque Storage dice que existe', [
+                    'prorroga_id' => $prorroga->id,
+                    'evidencia_path' => $prorroga->evidencia_path,
+                    'normalized_path' => $evidenciaPath,
+                    'full_path' => $path
+                ]);
+                abort(404, 'Archivo físico no encontrado');
+            }
+            
+            // Usar el nombre original si está disponible, sino extraer del path
+            $filename = $prorroga->evidencia_nombre_original ?? $this->extractOriginalFilename($evidenciaPath);
+
+            return response()->download($path, $filename);
+        } catch (\Exception $e) {
+            Log::error('Error al descargar evidencia de prórroga', [
+                'prorroga_id' => $prorroga->id,
+                'evidencia_path' => $prorroga->evidencia_path ?? 'null',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            abort(500, 'Error al descargar la evidencia: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Extraer nombre original del archivo almacenado
+     * Formato: nombre_original_hash.ext -> nombre_original.ext
+     */
+    private function extractOriginalFilename($storedPath)
+    {
+        $basename = basename($storedPath);
+        $extension = pathinfo($basename, PATHINFO_EXTENSION);
+        $nameWithoutExt = pathinfo($basename, PATHINFO_FILENAME);
+        
+        // Si tiene formato nombre_hash.ext, extraer el nombre original
+        // Buscar el último underscore seguido de 8 caracteres alfanuméricos (el hash)
+        if (preg_match('/^(.+)_([a-f0-9]{8})$/i', $nameWithoutExt, $matches)) {
+            return $matches[1] . ($extension ? '.' . $extension : '');
+        }
+        
+        // Si no tiene el formato esperado, devolver el nombre tal cual
+        return $basename;
     }
 }

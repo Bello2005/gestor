@@ -16,16 +16,33 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $usuarios = User::with('roles')
+        $query = User::with('roles')
             ->addSelect(['last_password_reset' => DB::table('password_reset_tokens')
                 ->select('created_at')
                 ->whereColumn('email', 'users.email')
                 ->latest()
                 ->limit(1)
-            ])
-            ->paginate(10);
+            ]);
+
+        // Búsqueda por nombre o email
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('full_name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Filtro por rol
+        if ($request->filled('role') && $request->role !== 'all') {
+            $query->whereHas('roles', function($q) use ($request) {
+                $q->where('slug', $request->role);
+            });
+        }
+
+        $usuarios = $query->latest('created_at')->paginate(10)->withQueryString();
         $roles = Role::all();
 
         return view('users.index', compact('usuarios', 'roles'));

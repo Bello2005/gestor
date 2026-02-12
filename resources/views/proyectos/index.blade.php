@@ -360,7 +360,7 @@
                         class="flex-1 px-4 py-2.5 bg-matter-light hover:bg-matter text-gray-300 hover:text-white rounded-quantum font-medium transition-all duration-200">
                     Cancelar
                 </button>
-                <form :action="'/proyectos/' + proyectoId" method="POST" class="flex-1">
+                <form x-bind:action="'/proyectos/' + proyectoId" method="POST" class="flex-1">
                     @csrf
                     @method('DELETE')
                     <button type="submit"

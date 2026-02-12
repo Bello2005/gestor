@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Proyecto;
+use App\Models\Prorroga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -485,6 +486,22 @@ class ProyectoController extends Controller
     public function destroy(Request $request, Proyecto $proyecto)
     {
         try {
+            // Eliminar archivos de evidencias de prórrogas asociadas
+            foreach ($proyecto->prorrogas as $prorroga) {
+                if ($prorroga->evidencia_path && !str_starts_with($prorroga->evidencia_path, 'http')) {
+                    try {
+                        Storage::disk('public')->delete($prorroga->evidencia_path);
+                    } catch (\Exception $e) {
+                        Log::warning('No se pudo eliminar evidencia de prórroga', [
+                            'prorroga_id' => $prorroga->id,
+                            'evidencia_path' => $prorroga->evidencia_path,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
+            }
+
+            // Eliminar archivos del proyecto
             if ($proyecto->cargar_archivo_proyecto) {
                 Storage::disk('public')->delete($proyecto->cargar_archivo_proyecto);
             }
@@ -495,10 +512,16 @@ class ProyectoController extends Controller
             
             if ($proyecto->cargar_evidencias) {
                 foreach ($proyecto->cargar_evidencias as $evidencia) {
-                    Storage::disk('public')->delete($evidencia);
+                    if ($evidencia && !str_starts_with($evidencia, 'http')) {
+                        Storage::disk('public')->delete($evidencia);
+                    }
                 }
             }
 
+            // Guardar el ID antes de eliminar para logging
+            $proyectoId = $proyecto->id;
+            
+            // Eliminar el proyecto (esto también eliminará las prórrogas por cascade)
             $proyecto->delete();
 
             if ($request->expectsJson()) {
@@ -507,13 +530,24 @@ class ProyectoController extends Controller
                 ]);
             }
 
-            return redirect()
-                ->route('proyectos.index')
-                ->with('success', 'Proyecto eliminado exitosamente.');
+            // Intentar redirigir, si falla usar URL directa
+            try {
+                return redirect()
+                    ->route('proyectos.index')
+                    ->with('success', 'Proyecto eliminado exitosamente.');
+            } catch (\Exception $redirectError) {
+                Log::warning('Error en redirect después de eliminar proyecto', [
+                    'proyecto_id' => $proyectoId ?? 'unknown',
+                    'error' => $redirectError->getMessage()
+                ]);
+                // Fallback: redirigir usando URL directa
+                return redirect('/proyectos')
+                    ->with('success', 'Proyecto eliminado exitosamente.');
+            }
 
         } catch (\Exception $e) {
             Log::error('Error al eliminar proyecto', [
-                'proyecto_id' => $proyecto->id,
+                'proyecto_id' => $proyecto->id ?? 'unknown',
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -524,9 +558,15 @@ class ProyectoController extends Controller
                 ], 500);
             }
 
-            return redirect()
-                ->back()
-                ->withErrors(['error' => 'Error al eliminar el proyecto: ' . $e->getMessage()]);
+            // Intentar redirigir, si falla usar URL directa
+            try {
+                return redirect()
+                    ->route('proyectos.index')
+                    ->withErrors(['error' => 'Error al eliminar el proyecto: ' . $e->getMessage()]);
+            } catch (\Exception $redirectError) {
+                return redirect('/proyectos')
+                    ->withErrors(['error' => 'Error al eliminar el proyecto: ' . $e->getMessage()]);
+            }
         }
     }
 
