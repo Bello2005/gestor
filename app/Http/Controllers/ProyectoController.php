@@ -13,11 +13,22 @@ class ProyectoController extends Controller
 {
     /**
      * Helper para guardar archivos en almacenamiento local
+     * Preserva el nombre original del archivo con un hash único para evitar conflictos
      */
     private function saveFile($file, $path)
     {
-        // Guardar en almacenamiento público local
-        return Storage::disk('public')->putFile($path, $file);
+        $originalName = $file->getClientOriginalName();
+        $extension = $file->getClientOriginalExtension();
+        $nameWithoutExtension = pathinfo($originalName, PATHINFO_FILENAME);
+        
+        // Generar hash único corto para evitar conflictos
+        $hash = substr(md5($originalName . time() . uniqid()), 0, 8);
+        
+        // Construir nombre: nombre_original_hash.ext
+        $filename = $nameWithoutExtension . '_' . $hash . ($extension ? '.' . $extension : '');
+        
+        // Guardar con el nombre preservado
+        return Storage::disk('public')->putFileAs($path, $file, $filename);
     }
 
     public function exportPdf(Request $request)
@@ -607,6 +618,26 @@ class ProyectoController extends Controller
     }
 
     /**
+     * Extraer nombre original del archivo almacenado
+     * Formato: nombre_original_hash.ext -> nombre_original.ext
+     */
+    private function extractOriginalFilename($storedPath)
+    {
+        $basename = basename($storedPath);
+        $extension = pathinfo($basename, PATHINFO_EXTENSION);
+        $nameWithoutExt = pathinfo($basename, PATHINFO_FILENAME);
+        
+        // Si tiene formato nombre_hash.ext, extraer el nombre original
+        // Buscar el último underscore seguido de 8 caracteres alfanuméricos (el hash)
+        if (preg_match('/^(.+)_([a-f0-9]{8})$/i', $nameWithoutExt, $matches)) {
+            return $matches[1] . ($extension ? '.' . $extension : '');
+        }
+        
+        // Si no tiene el formato esperado, devolver el nombre tal cual
+        return $basename;
+    }
+
+    /**
      * Descargar archivo del proyecto
      */
     public function downloadArchivoProyecto(Proyecto $proyecto)
@@ -627,7 +658,8 @@ class ProyectoController extends Controller
             }
 
             $path = Storage::disk('public')->path($proyecto->cargar_archivo_proyecto);
-            $filename = basename($proyecto->cargar_archivo_proyecto);
+            // Extraer nombre original preservando el nombre en la DB
+            $filename = $this->extractOriginalFilename($proyecto->cargar_archivo_proyecto);
 
             return response()->download($path, $filename);
         } catch (\Exception $e) {
@@ -660,7 +692,8 @@ class ProyectoController extends Controller
             }
 
             $path = Storage::disk('public')->path($proyecto->cargar_contrato_o_convenio);
-            $filename = basename($proyecto->cargar_contrato_o_convenio);
+            // Extraer nombre original preservando el nombre en la DB
+            $filename = $this->extractOriginalFilename($proyecto->cargar_contrato_o_convenio);
 
             return response()->download($path, $filename);
         } catch (\Exception $e) {
@@ -697,7 +730,8 @@ class ProyectoController extends Controller
             }
 
             $path = Storage::disk('public')->path($evidencia);
-            $filename = basename($evidencia);
+            // Extraer nombre original preservando el nombre en la DB
+            $filename = $this->extractOriginalFilename($evidencia);
 
             return response()->download($path, $filename);
         } catch (\Exception $e) {
