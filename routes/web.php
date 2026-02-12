@@ -78,6 +78,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/proyectos/{proyecto}', [ProyectoController::class, 'destroy'])->name('proyectos.destroy');
     
     // Gestión de archivos de proyectos
+    Route::get('/proyectos/{proyecto}/archivo/download', [ProyectoController::class, 'downloadArchivoProyecto'])
+        ->name('proyectos.download.archivo');
+    Route::get('/proyectos/{proyecto}/contrato/download', [ProyectoController::class, 'downloadContrato'])
+        ->name('proyectos.download.contrato');
+    Route::get('/proyectos/{proyecto}/evidencia/{indice}/download', [ProyectoController::class, 'downloadEvidencia'])
+        ->name('proyectos.download.evidencia');
     Route::delete('/proyectos/{proyecto}/archivo', [ProyectoController::class, 'deleteProyectoArchivo'])
         ->name('proyectos.delete.archivo');
     Route::delete('/proyectos/{proyecto}/contrato', [ProyectoController::class, 'deleteContratoArchivo'])

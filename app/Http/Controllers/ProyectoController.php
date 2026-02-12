@@ -605,4 +605,108 @@ class ProyectoController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Descargar archivo del proyecto
+     */
+    public function downloadArchivoProyecto(Proyecto $proyecto)
+    {
+        try {
+            if (!$proyecto->cargar_archivo_proyecto) {
+                abort(404, 'Archivo no encontrado');
+            }
+
+            // Si es una URL externa (Cloudinary), redirigir
+            if (strpos($proyecto->cargar_archivo_proyecto, 'http://') === 0 || strpos($proyecto->cargar_archivo_proyecto, 'https://') === 0) {
+                return redirect($proyecto->cargar_archivo_proyecto);
+            }
+
+            // Verificar que el archivo existe
+            if (!Storage::disk('public')->exists($proyecto->cargar_archivo_proyecto)) {
+                abort(404, 'Archivo no encontrado en el servidor');
+            }
+
+            $path = Storage::disk('public')->path($proyecto->cargar_archivo_proyecto);
+            $filename = basename($proyecto->cargar_archivo_proyecto);
+
+            return response()->download($path, $filename);
+        } catch (\Exception $e) {
+            Log::error('Error al descargar archivo del proyecto', [
+                'proyecto_id' => $proyecto->id,
+                'error' => $e->getMessage()
+            ]);
+            abort(500, 'Error al descargar el archivo');
+        }
+    }
+
+    /**
+     * Descargar contrato/convenio
+     */
+    public function downloadContrato(Proyecto $proyecto)
+    {
+        try {
+            if (!$proyecto->cargar_contrato_o_convenio) {
+                abort(404, 'Archivo no encontrado');
+            }
+
+            // Si es una URL externa (Cloudinary), redirigir
+            if (strpos($proyecto->cargar_contrato_o_convenio, 'http://') === 0 || strpos($proyecto->cargar_contrato_o_convenio, 'https://') === 0) {
+                return redirect($proyecto->cargar_contrato_o_convenio);
+            }
+
+            // Verificar que el archivo existe
+            if (!Storage::disk('public')->exists($proyecto->cargar_contrato_o_convenio)) {
+                abort(404, 'Archivo no encontrado en el servidor');
+            }
+
+            $path = Storage::disk('public')->path($proyecto->cargar_contrato_o_convenio);
+            $filename = basename($proyecto->cargar_contrato_o_convenio);
+
+            return response()->download($path, $filename);
+        } catch (\Exception $e) {
+            Log::error('Error al descargar contrato/convenio', [
+                'proyecto_id' => $proyecto->id,
+                'error' => $e->getMessage()
+            ]);
+            abort(500, 'Error al descargar el archivo');
+        }
+    }
+
+    /**
+     * Descargar evidencia por índice
+     */
+    public function downloadEvidencia(Proyecto $proyecto, $indice)
+    {
+        try {
+            $evidencias = is_array($proyecto->cargar_evidencias) ? $proyecto->cargar_evidencias : [];
+            
+            if (!isset($evidencias[$indice])) {
+                abort(404, 'Evidencia no encontrada');
+            }
+
+            $evidencia = $evidencias[$indice];
+
+            // Si es una URL externa (Cloudinary), redirigir
+            if (strpos($evidencia, 'http://') === 0 || strpos($evidencia, 'https://') === 0) {
+                return redirect($evidencia);
+            }
+
+            // Verificar que el archivo existe
+            if (!Storage::disk('public')->exists($evidencia)) {
+                abort(404, 'Archivo no encontrado en el servidor');
+            }
+
+            $path = Storage::disk('public')->path($evidencia);
+            $filename = basename($evidencia);
+
+            return response()->download($path, $filename);
+        } catch (\Exception $e) {
+            Log::error('Error al descargar evidencia', [
+                'proyecto_id' => $proyecto->id,
+                'indice' => $indice,
+                'error' => $e->getMessage()
+            ]);
+            abort(500, 'Error al descargar la evidencia');
+        }
+    }
 }
