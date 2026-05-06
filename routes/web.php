@@ -7,11 +7,8 @@ use App\Http\Controllers\AccessRequestController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmailVerificationController;
-use App\Http\Controllers\TestMailController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\EstadisticaController;
-use App\Http\Controllers\AuditoriaController;
-use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\UserController;
@@ -155,18 +152,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Prórrogas (aprobar y rechazar — solo admin)
     Route::put('/prorrogas/{prorroga}/approve', [ProrrogaController::class, 'approve'])->name('prorrogas.approve');
     Route::put('/prorrogas/{prorroga}/reject', [ProrrogaController::class, 'reject'])->name('prorrogas.reject');
-});
-
-// temporal — borra después
-Route::get('/__envcheck', function(){
-    return response()->json([
-        'getenv_APP_KEY' => getenv('APP_KEY'),
-        '_ENV_APP_KEY'   => $_ENV['APP_KEY'] ?? null,
-        '_SERVER_APP_KEY'=> $_SERVER['APP_KEY'] ?? null,
-        'config_app_key' => config('app.key'),
-        'php_sapi'       => php_sapi_name(),
-        'loaded_ini'     => php_ini_loaded_file(),
-    ]);
 });
 
 
